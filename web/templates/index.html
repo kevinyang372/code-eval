@@ -5,6 +5,19 @@
     <title>CS162 Final Project</title>
 </head>
 <body>
-    <p>Hello World!</p>
+    <h1>Upload your code</h1>
+    <form action="/" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+          <label>Select file</label>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" name="code" id="code">
+            <label class="custom-file-label" for="image">Select file...</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Upload</button>
+
+      </form>
 </body>
 </html>
