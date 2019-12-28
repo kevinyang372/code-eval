@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Result</title>
+</head>
+<body>
+    <h1> Failed Test Cases: {{ result|length }} / {{ total }} </h1>
+    <ul>
+    {% for err in result %}
+        <li>{{ result[err] }}</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

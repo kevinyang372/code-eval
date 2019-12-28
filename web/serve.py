@@ -42,19 +42,19 @@ def index():
                 test_cases = importlib.import_module('.sample_test', 'web.tests')
                 to_test = importlib.import_module('.' + filename.split('.')[0], 'web.tmp')
 
-                res = test_cases.TestCases(to_test.add).test()
-                print(res)
+                temp = test_cases.TestCases(to_test.add)
+                res = temp.test()
 
                 os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+                return render_template('results.html', result = res, total = len(temp.answers))
 
             return redirect(request.url)
 
     return render_template('index.html')
 
-@app.route('/users')
-def users():
-    users = User.query.all()
-    return render_template('users.html', users=users)
+@app.route('/results')
+def results():
+    return render_template('results.html', result = {}, total = 0)
 
 if __name__ == '__main__':
     app.run()
