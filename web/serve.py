@@ -3,12 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import os
+import importlib
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["FILE_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/tmp"
+app.config["FILE_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tmp"
 app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
 db = SQLAlchemy(app)
 
@@ -37,6 +38,14 @@ def index():
             if is_valid(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
+
+                test_cases = importlib.import_module('.sample_test', 'web.tests')
+                to_test = importlib.import_module('.' + filename.split('.')[0], 'web.tmp')
+
+                res = test_cases.TestCases(to_test.add).test()
+                print(res)
+
+                os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             return redirect(request.url)
 
