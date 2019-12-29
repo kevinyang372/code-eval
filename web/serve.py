@@ -3,10 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import os
+import glob
+import re
 import importlib
+from web.forms import CodeSumitForm
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["FILE_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tmp"
@@ -31,26 +35,30 @@ def index():
             return True
         return False
 
+    form = CodeSumitForm()
+
+    total = glob.glob('web/tests/session_*.py')
+    pattern = re.compile('web/tests/session_(.*).py')
+    form.sessions.choices = [(i + 1, 'session %s' % pattern.findall(v)[0]) for i, v in enumerate(list(filter(pattern.match, total)))]
+
     if request.method == "POST":
-        if request.files:
-            file = request.files["code"]
+        if is_valid(form.filename.data.filename):
 
-            if is_valid(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
+            filename = secure_filename(form.filename.data.filename)
+            form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
-                test_cases = importlib.import_module('.sample_test', 'web.tests')
-                to_test = importlib.import_module('.' + filename.split('.')[0], 'web.tmp')
+            test_cases = importlib.import_module('.session_%s' % form.sessions.data, 'web.tests')
+            to_test = importlib.import_module('.' + filename.split('.')[0], 'web.tmp')
 
-                temp = test_cases.TestCases(to_test.add)
-                res = temp.test()
+            temp = test_cases.TestCases(to_test.entry)
+            res = temp.test()
 
-                os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
-                return render_template('results.html', result = res, total = len(temp.answers))
+            os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+            return render_template('results.html', result = res, total = len(temp.answers))
 
-            return redirect(request.url)
+        return redirect(request.url)
 
-    return render_template('index.html')
+    return render_template('index.html', form = form)
 
 @app.route('/results')
 def results():
