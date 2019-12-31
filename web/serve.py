@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import os
@@ -15,15 +16,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["FILE_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tmp"
 app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200))
+    email = db.Column(db.String(200))
+    password_hash = db.Column(db.String(128))
+    is_admin = db.Column()
 
 db.create_all()
-example_user = User(name="Philip Sterne")
+example_user = User(email="example_user@gmail.com")
 db.session.merge(example_user)
 db.session.commit()
 
