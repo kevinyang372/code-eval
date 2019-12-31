@@ -53,8 +53,13 @@ def index():
             temp = test_cases.TestCases(to_test.entry)
             res = temp.test()
 
+            content = []
+            with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as f:
+                for line in f:
+                    content.append(line)
+
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
-            return render_template('results.html', result = res, total = len(temp.answers))
+            return render_template('results.html', result = res, total = len(temp.answers), file = content)
 
         return redirect(request.url)
 
@@ -62,7 +67,7 @@ def index():
 
 @app.route('/results')
 def results():
-    return render_template('results.html', result = {}, total = 0)
+    return render_template('results.html', result = {}, total = 0, file = '')
 
 if __name__ == '__main__':
     app.run()

@@ -11,6 +11,9 @@
         <li>{{ result[err] }}</li>
     {% endfor %}
     </ul>
+    {% for l in file %}
+        <p>{{ l }}</p>
+    {% endfor %}
     <a href="{{ url_for('index') }}">back</a>
 </body>
 </html>
