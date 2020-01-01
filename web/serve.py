@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager, UserMixin
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 import os
 import glob
 import re
 import importlib
-from web.forms import CodeSumitForm
+from web.forms import CodeSumitForm, LoginForm
 
 app = Flask(__name__)
 
@@ -19,17 +21,29 @@ app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+login = LoginManager(app)
+login.login_view = 'login'
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     password_hash = db.Column(db.String(128))
     is_admin = db.Column()
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 db.create_all()
-example_user = User(email="example_user@gmail.com")
-db.session.merge(example_user)
-db.session.commit()
+# example_user = User(email="example_user@gmail.com")
+# db.session.merge(example_user)
+# db.session.commit()
 
 @app.route('/', methods=["GET", "POST"])
 def index():
@@ -72,6 +86,14 @@ def index():
 @app.route('/results')
 def results():
     return render_template('results.html', result = {}, total = 0, file = '')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if request.method == "POST":
+        print(form.email.data)
+        return redirect('/')
+    return render_template('login.html', form = form)
 
 if __name__ == '__main__':
     app.run()
