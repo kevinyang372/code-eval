@@ -9,7 +9,7 @@ import os
 import glob
 import re
 import importlib
-from web.forms import CodeSumitForm, LoginForm
+from web.forms import CodeSumitForm, LoginForm, UploadForm
 
 app = Flask(__name__)
 
@@ -17,6 +17,7 @@ app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["FILE_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tmp"
+app.config["SESSION_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tests"
 app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
 
 db = SQLAlchemy(app)
@@ -41,7 +42,7 @@ def load_user(id):
     return User.query.get(int(id))
 
 db.create_all()
-example_user = User(email="example_user@gmail.com", is_admin = False)
+example_user = User(email="example_admin_user@gmail.com", is_admin = True)
 example_user.set_password("111") 
 db.session.merge(example_user)
 db.session.commit()
@@ -106,6 +107,34 @@ def login():
 def logout():
     logout_user()
     return redirect('/')
+
+@app.route('/upload_session', methods=["GET", "POST"])
+@login_required
+def upload_session():
+
+    print(current_user.is_admin)
+    if not current_user.is_admin: return redirect('/')
+    form = UploadForm()
+
+    def is_valid(filename):
+        return re.match('session_[0-9]+\.py', filename) is not None
+
+    if request.method == "POST":
+        if is_valid(form.filename.data.filename):
+
+            filename = secure_filename(form.filename.data.filename)
+
+            if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], filename)):
+                os.remove(os.path.join(app.config["SESSION_UPLOADS"], filename))
+
+            form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], filename))
+            return redirect('/')
+
+        return redirect(request.url)
+
+    return render_template('upload_session.html', form = form)
+
+
 
 if __name__ == '__main__':
     app.run()
