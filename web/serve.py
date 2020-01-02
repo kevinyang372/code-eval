@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin, current_user, login_user, login_required, logout_user
 from datetime import datetime
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import glob
 import re
@@ -28,7 +28,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     password_hash = db.Column(db.String(128))
-    is_admin = db.Column()
+    is_admin = db.Column(db.Boolean)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -41,11 +41,13 @@ def load_user(id):
     return User.query.get(int(id))
 
 db.create_all()
-# example_user = User(email="example_user@gmail.com")
-# db.session.merge(example_user)
-# db.session.commit()
+example_user = User(email="example_user@gmail.com", is_admin = False)
+example_user.set_password("111") 
+db.session.merge(example_user)
+db.session.commit()
 
 @app.route('/', methods=["GET", "POST"])
+@login_required
 def index():
 
     def is_valid(filename):
@@ -89,11 +91,21 @@ def results():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated: return redirect('/')
     form = LoginForm()
     if request.method == "POST":
-        print(form.email.data)
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user)
         return redirect('/')
     return render_template('login.html', form = form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/')
 
 if __name__ == '__main__':
     app.run()
