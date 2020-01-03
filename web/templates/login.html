@@ -6,6 +6,9 @@
 </head>
 <body>
     {% block content %}
+        {%- for message in get_flashed_messages() %}
+            {{ message }}
+        {%- endfor %}
         <h1>Sign In</h1>
         <form action="" method="post">
             <p>
