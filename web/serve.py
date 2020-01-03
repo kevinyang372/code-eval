@@ -11,6 +11,9 @@ import re
 import importlib
 from web.forms import CodeSumitForm, LoginForm, UploadForm
 
+import sys
+sys.path.append('web/tests')
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'you-will-never-guess'
