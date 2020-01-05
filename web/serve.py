@@ -72,9 +72,13 @@ def index():
             form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             test_cases = importlib.import_module('.session_%s' % form.sessions.data, 'web.tests')
-            to_test = importlib.import_module('.' + filename.split('.')[0], 'web.tmp')
+            to_test = ''
 
-            temp = test_cases.TestCases(to_test.entry)
+            with open(os.path.join('web/tmp', filename), 'r') as file:
+                for line in file:
+                    to_test += line
+
+            temp = test_cases.TestCases(to_test)
             res = temp.test()
 
             content = []
@@ -136,8 +140,6 @@ def upload_session():
         return redirect(request.url)
 
     return render_template('upload_session.html', form = form)
-
-
 
 if __name__ == '__main__':
     app.run()
