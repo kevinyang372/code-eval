@@ -1,4 +1,7 @@
-from RestrictedPython import compile_restricted_exec, safe_builtins
+from RestrictedPython import compile_restricted_exec, safe_globals
+from RestrictedPython.PrintCollector import PrintCollector
+from RestrictedPython.Eval import default_guarded_getiter
+from RestrictedPython.Guards import guarded_iter_unpack_sequence
 
 class BaseTest(object):
 
@@ -15,7 +18,11 @@ class BaseTest(object):
         )
 
         safe_locals = {}
-        exec(byte_code.code, {}, safe_locals)
+        safe_globals['_print_'] = PrintCollector
+        safe_globals['_getiter_'] = default_guarded_getiter
+        safe_globals['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
+
+        exec(byte_code.code, safe_globals, safe_locals)
 
         for i, params in enumerate(self.parameters):
             try:
