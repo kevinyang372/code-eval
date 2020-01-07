@@ -3,7 +3,7 @@ from RestrictedPython.PrintCollector import PrintCollector
 from RestrictedPython.Eval import default_guarded_getiter
 from RestrictedPython.Guards import guarded_iter_unpack_sequence
 
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 class TimeoutException(Exception): pass
 
@@ -14,8 +14,6 @@ class BaseTest(object):
         self.timeout = timeout
 
     def test(self):
-        
-        errs = {}
 
         byte_code = compile_restricted_exec(
             self.func,
@@ -29,20 +27,25 @@ class BaseTest(object):
 
         exec(byte_code.code, safe_globals, safe_locals)
 
+        errs = {}
         for i, params in enumerate(self.parameters):
             try:
                 def getResult(r):
-                    r.append(safe_locals['entry'](*params))
+                    r.put(safe_locals['entry'](*params))
 
-                result = []
+                result = Queue()
                 p = Process(target=getResult, args=(result,))
                 p.start()
                 p.join(self.timeout)
 
-                if not result:
+                if result.empty():
                     errs[i] = "Time Out"
-                elif result[0] != self.answers[i]:
-                    errs[i] = "Wrong Answers"
+                else:
+                    output = result.get()
+                    if output != self.answers[i]:
+                        errs[i] = "Wrong Answers"
+                    else:
+                        errs[i] = "Passed"
             except Exception as e:
                 errs[i] = str(e)
 

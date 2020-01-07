@@ -10,6 +10,7 @@ import glob
 import re
 import importlib
 from web.forms import CodeSumitForm, LoginForm, UploadForm
+import timeit
 
 import sys
 sys.path.append('web/tests')
@@ -80,6 +81,7 @@ def index():
 
             temp = test_cases.TestCases(to_test)
             res = temp.test()
+            time = timeit.timeit(lambda: test_cases.TestCases(to_test).test(), number = 1)
 
             content = []
             with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as f:
@@ -87,7 +89,7 @@ def index():
                     content.append(line)
 
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
-            return render_template('results.html', result = res, total = len(temp.answers), file = content)
+            return render_template('results.html', result = res, total = len(temp.answers), file = content, time = time)
 
         return redirect(request.url)
 
@@ -95,7 +97,7 @@ def index():
 
 @app.route('/results')
 def results():
-    return render_template('results.html', result = {}, total = 0, file = '')
+    return render_template('results.html', result = {}, total = 0, file = '', time = 0)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

@@ -6,9 +6,10 @@
 </head>
 <body>
     <h1> Failed Test Cases: {{ result|length }} / {{ total }} </h1>
+    <h3> Total Run Time: {{ time }}</h3>
     <ul>
     {% for err in result %}
-        <li>{{ result[err] }}</li>
+        <li>Test Case {{ err }}: {{ result[err] }}</li>
     {% endfor %}
     </ul>
     {% for l in file %}
