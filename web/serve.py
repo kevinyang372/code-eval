@@ -98,11 +98,12 @@ def index():
 
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
-            to_add = Result(user_id = current_user.id, email = current_user.email, session=form.sessions.data, passed_num=sum([1 for case in res if res[case] == "Passed"]), runtime = time)
+            passed_num = sum([1 for case in res if res[case] == "Passed"])
+            to_add = Result(user_id = current_user.id, email = current_user.email, session=form.sessions.data, passed_num=passed_num, runtime = time)
             db.session.add(to_add)
             db.session.commit()
 
-            return render_template('results.html', result = res, total = len(temp.answers), file = content, time = time)
+            return render_template('results.html', result = res, passed = passed_num, total = len(temp.answers), file = content, time = time)
 
         return redirect(request.url)
 
@@ -111,7 +112,7 @@ def index():
 @app.route('/results')
 @login_required
 def results():
-    return render_template('results.html', result = {}, total = 0, file = '', time = 0)
+    return render_template('results.html', result = {}, passed = 0, total = 0, file = '', time = 0)
 
 @app.route('/summary')
 @login_required
@@ -141,7 +142,6 @@ def logout():
 @login_required
 def upload_session():
 
-    print(current_user.is_admin)
     if not current_user.is_admin: return redirect('/')
     form = UploadForm()
 

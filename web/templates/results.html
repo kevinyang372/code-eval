@@ -5,7 +5,7 @@
     <title>Result</title>
 </head>
 <body>
-    <h1> Failed Test Cases: {{ result|length }} / {{ total }} </h1>
+    <h1> Failed Test Cases: {{ total - passed }} / {{ total }} </h1>
     <h3> Total Run Time: {{ time }}</h3>
     <ul>
     {% for err in result %}

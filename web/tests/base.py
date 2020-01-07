@@ -39,6 +39,7 @@ class BaseTest(object):
                 p.join(self.timeout)
 
                 if result.empty():
+                    p.terminate()
                     errs[i] = "Time Out"
                 else:
                     output = result.get()
