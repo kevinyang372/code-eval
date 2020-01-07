@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Summary</title>
+</head>
+<body>
+    <ul>
+    {% for r in result %}
+        <li> Email: {{r.email}} Session: {{r.session}} Passed: {{r.passed_num}} Run Time: {{r.runtime }} </li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">back</a>
+</body>
+</html>

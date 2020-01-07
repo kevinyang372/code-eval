@@ -43,6 +43,8 @@ class User(UserMixin, db.Model):
 
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    email = db.Column(db.String)
     session = db.Column(db.Integer)
     passed_num = db.Column(db.Integer)
     runtime = db.Column(db.Float)
@@ -96,7 +98,7 @@ def index():
 
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
-            to_add = Result(session=form.sessions.data, passed_num=sum([1 for case in res if res[case] == "Passed"]), runtime = time)
+            to_add = Result(user_id = current_user.id, email = current_user.email, session=form.sessions.data, passed_num=sum([1 for case in res if res[case] == "Passed"]), runtime = time)
             db.session.add(to_add)
             db.session.commit()
 
@@ -107,8 +109,15 @@ def index():
     return render_template('index.html', form = form)
 
 @app.route('/results')
+@login_required
 def results():
     return render_template('results.html', result = {}, total = 0, file = '', time = 0)
+
+@app.route('/summary')
+@login_required
+def summary():
+    results = Result.query.all()
+    return render_template('summary.html', result = results)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -153,6 +162,8 @@ def upload_session():
         return redirect(request.url)
 
     return render_template('upload_session.html', form = form)
+
+
 
 if __name__ == '__main__':
     app.run()
