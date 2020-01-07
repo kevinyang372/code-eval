@@ -41,6 +41,12 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+class Result(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session = db.Column(db.Integer)
+    passed_num = db.Column(db.Integer)
+    runtime = db.Column(db.Float)
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -89,6 +95,11 @@ def index():
                     content.append(line)
 
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+
+            to_add = Result(session=form.sessions.data, passed_num=sum([1 for case in res if res[case] == "Passed"]), runtime = time)
+            db.session.add(to_add)
+            db.session.commit()
+
             return render_template('results.html', result = res, total = len(temp.answers), file = content, time = time)
 
         return redirect(request.url)
