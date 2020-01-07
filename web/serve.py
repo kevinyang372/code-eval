@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, current_user, login_user, login_required, logout_user
+from flask_bootstrap import Bootstrap
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -27,6 +28,7 @@ app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
+bootstrap = Bootstrap(app)
 login.login_view = 'login'
 
 class User(UserMixin, db.Model):

@@ -1,15 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>Summary</title>
-</head>
-<body>
-    <ul>
-    {% for r in result %}
-        <li> Email: {{r.email}} Session: {{r.session}} Passed: {{r.passed_num}} Run Time: {{r.runtime }} </li>
-    {% endfor %}
-    </ul>
-    <a href="{{ url_for('index') }}">back</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Session</th>
+                <th>Passed</th>
+                <th>Run Time</th>
+            <tr>
+        </thead>
+        <tbody>
+            {% for r in result %}
+            <tr>
+                <td>{{ r.email }}</td>
+                <td>{{ r.session }}</td>
+                <td>{{ r.passed_num }}</td>
+                <td>{{ r.runtime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

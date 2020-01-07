@@ -1,7 +1,9 @@
 alembic==1.3.2
 Click==7.0
 cycler==0.10.0
+dominate==2.4.0
 Flask==1.0.2
+Flask-Bootstrap==3.3.7.1
 Flask-Login==0.4.1
 Flask-Migrate==2.5.2
 Flask-SQLAlchemy==2.3.2
@@ -20,5 +22,6 @@ python-editor==1.0.4
 RestrictedPython==5.0
 six==1.13.0
 SQLAlchemy==1.3.0
+visitor==0.1.3
 Werkzeug==0.15.3
 WTForms==2.2.1

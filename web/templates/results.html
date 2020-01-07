@@ -1,20 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>Result</title>
-</head>
-<body>
-    <h1> Failed Test Cases: {{ total - passed }} / {{ total }} </h1>
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h3> Failed Test Cases: {{ total - passed }} / {{ total }} </h1>
     <h3> Total Run Time: {{ time }}</h3>
-    <ul>
-    {% for err in result %}
-        <li>Test Case {{ err }}: {{ result[err] }}</li>
-    {% endfor %}
-    </ul>
-    {% for l in file %}
-        <p>{{ l }}</p>
-    {% endfor %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Test Case</th>
+                <th>Result</th>
+            <tr>
+        </thead>
+        <tbody>
+            {% for err in result %}
+            <tr>
+                <td>{{ err }}</td>
+                <td>{{ result[err] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="card">
+      <div class="card-body">
+        {% for l in file %}
+            <p class="card-text">{{ l }}</p>
+        {% endfor %}
+      </div>
+    </div>
+
     <a href="{{ url_for('index') }}">back</a>
-</body>
-</html>
+{% endblock %}

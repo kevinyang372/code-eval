@@ -1,26 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>CodeEval</title>
-</head>
-<body>
-    {% block content %}
-        {%- for message in get_flashed_messages() %}
-            {{ message }}
-        {%- endfor %}
-        <h1>Sign In</h1>
-        <form action="" method="post">
-            <p>
-                {{ form.email.label }}<br>
-                {{ form.email(size=32) }}
-            </p>
-            <p>
-                {{ form.password.label }}<br>
-                {{ form.password(size=32) }}
-            </p>
-            <p>{{ form.submit() }}</p>
-        </form>
-    {% endblock %}
-</body>
-</html>
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{{ wtf.quick_form(form) }}
+{% endblock %}
