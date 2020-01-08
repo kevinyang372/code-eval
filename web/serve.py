@@ -72,13 +72,13 @@ db.session.commit()
 @app.route('/', methods=["GET", "POST"])
 @login_required
 def index():
-    seminars = Seminar.query.all()
+    seminars = sorted(Seminar.query.all(), key = lambda x: x.seminar_num)
     return render_template('index.html', seminars = seminars)
 
 @app.route('/seminars/<seminar_num>', methods=["GET", "POST"])
 @login_required
 def seminar(seminar_num):
-    
+
     def is_valid(filename):
         if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
             return True
@@ -88,7 +88,7 @@ def seminar(seminar_num):
 
     total = glob.glob('web/tests/%s/session_*.py' % str(seminar_num))
     pattern = re.compile('web/tests/%s/session_(.*).py' %str(seminar_num))
-    form.sessions.choices = [(i + 1, 'session %s' % pattern.findall(v)[0]) for i, v in enumerate(list(filter(pattern.match, total)))]
+    form.sessions.choices = sorted([(pattern.findall(v)[0], 'session %s' % pattern.findall(v)[0]) for v in list(filter(pattern.match, total))])
 
     if request.method == "POST":
         if is_valid(form.filename.data.filename):
@@ -158,7 +158,7 @@ def upload_session():
     if not current_user.is_admin: return redirect('/')
 
     form = UploadForm()
-    form.seminar_num.choices = [(s.seminar_num, 'seminar %s' % str(s.seminar_num)) for s in Seminar.query.all()]
+    form.seminar_num.choices = sorted([(s.seminar_num, 'seminar %s' % str(s.seminar_num)) for s in Seminar.query.all()])
 
     def is_valid(filename):
         return re.match('session_[0-9]+\.py', filename) is not None
