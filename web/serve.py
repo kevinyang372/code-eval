@@ -47,24 +47,37 @@ class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     email = db.Column(db.String)
+    seminar_num = db.Column(db.Integer)
     session = db.Column(db.Integer)
     passed_num = db.Column(db.Integer)
     runtime = db.Column(db.Float)
+
+class Seminar(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    seminar_num = db.Column(db.Integer)
 
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
 db.create_all()
-example_user = User(email="example_admin_user@gmail.com", is_admin = True)
-example_user.set_password("111") 
+example_user = User(id=1, email="example_admin_user@gmail.com", is_admin = True)
+example_user.set_password("111")
 db.session.merge(example_user)
+
+example_seminar = Seminar(id=1, seminar_num=156)
+db.session.merge(example_seminar)
 db.session.commit()
 
 @app.route('/', methods=["GET", "POST"])
 @login_required
 def index():
+    seminars = Seminar.query.all()
+    return render_template('index.html', seminars = seminars)
 
+@app.route('/seminars/<seminar_num>', methods=["GET", "POST"])
+@login_required
+def seminar(seminar_num):
     def is_valid(filename):
         if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
             return True
@@ -72,8 +85,8 @@ def index():
 
     form = CodeSumitForm()
 
-    total = glob.glob('web/tests/session_*.py')
-    pattern = re.compile('web/tests/session_(.*).py')
+    total = glob.glob('web/tests/%s/session_*.py' % str(seminar_num))
+    pattern = re.compile('web/tests/%s/session_(.*).py' %str(seminar_num))
     form.sessions.choices = [(i + 1, 'session %s' % pattern.findall(v)[0]) for i, v in enumerate(list(filter(pattern.match, total)))]
 
     if request.method == "POST":
@@ -82,7 +95,7 @@ def index():
             filename = secure_filename(form.filename.data.filename)
             form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
-            test_cases = importlib.import_module('.session_%s' % form.sessions.data, 'web.tests')
+            test_cases = importlib.import_module('.session_%s' % form.sessions.data, 'web.tests.%s' % str(seminar_num))
             to_test = ''
 
             with open(os.path.join('web/tmp', filename), 'r') as file:
@@ -101,7 +114,7 @@ def index():
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             passed_num = sum([1 for case in res if res[case] == "Passed"])
-            to_add = Result(user_id = current_user.id, email = current_user.email, session=form.sessions.data, passed_num=passed_num, runtime = time)
+            to_add = Result(user_id = current_user.id, email = current_user.email, session=form.sessions.data, passed_num=passed_num, runtime = time, seminar_num = seminar_num)
             db.session.add(to_add)
             db.session.commit()
 
@@ -109,12 +122,7 @@ def index():
 
         return redirect(request.url)
 
-    return render_template('index.html', form = form)
-
-@app.route('/results')
-@login_required
-def results():
-    return render_template('results.html', result = {}, passed = 0, total = 0, file = '', time = 0)
+    return render_template('seminars.html', form = form)
 
 @app.route('/summary')
 @login_required
@@ -145,7 +153,9 @@ def logout():
 def upload_session():
 
     if not current_user.is_admin: return redirect('/')
+
     form = UploadForm()
+    form.seminar_num.choices = [(s.seminar_num, 'seminar %s' % str(s.seminar_num)) for s in Seminar.query.all()]
 
     def is_valid(filename):
         return re.match('session_[0-9]+\.py', filename) is not None
@@ -155,10 +165,10 @@ def upload_session():
 
             filename = secure_filename(form.filename.data.filename)
 
-            if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], filename)):
-                os.remove(os.path.join(app.config["SESSION_UPLOADS"], filename))
+            if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename)):
+                os.remove(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
 
-            form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], filename))
+            form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
             return redirect('/')
 
         return redirect(request.url)

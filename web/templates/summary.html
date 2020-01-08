@@ -5,6 +5,7 @@
         <thead>
             <tr>
                 <th>Email</th>
+                <th>Seminar</th>
                 <th>Session</th>
                 <th>Passed</th>
                 <th>Run Time</th>
@@ -14,6 +15,7 @@
             {% for r in result %}
             <tr>
                 <td>{{ r.email }}</td>
+                <td>{{ r.seminar_num }}</td>
                 <td>{{ r.session }}</td>
                 <td>{{ r.passed_num }}</td>
                 <td>{{ r.runtime }}</td>

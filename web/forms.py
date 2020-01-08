@@ -14,4 +14,5 @@ class LoginForm(FlaskForm):
 
 class UploadForm(FlaskForm):
     filename = FileField()
+    seminar_num = SelectField('Choose Seminar', coerce = str)
     submit = SubmitField('Submit')

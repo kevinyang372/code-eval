@@ -2,5 +2,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-{{ wtf.quick_form(form) }}
+    {% for s in seminars %}
+        <a href="{{ url_for('seminar', seminar_num = s.seminar_num) }}">Seminar {{ s.seminar_num }}</a>
+    {% endfor %}
 {% endblock %}
