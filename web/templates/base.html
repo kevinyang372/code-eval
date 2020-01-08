@@ -22,6 +22,7 @@
                     {% if current_user.is_admin %}
                         <li><a href="{{ url_for('summary') }}">Summary</a></li>
                         <li><a href="{{ url_for('upload_session') }}">Upload Session</a></li>
+                        <li><a href="{{ url_for('add_seminar') }}">Add Seminar</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

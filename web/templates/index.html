@@ -3,6 +3,6 @@
 
 {% block app_content %}
     {% for s in seminars %}
-        <a href="{{ url_for('seminar', seminar_num = s.seminar_num) }}">Seminar {{ s.seminar_num }}</a>
+        <a href="{{ url_for('seminar', seminar_num = s.seminar_num) }}", class="btn btn-secondary btn-lg">Seminar {{ s.seminar_num }}</a><br>
     {% endfor %}
 {% endblock %}

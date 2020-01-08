@@ -10,7 +10,7 @@ import os
 import glob
 import re
 import importlib
-from web.forms import CodeSumitForm, LoginForm, UploadForm
+from web.forms import CodeSumitForm, LoginForm, UploadForm, AddSeminar
 import timeit
 
 import sys
@@ -78,6 +78,7 @@ def index():
 @app.route('/seminars/<seminar_num>', methods=["GET", "POST"])
 @login_required
 def seminar(seminar_num):
+    
     def is_valid(filename):
         if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
             return True
@@ -132,7 +133,9 @@ def summary():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     if current_user.is_authenticated: return redirect('/')
+
     form = LoginForm()
     if request.method == "POST":
         user = User.query.filter_by(email=form.email.data).first()
@@ -175,7 +178,29 @@ def upload_session():
 
     return render_template('upload_session.html', form = form)
 
+@app.route('/add_seminar', methods=["GET", "POST"])
+@login_required
+def add_seminar():
 
+    if not current_user.is_admin: return redirect('/')
+
+    form = AddSeminar()
+    if request.method == "POST":
+
+        if Seminar.query.filter_by(seminar_num=form.seminar_num.data).first() is None:
+            new_seminar = Seminar(seminar_num=form.seminar_num.data)
+            db.session.add(new_seminar)
+            db.session.commit()
+
+            path = os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data)
+            os.mkdir(path)
+        else:
+            flash('Seminar already exists')
+            return redirect(url_for('add_seminar'))
+
+        return redirect('/')
+
+    return render_template('add_seminar.html', form = form)
 
 if __name__ == '__main__':
     app.run()
