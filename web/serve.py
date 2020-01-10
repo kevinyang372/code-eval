@@ -56,6 +56,17 @@ class Seminar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seminar_num = db.Column(db.Integer)
 
+class Session(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_num = db.Column(db.Integer)
+    seminar_num = db.Column(db.Integer)
+    entry_point = db.Column(db.String)
+    runtime = db.Column(db.Float)
+    blacklist = db.Column(db.String)
+
+    def get_blacklist(self):
+        return list(filter(lambda x: x != '', self.blacklist.split(',')))
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -103,9 +114,10 @@ def seminar(seminar_num):
                 for line in file:
                     to_test += line
 
+            setting = Session.query.filter_by(seminar_num=seminar_num, session_num=form.sessions.data).first()
             temp = test_cases.TestCases(to_test)
-            res = temp.test()
-            time = timeit.timeit(lambda: test_cases.TestCases(to_test).test(), number = 1)
+            res = temp.test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist())
+            time = timeit.timeit(lambda: test_cases.TestCases(to_test).test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist()), number = 1)
 
             content = []
             with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as f:
@@ -128,6 +140,7 @@ def seminar(seminar_num):
 @app.route('/summary')
 @login_required
 def summary():
+    if not current_user.is_admin: return redirect('/')
     results = Result.query.all()
     return render_template('summary.html', result = results)
 
@@ -167,11 +180,25 @@ def upload_session():
         if is_valid(form.filename.data.filename):
 
             filename = secure_filename(form.filename.data.filename)
+            valid_name = 'session_%s.py' % form.session_num.data
 
-            if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename)):
-                os.remove(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
+            if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name)):
+                os.remove(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
 
             form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
+            os.rename(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename), os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
+
+            to_add = {'seminar_num': form.seminar_num.data, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
+
+            if Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first():
+                s = Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first()
+                for key, val in to_add.items():
+                    setattr(s, key, val)
+            else:
+                s = Session(**to_add)
+                db.session.add(s)
+
+            db.session.commit()
             return redirect('/')
 
         return redirect(request.url)
@@ -201,6 +228,13 @@ def add_seminar():
         return redirect('/')
 
     return render_template('add_seminar.html', form = form)
+
+@app.route('/all_settings')
+@login_required
+def all_settings():
+    if not current_user.is_admin: return redirect('/')
+    session = Session.query.all()
+    return render_template('all_setting.html', session = session)
 
 if __name__ == '__main__':
     app.run()

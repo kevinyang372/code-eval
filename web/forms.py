@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, FileField, BooleanField, SubmitField, PasswordField, StringField, IntegerField
+from wtforms import SelectField, FileField, BooleanField, SubmitField, PasswordField, StringField, DecimalField, IntegerField
 from wtforms.validators import InputRequired, DataRequired
 
 class CodeSumitForm(FlaskForm):
@@ -14,7 +14,11 @@ class LoginForm(FlaskForm):
 
 class UploadForm(FlaskForm):
     filename = FileField()
+    session_num = IntegerField('Session Number', validators=[DataRequired()])
     seminar_num = SelectField('Choose Seminar', coerce = str)
+    runtime = DecimalField('Run Time', default = 1.0)
+    entry_point = StringField('Entry Point', default = 'entry')
+    blacklist = StringField('Blacklist', default = '')
     submit = SubmitField('Submit')
 
 class AddSeminar(FlaskForm):

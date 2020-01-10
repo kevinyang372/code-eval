@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Seminar</th>
+                <th>Session</th>
+                <th>Entry Point</th>
+                <th>Run Time</th>
+                <th>Black List</th>
+            <tr>
+        </thead>
+        <tbody>
+            {% for s in session %}
+            <tr>
+                <td>{{ s.seminar_num }}</td>
+                <td>{{ s.session_num }}</td>
+                <td>{{ s.entry_point }}</td>
+                <td>{{ s.runtime }}</td>
+                <td>{{ s.get_blacklist() }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
