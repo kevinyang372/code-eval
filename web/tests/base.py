@@ -29,10 +29,15 @@ class BaseTest(object):
         for item in blacklist:
             if item in list(safe_globals.keys()):
                 safe_globals.pop(item)
-
-        exec(byte_code.code, safe_globals, safe_locals)
-
+        
         errs = {}
+        try:
+            exec(byte_code.code, safe_globals, safe_locals)
+        except Exception as e:
+            for ind in range(len(self.parameters)):
+                errs[ind] = e
+            return errs
+
         for i, params in enumerate(self.parameters):
             def getResult(r):
                 try:
