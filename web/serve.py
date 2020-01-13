@@ -71,25 +71,32 @@ class Session(db.Model):
 def load_user(id):
     return User.query.get(int(id))
 
+# add example user, seminar and session
 db.create_all()
-example_user = User(id=1, email="example_admin_user@gmail.com", is_admin = True)
+example_user = User(id=1, email="example_admin_user@gmail.com", is_admin=True)
 example_user.set_password("111")
 db.session.merge(example_user)
 
 example_seminar = Seminar(id=1, seminar_num=156)
 db.session.merge(example_seminar)
+
+example_session = Session(id = 1, session_num=1, seminar_num=156, entry_point="entry", runtime=1.0, blacklist='')
+db.session.merge(example_session)
 db.session.commit()
 
+# index page shows a list of all available seminars
 @app.route('/', methods=["GET", "POST"])
 @login_required
 def index():
     seminars = sorted(Seminar.query.all(), key = lambda x: x.seminar_num)
     return render_template('index.html', seminars = seminars)
 
+# submission page
 @app.route('/seminars/<seminar_num>', methods=["GET", "POST"])
 @login_required
 def seminar(seminar_num):
 
+    # check if filename is valid
     def is_valid(filename):
         if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
             return True
@@ -97,9 +104,9 @@ def seminar(seminar_num):
 
     form = CodeSumitForm()
 
-    total = glob.glob('web/tests/%s/session_*.py' % str(seminar_num))
-    pattern = re.compile('web/tests/%s/session_(.*).py' %str(seminar_num))
-    form.sessions.choices = sorted([(pattern.findall(v)[0], 'session %s' % pattern.findall(v)[0]) for v in list(filter(pattern.match, total))])
+    # list available sessions
+    available = Session.query.filter_by(seminar_num=seminar_num).all()
+    form.sessions.choices = sorted([(i.session_num, 'session %s' % i.session_num) for i in available])
 
     if request.method == "POST":
         if is_valid(form.filename.data.filename):
