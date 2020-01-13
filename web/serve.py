@@ -21,8 +21,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["FILE_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tmp"
-app.config["SESSION_UPLOADS"] = "/Users/kevin/desktop/Github/codeEval/web/tests"
+app.config["FILE_UPLOADS"] = "web/tmp"
+app.config["SESSION_UPLOADS"] = "web/tests"
 app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
 
 db = SQLAlchemy(app)
@@ -114,23 +114,25 @@ def seminar(seminar_num):
             filename = secure_filename(form.filename.data.filename)
             form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
+            # import test cases
             test_cases = importlib.import_module('.session_%s' % form.sessions.data, 'web.tests.%s' % str(seminar_num))
-            to_test = ''
+            content = []
 
-            with open(os.path.join('web/tmp', filename), 'r') as file:
+            # read in student submission
+            with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as file:
                 for line in file:
-                    to_test += line
+                    content.append(line)
+            to_test = ''.join(content)
 
+            # fetch session settings
             setting = Session.query.filter_by(seminar_num=seminar_num, session_num=form.sessions.data).first()
             temp = test_cases.TestCases(to_test)
             res = temp.test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist())
+
+            # record runtime
             time = timeit.timeit(lambda: test_cases.TestCases(to_test).test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist()), number = 1)
 
-            content = []
-            with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as f:
-                for line in f:
-                    content.append(line)
-
+            # remove submission
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             passed_num = sum([1 for case in res if res[case] == "Passed"])
@@ -180,6 +182,7 @@ def upload_session():
     form = UploadForm()
     form.seminar_num.choices = sorted([(s.seminar_num, 'seminar %s' % str(s.seminar_num)) for s in Seminar.query.all()])
 
+    # check valid session test name
     def is_valid(filename):
         return re.match('session_[0-9]+\.py', filename) is not None
 
@@ -197,6 +200,7 @@ def upload_session():
 
             to_add = {'seminar_num': form.seminar_num.data, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
 
+            # update / insert session settings
             if Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first():
                 s = Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first()
                 for key, val in to_add.items():
