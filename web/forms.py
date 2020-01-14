@@ -14,7 +14,7 @@ class LoginForm(FlaskForm):
 
 class UploadForm(FlaskForm):
     filename = FileField()
-    session_num = IntegerField('Session Number (Must be a positive integer)', validators=[DataRequired()])
+    session_num = DecimalField('Session Number (Must be a positive decimal)', validators=[DataRequired()])
     seminar_num = SelectField('Choose Seminar', coerce = str)
     runtime = DecimalField('Run Time (Must a positive float)', default = 1.0)
     entry_point = StringField('Entry Point (Name of the function to run)', default = 'entry')

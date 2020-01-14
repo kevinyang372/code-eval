@@ -48,7 +48,7 @@ class Result(db.Model):
     user_id = db.Column(db.Integer)
     email = db.Column(db.String)
     seminar_num = db.Column(db.Integer)
-    session = db.Column(db.Integer)
+    session = db.Column(db.Float)
     passed_num = db.Column(db.Integer)
     runtime = db.Column(db.Float)
 
@@ -58,7 +58,7 @@ class Seminar(db.Model):
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    session_num = db.Column(db.Integer)
+    session_num = db.Column(db.Float)
     seminar_num = db.Column(db.Integer)
     entry_point = db.Column(db.String)
     runtime = db.Column(db.Float)
@@ -80,7 +80,7 @@ db.session.merge(example_user)
 example_seminar = Seminar(id=1, seminar_num=156)
 db.session.merge(example_seminar)
 
-example_session = Session(id = 1, session_num=1, seminar_num=156, entry_point="entry", runtime=1.0, blacklist='')
+example_session = Session(id = 1, session_num=1.1, seminar_num=156, entry_point="entry", runtime=1.0, blacklist='')
 db.session.merge(example_session)
 db.session.commit()
 
@@ -115,7 +115,8 @@ def seminar(seminar_num):
             form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             # import test cases
-            test_cases = importlib.import_module('.session_%s' % form.sessions.data, 'web.tests.%s' % str(seminar_num))
+            i1, i2 = str(form.sessions.data).split('.')
+            test_cases = importlib.import_module('.session_%s_%s' % (i1, i2), 'web.tests.%s' % str(seminar_num))
             content = []
 
             # read in student submission
@@ -182,35 +183,31 @@ def upload_session():
     form = UploadForm()
     form.seminar_num.choices = sorted([(s.seminar_num, 'seminar %s' % str(s.seminar_num)) for s in Seminar.query.all()])
 
-    # check valid session test name
-    def is_valid(filename):
-        return re.match('session_[0-9]+\.py', filename) is not None
-
     if request.method == "POST":
-        if is_valid(form.filename.data.filename):
 
-            filename = secure_filename(form.filename.data.filename)
-            valid_name = 'session_%s.py' % form.session_num.data
+        filename = secure_filename(form.filename.data.filename)
+        i1, i2 = str(form.session_num.data).split('.')
+        valid_name = 'session_%s_%s.py' % (i1, i2)
 
-            if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name)):
-                os.remove(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
+        if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name)):
+            os.remove(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
 
-            form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
-            os.rename(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename), os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
+        form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
+        os.rename(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename), os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
 
-            to_add = {'seminar_num': form.seminar_num.data, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
+        to_add = {'seminar_num': form.seminar_num.data, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
 
-            # update / insert session settings
-            if Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first():
-                s = Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first()
-                for key, val in to_add.items():
-                    setattr(s, key, val)
-            else:
-                s = Session(**to_add)
-                db.session.add(s)
+        # update / insert session settings
+        if Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first():
+            s = Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first()
+            for key, val in to_add.items():
+                setattr(s, key, val)
+        else:
+            s = Session(**to_add)
+            db.session.add(s)
 
-            db.session.commit()
-            return redirect('/')
+        db.session.commit()
+        return redirect('/')
 
         return redirect(request.url)
 
