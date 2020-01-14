@@ -22,5 +22,5 @@ class UploadForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class AddSeminar(FlaskForm):
-    seminar_num = StringField('Seminar', validators=[DataRequired()])
+    seminar_num = IntegerField('Seminar', validators=[DataRequired()])
     submit = SubmitField('Submit')

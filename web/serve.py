@@ -230,7 +230,7 @@ def add_seminar():
             db.session.add(new_seminar)
             db.session.commit()
 
-            path = os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data)
+            path = os.path.join(app.config["SESSION_UPLOADS"], str(form.seminar_num.data))
             os.mkdir(path)
         else:
             flash('Seminar already exists')
