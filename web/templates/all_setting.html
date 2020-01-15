@@ -9,6 +9,7 @@
                 <th>Entry Point</th>
                 <th>Run Time</th>
                 <th>Black List</th>
+                <th>Registration Link</th>
             <tr>
         </thead>
         <tbody>
@@ -19,6 +20,7 @@
                 <td>{{ s.entry_point }}</td>
                 <td>{{ s.runtime }}</td>
                 <td>{{ s.get_blacklist() }}</td>
+                <td>{{ s.seminar.registration }}</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -5,6 +5,7 @@ from flask_login import LoginManager, UserMixin, current_user, login_user, login
 from flask_bootstrap import Bootstrap
 from datetime import datetime
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import MultiDict
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import glob
@@ -12,6 +13,8 @@ import re
 import importlib
 from web.forms import CodeSumitForm, LoginForm, UploadForm, AddSeminar
 import timeit
+import random
+import string
 
 import sys
 sys.path.append('web/tests')
@@ -37,6 +40,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean)
     results = db.relationship('Result', backref='user', lazy=True)
+    seminars = db.relationship('Seminar', secondary='access')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -55,7 +59,9 @@ class Result(db.Model):
 class Seminar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seminar_num = db.Column(db.Integer)
+    registration = db.Column(db.String)
     sessions = db.relationship('Session', backref='seminar', lazy=True)
+    users = db.relationship('User', secondary='access')
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -68,6 +74,14 @@ class Session(db.Model):
 
     def get_blacklist(self):
         return list(filter(lambda x: x != '', self.blacklist.split(',')))
+
+class Access(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
+
+    user = db.relationship('User', backref=db.backref("seminar", cascade="all, delete-orphan"))
+    seminar = db.relationship('Seminar', backref=db.backref("user", cascade="all, delete-orphan"))
 
 @login.user_loader
 def load_user(id):
@@ -83,7 +97,7 @@ example_user = User(id=2, email="example_user@gmail.com", is_admin=False)
 example_user.set_password("111")
 db.session.merge(example_user)
 
-example_seminar = Seminar(id=1, seminar_num=156)
+example_seminar = Seminar(id=1, seminar_num=156, registration="join156")
 db.session.merge(example_seminar)
 
 example_session = Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
@@ -94,7 +108,10 @@ db.session.commit()
 @app.route('/', methods=["GET", "POST"])
 @login_required
 def index():
-    seminars = sorted(Seminar.query.all(), key = lambda x: x.seminar_num)
+    if current_user.is_admin:
+        seminars = sorted(Seminar.query.all(), key = lambda x: x.seminar_num)
+    else:
+        seminars = sorted(Seminar.query.filter(Seminar.users.any(id=current_user.id)).all(), key = lambda x: x.seminar_num)
     return render_template('index.html', seminars = seminars)
 
 # submission page
@@ -107,6 +124,10 @@ def seminar(seminar_num):
         if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
             return True
         return False
+
+    if not current_user.is_admin and not any(int(seminar_num) == i.seminar_num for i in current_user.seminars):
+        flash('You have no access to this course!')
+        return redirect(url_for('index'))
 
     form = CodeSumitForm()
 
@@ -121,7 +142,12 @@ def seminar(seminar_num):
             form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             # import test cases
-            i1, i2 = str(form.sessions.data).split('.')
+            try:
+                i1, i2 = str(form.sessions.data).split('.')
+            except:
+                i1 = str(form.sessions.data)
+                i2 = 0
+                
             test_cases = importlib.import_module('.session_%s_%s' % (i1, i2), 'web.tests.%s' % str(seminar_num))
             content = []
 
@@ -226,11 +252,14 @@ def add_seminar():
 
     if not current_user.is_admin: return redirect('/')
 
-    form = AddSeminar()
+    random_generated = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+    form = AddSeminar(formdata=MultiDict({'registration_link': random_generated}))
+
     if request.method == "POST":
 
+        form = AddSeminar()
         if Seminar.query.filter_by(seminar_num=form.seminar_num.data).first() is None:
-            new_seminar = Seminar(seminar_num=form.seminar_num.data)
+            new_seminar = Seminar(seminar_num=form.seminar_num.data, registration=form.registration_link.data)
             db.session.add(new_seminar)
             db.session.commit()
 
@@ -250,6 +279,29 @@ def all_settings():
     if not current_user.is_admin: return redirect('/')
     session = Session.query.all()
     return render_template('all_setting.html', session = session)
+
+@app.route('/register/<link>', methods=["GET", "POST"])
+@login_required
+def register(link):
+
+    if current_user.is_admin:
+        flash('You are an admin! Enjoy your privileges.')
+        return redirect(url_for('index'))
+
+    res = Seminar.query.filter_by(registration=link).first()
+    if not res:
+        flash('The registration link does not exist!')
+        return redirect(url_for('index'))
+
+    if any(user.id == current_user.id for user in res.users):
+        flash('You have already registered!')
+        return redirect(url_for('index'))
+
+    db.session.add(Access(user_id=current_user.id, seminar_id=res.id))
+    db.session.commit()
+
+    flash('You have successfully registered!')
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run()

@@ -23,4 +23,5 @@ class UploadForm(FlaskForm):
 
 class AddSeminar(FlaskForm):
     seminar_num = IntegerField('Seminar', validators=[DataRequired()])
+    registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[DataRequired()])
     submit = SubmitField('Submit')
