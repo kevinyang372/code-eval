@@ -36,6 +36,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(200))
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean)
+    results = db.relationship('Result', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -45,24 +46,25 @@ class User(UserMixin, db.Model):
 
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
     email = db.Column(db.String)
-    seminar_num = db.Column(db.Integer)
-    session = db.Column(db.Float)
     passed_num = db.Column(db.Integer)
     runtime = db.Column(db.Float)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
 
 class Seminar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seminar_num = db.Column(db.Integer)
+    sessions = db.relationship('Session', backref='seminar', lazy=True)
 
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_num = db.Column(db.Float)
-    seminar_num = db.Column(db.Integer)
     entry_point = db.Column(db.String)
     runtime = db.Column(db.Float)
     blacklist = db.Column(db.String)
+    seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
+    results = db.relationship('Result', backref='session', lazy=True)
 
     def get_blacklist(self):
         return list(filter(lambda x: x != '', self.blacklist.split(',')))
@@ -73,14 +75,18 @@ def load_user(id):
 
 # add example user, seminar and session
 db.create_all()
-example_user = User(id=1, email="example_admin_user@gmail.com", is_admin=True)
+example_admin = User(id=1, email="example_admin_user@gmail.com", is_admin=True)
+example_admin.set_password("111")
+db.session.merge(example_admin)
+
+example_user = User(id=2, email="example_user@gmail.com", is_admin=False)
 example_user.set_password("111")
 db.session.merge(example_user)
 
 example_seminar = Seminar(id=1, seminar_num=156)
 db.session.merge(example_seminar)
 
-example_session = Session(id = 1, session_num=1.1, seminar_num=156, entry_point="entry", runtime=1.0, blacklist='')
+example_session = Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
 db.session.merge(example_session)
 db.session.commit()
 
@@ -105,7 +111,7 @@ def seminar(seminar_num):
     form = CodeSumitForm()
 
     # list available sessions
-    available = Session.query.filter_by(seminar_num=seminar_num).all()
+    available = Session.query.filter(Session.seminar.has(seminar_num=seminar_num)).all()
     form.sessions.choices = sorted([(i.session_num, 'session %s' % i.session_num) for i in available])
 
     if request.method == "POST":
@@ -126,7 +132,7 @@ def seminar(seminar_num):
             to_test = ''.join(content)
 
             # fetch session settings
-            setting = Session.query.filter_by(seminar_num=seminar_num, session_num=form.sessions.data).first()
+            setting = Session.query.filter(Session.seminar.has(seminar_num=seminar_num)).filter_by(session_num=form.sessions.data).first()
             temp = test_cases.TestCases(to_test)
             res = temp.test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist())
 
@@ -137,7 +143,7 @@ def seminar(seminar_num):
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             passed_num = sum([1 for case in res if res[case] == "Passed"])
-            to_add = Result(user_id = current_user.id, email = current_user.email, session=form.sessions.data, passed_num=passed_num, runtime = time, seminar_num = seminar_num)
+            to_add = Result(user_id = current_user.id, email = current_user.email, session_id=setting.id, passed_num=passed_num, runtime = time)
             db.session.add(to_add)
             db.session.commit()
 
@@ -195,11 +201,12 @@ def upload_session():
         form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
         os.rename(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename), os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
 
-        to_add = {'seminar_num': form.seminar_num.data, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
+        seminar_id = Seminar.query.filter_by(seminar_num=form.seminar_num.data).first().id
+        to_add = {'seminar_id': seminar_id, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
 
         # update / insert session settings
-        if Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first():
-            s = Session.query.filter_by(seminar_num=form.seminar_num.data, session_num=form.session_num.data).first()
+        if Session.query.filter_by(seminar_id=seminar_id, session_num=form.session_num.data).first():
+            s = Session.query.filter_by(seminar_id=seminar_id, session_num=form.session_num.data).first()
             for key, val in to_add.items():
                 setattr(s, key, val)
         else:
