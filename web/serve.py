@@ -322,5 +322,39 @@ def register(link):
     flash('You have successfully registered!')
     return redirect(url_for('index'))
 
+@app.route('/delete_course/<seminar_id>')
+@login_required
+def delete_course(seminar_id):
+    if not current_user.is_admin: return redirect('/')
+
+    seminar = Seminar.query.filter_by(id=seminar_id).first()
+    if not seminar:
+        flash('Course to delete does not exist')
+        return redirect(url_for('all_settings'))
+    else:
+        os.remove(os.path.join(app.config["SESSION_UPLOADS"], seminar.seminar_num))
+        db.session.delete(seminar)
+        db.session.commit()
+        return redirect(url_for('all_settings'))
+
+@app.route('/delete_session/<session_id>')
+@login_required
+def delete_session(session_id):
+    if not current_user.is_admin: return redirect('/')
+
+    session = Session.query.filter_by(id=session_id).first()
+    if not session:
+        flash('Session to delete does not exist')
+        return redirect(url_for('/'))
+    else:
+
+        i1, i2 = str(session.session_num).split('.')
+        valid_name = 'session_%s_%s.py' % (i1, i2)
+
+        os.remove(os.path.join(app.config["SESSION_UPLOADS"], str(session.seminar.seminar_num), valid_name))
+        db.session.delete(session)
+        db.session.commit()
+        return redirect(url_for('all_settings'))
+
 if __name__ == '__main__':
     app.run()

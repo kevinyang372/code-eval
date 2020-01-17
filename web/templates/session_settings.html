@@ -12,6 +12,7 @@
                 <th>Total Submissions</th>
                 <th>Submitted Students</th>
                 <th>Passing Rate</th>
+                <th>Delete Session</th>
             <tr>
         </thead>
         <tbody>
@@ -24,6 +25,7 @@
                 <td>{{ s.results | length }}</td>
                 <td>{{ s.submitted_students }}</td>
                 <td>{{ s.passing_rate }}</td>
+                <td><a href="{{ url_for('delete_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
             </tr>
             {% endfor %}
         </tbody>
