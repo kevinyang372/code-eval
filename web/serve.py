@@ -53,6 +53,7 @@ class Result(db.Model):
     email = db.Column(db.String)
     passed_num = db.Column(db.Integer)
     runtime = db.Column(db.Float)
+    success = db.Column(db.Boolean)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
 
@@ -169,7 +170,7 @@ def seminar(seminar_num):
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             passed_num = sum([1 for case in res if res[case] == "Passed"])
-            to_add = Result(user_id = current_user.id, email = current_user.email, session_id=setting.id, passed_num=passed_num, runtime = time)
+            to_add = Result(user_id = current_user.id, email = current_user.email, session_id=setting.id, passed_num=passed_num, runtime = time, success = passed_num == len(temp.answers))
             db.session.add(to_add)
             db.session.commit()
 
@@ -277,8 +278,26 @@ def add_seminar():
 @login_required
 def all_settings():
     if not current_user.is_admin: return redirect('/')
-    session = Session.query.all()
-    return render_template('all_setting.html', session = session)
+    seminar = Seminar.query.all()
+    return render_template('all_setting.html', seminar = seminar)
+
+@app.route('/all_settings/<seminar_id>')
+@login_required
+def session_settings(seminar_id):
+    if not current_user.is_admin: return redirect('/')
+    session = Session.query.filter_by(seminar_id=seminar_id).all()
+
+    total_s = len(Seminar.query.filter_by(id=seminar_id).first().users)
+
+    for ind in range(len(session)):
+        session[ind].submitted_students = len(set([t.user.id for t in session[ind].results]))
+
+        if session[ind].submitted_students != 0:
+            session[ind].passing_rate = len(set([t.user.id for t in session[ind].results if t.success ])) / float(session[ind].submitted_students)
+        else:
+            session[ind].passing_rate = 0
+
+    return render_template('session_settings.html', session = session)
 
 @app.route('/register/<link>', methods=["GET", "POST"])
 @login_required

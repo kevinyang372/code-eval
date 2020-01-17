@@ -5,22 +5,20 @@
         <thead>
             <tr>
                 <th>Seminar</th>
-                <th>Session</th>
-                <th>Entry Point</th>
-                <th>Run Time</th>
-                <th>Black List</th>
-                <th>Registration Link</th>
+                <th>Number of Sessions</th>
+                <th>Number of Students</th>
+                <th>Invitation Link</th>
+                <th>Session Settings</th>
             <tr>
         </thead>
         <tbody>
-            {% for s in session %}
+            {% for s in seminar %}
             <tr>
-                <td>{{ s.seminar.seminar_num }}</td>
-                <td>{{ s.session_num }}</td>
-                <td>{{ s.entry_point }}</td>
-                <td>{{ s.runtime }}</td>
-                <td>{{ s.get_blacklist() }}</td>
-                <td>{{ s.seminar.registration }}</td>
+                <td>{{ s.seminar_num }}</td>
+                <td>{{ s.sessions | length }}</td>
+                <td>{{ s.users | length }}</td>
+                <td>{{ s.registration }}</td>
+                <td><a href="{{ url_for('session_settings', seminar_id = s.id) }}", class="btn btn-secondary btn-lg">Details</a></td>
             </tr>
             {% endfor %}
         </tbody>
