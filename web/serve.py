@@ -220,7 +220,13 @@ def upload_session():
     if request.method == "POST":
 
         filename = secure_filename(form.filename.data.filename)
-        i1, i2 = str(form.session_num.data).split('.')
+
+        if int(form.session_num.data) == form.session_num.data:
+            i1 = str(form.session_num.data)
+            i2 = 0
+        else:
+            i1, i2 = str(form.session_num.data).split('.')
+            
         valid_name = 'session_%s_%s.py' % (i1, i2)
 
         if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name)):
