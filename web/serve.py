@@ -269,7 +269,7 @@ def add_seminar():
             os.mkdir(path)
         else:
             flash('Seminar already exists')
-            return redirect(url_for('add_seminar'))
+            return redirect(url_for('change_course'))
 
         return redirect('/')
 
@@ -356,6 +356,39 @@ def delete_session(session_id):
         db.session.delete(session)
         db.session.commit()
         return redirect(url_for('all_settings'))
+
+@app.route('/change_course/<seminar_id>', methods=["GET", "POST"])
+@login_required
+def change_course(seminar_id):
+    if not current_user.is_admin: return redirect('/')
+
+    seminar = Seminar.query.filter_by(id=seminar_id).first()
+    if not seminar:
+        flash('Course to change does not exist')
+        return redirect(url_for('all_settings'))
+    
+    form = AddSeminar(formdata=MultiDict({'registration_link': seminar.registration, 'seminar_num': seminar.seminar_num}))
+
+    if request.method == "POST":
+
+        form = AddSeminar()
+
+        if form.seminar_num.data != seminar.seminar_num:
+            try:
+                os.rename(os.path.join(app.config["SESSION_UPLOADS"], str(seminar.seminar_num)), os.path.join(app.config["SESSION_UPLOADS"], str(form.seminar_num.data)))
+            except Exception as e:
+                print(e)
+                flash('The modified seminar num already exists!')
+                return redirect('/')
+
+            seminar.seminar_num = form.seminar_num.data
+
+        seminar.registration = form.registration_link.data
+
+        db.session.commit()
+        return redirect('/')
+
+    return render_template('add_seminar.html', form = form)
 
 if __name__ == '__main__':
     app.run()
