@@ -15,6 +15,7 @@ from web.forms import CodeSumitForm, LoginForm, UploadForm, AddSeminar
 import timeit
 import random
 import string
+import shutil
 
 import sys
 sys.path.append('web/tests')
@@ -61,7 +62,7 @@ class Seminar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     seminar_num = db.Column(db.Integer)
     registration = db.Column(db.String)
-    sessions = db.relationship('Session', backref='seminar', lazy=True)
+    sessions = db.relationship('Session', cascade="all,delete", backref='seminar', lazy=True)
     users = db.relationship('User', secondary='access')
 
 class Session(db.Model):
@@ -332,7 +333,7 @@ def delete_course(seminar_id):
         flash('Course to delete does not exist')
         return redirect(url_for('all_settings'))
     else:
-        os.remove(os.path.join(app.config["SESSION_UPLOADS"], seminar.seminar_num))
+        shutil.rmtree(os.path.join(app.config["SESSION_UPLOADS"], str(seminar.seminar_num)))
         db.session.delete(seminar)
         db.session.commit()
         return redirect(url_for('all_settings'))
