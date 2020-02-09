@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    {% for s in students %}
+        <a href="{{ url_for('summary_result', seminar_id = seminar_id, session_id = session_id, user_id = s.id) }}", class="btn btn-secondary btn-lg">Student {{ s.email }}</a><br>
+    {% endfor %}
+{% endblock %}

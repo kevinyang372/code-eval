@@ -185,8 +185,30 @@ def seminar(seminar_num):
 @login_required
 def summary():
     if not current_user.is_admin: return redirect('/')
-    results = Result.query.all()
-    return render_template('summary.html', result = results)
+    seminars = Seminar.query.all()
+    return render_template('summary.html', seminars = seminars)
+
+@app.route('/summary/<seminar_id>')
+@login_required
+def summary_session(seminar_id):
+    if not current_user.is_admin: return redirect('/')
+    sessions = Session.query.filter_by(seminar_id=seminar_id).all()
+    return render_template('summary_session.html', seminar_id = seminar_id, sessions = sessions)
+
+@app.route('/summary/<seminar_id>/<session_id>')
+@login_required
+def summary_student(seminar_id, session_id):
+    if not current_user.is_admin: return redirect('/')
+    results = Result.query.filter_by(session_id=session_id).all()
+    students = set([r.user for r in results])
+    return render_template('summary_student.html', seminar_id = seminar_id, session_id = session_id, students = students)
+
+@app.route('/summary/<seminar_id>/<session_id>/<user_id>')
+@login_required
+def summary_result(seminar_id, session_id, user_id):
+    if not current_user.is_admin: return redirect('/')
+    results = Result.query.filter_by(session_id=session_id, user_id=user_id).all()
+    return render_template('summary_result.html', results = results)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -226,7 +248,7 @@ def upload_session():
             i2 = 0
         else:
             i1, i2 = str(form.session_num.data).split('.')
-            
+
         valid_name = 'session_%s_%s.py' % (i1, i2)
 
         if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name)):

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Seminar</th>
+                <th>Session</th>
+                <th>Passed</th>
+                <th>Run Time</th>
+            <tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td>{{ r.email }}</td>
+                <td>{{ r.session.seminar.seminar_num }}</td>
+                <td>{{ r.session.session_num }}</td>
+                <td>{{ r.passed_num }}</td>
+                <td>{{ r.runtime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
