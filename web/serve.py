@@ -55,8 +55,17 @@ class Result(db.Model):
     passed_num = db.Column(db.Integer)
     runtime = db.Column(db.Float)
     success = db.Column(db.Boolean)
+    content = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
+    cases = db.relationship('Case', backref='result', lazy=True)
+
+class Case(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    case_num = db.Column(db.Integer)
+    success = db.Column(db.Boolean)
+    reason = db.Column(db.String)
+    result_id = db.Column(db.Integer, db.ForeignKey('result.id'), nullable=False)
 
 class Seminar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -171,8 +180,13 @@ def seminar(seminar_num):
             os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
 
             passed_num = sum([1 for case in res if res[case] == "Passed"])
-            to_add = Result(user_id = current_user.id, email = current_user.email, session_id=setting.id, passed_num=passed_num, runtime = time, success = passed_num == len(temp.answers))
+
+            to_add = Result(user_id = current_user.id, email = current_user.email, session_id = setting.id, passed_num = passed_num, content = to_test, runtime = time, success = passed_num == len(temp.answers))
             db.session.add(to_add)
+
+            for case in res:
+                to_add.cases.append(Case(case_num = case, success = res[case] == "Passed", reason = res[case]))
+
             db.session.commit()
 
             return render_template('results.html', result = res, passed = passed_num, total = len(temp.answers), file = content, time = time)
@@ -208,7 +222,16 @@ def summary_student(seminar_id, session_id):
 def summary_result(seminar_id, session_id, user_id):
     if not current_user.is_admin: return redirect('/')
     results = Result.query.filter_by(session_id=session_id, user_id=user_id).all()
-    return render_template('summary_result.html', results = results)
+    return render_template('summary_result.html', results = results, seminar_id = seminar_id, session_id = session_id, user_id = user_id)
+
+@app.route('/summary/<seminar_id>/<session_id>/<user_id>/<result_id>')
+@login_required
+def summary_case(seminar_id, session_id, user_id, result_id):
+    if not current_user.is_admin: return redirect('/')
+    result = Result.query.filter_by(id = result_id).first()
+    res = {case.case_num:case.reason for case in result.cases}
+    content = [c + '\n' for c in result.content.split('\n') if len(c) > 0]
+    return render_template('results.html', result = res, passed = result.passed_num, total = len(result.cases), file = content, time = result.runtime)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
