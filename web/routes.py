@@ -1,119 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager, UserMixin, current_user, login_user, login_required, logout_user
-from flask_bootstrap import Bootstrap
-from datetime import datetime
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import MultiDict
-from werkzeug.security import generate_password_hash, check_password_hash
-import os
-import glob
-import re
-import importlib
+from flask import render_template, request, redirect, url_for, flash
+from web import app, db
 from web.forms import CodeSumitForm, LoginForm, UploadForm, AddSeminar
+from web.models import User, Result, Case, Seminar, Session, Access
+from werkzeug.utils import secure_filename
+from flask_login import current_user, login_user, login_required, logout_user
+from datetime import datetime
+from werkzeug.datastructures import MultiDict
 import timeit
+import os
+import importlib
 import random
 import string
 import shutil
 
 import sys
 sys.path.append('web/tests')
-
-app = Flask(__name__)
-
-app.config['SECRET_KEY'] = 'you-will-never-guess'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["FILE_UPLOADS"] = "web/tmp"
-app.config["SESSION_UPLOADS"] = "web/tests"
-app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
-
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-login = LoginManager(app)
-bootstrap = Bootstrap(app)
-login.login_view = 'login'
-
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(200))
-    password_hash = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean)
-    results = db.relationship('Result', backref='user', lazy=True)
-    seminars = db.relationship('Seminar', secondary='access')
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-class Result(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String)
-    passed_num = db.Column(db.Integer)
-    runtime = db.Column(db.Float)
-    success = db.Column(db.Boolean)
-    content = db.Column(db.String)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
-    cases = db.relationship('Case', backref='result', lazy=True)
-
-class Case(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    case_num = db.Column(db.Integer)
-    success = db.Column(db.Boolean)
-    reason = db.Column(db.String)
-    result_id = db.Column(db.Integer, db.ForeignKey('result.id'), nullable=False)
-
-class Seminar(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    seminar_num = db.Column(db.Integer)
-    registration = db.Column(db.String)
-    sessions = db.relationship('Session', cascade="all,delete", backref='seminar', lazy=True)
-    users = db.relationship('User', secondary='access')
-
-class Session(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    session_num = db.Column(db.Float)
-    entry_point = db.Column(db.String)
-    runtime = db.Column(db.Float)
-    blacklist = db.Column(db.String)
-    seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
-    results = db.relationship('Result', backref='session', lazy=True)
-
-    def get_blacklist(self):
-        return list(filter(lambda x: x != '', self.blacklist.split(',')))
-
-class Access(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
-
-    user = db.relationship('User', backref=db.backref("seminar", cascade="all, delete-orphan"))
-    seminar = db.relationship('Seminar', backref=db.backref("user", cascade="all, delete-orphan"))
-
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
-
-# add example user, seminar and session
-db.create_all()
-example_admin = User(id=1, email="example_admin_user@gmail.com", is_admin=True)
-example_admin.set_password("111")
-db.session.merge(example_admin)
-
-example_user = User(id=2, email="example_user@gmail.com", is_admin=False)
-example_user.set_password("111")
-db.session.merge(example_user)
-
-example_seminar = Seminar(id=1, seminar_num=156, registration="join156")
-db.session.merge(example_seminar)
-
-example_session = Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
-db.session.merge(example_session)
-db.session.commit()
 
 # index page shows a list of all available seminars
 @app.route('/', methods=["GET", "POST"])
@@ -440,6 +341,3 @@ def change_course(seminar_id):
         return redirect('/')
 
     return render_template('add_seminar.html', form = form)
-
-if __name__ == '__main__':
-    app.run()
