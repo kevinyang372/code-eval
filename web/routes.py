@@ -90,7 +90,7 @@ def seminar(seminar_num):
 
             db.session.commit()
 
-            return render_template('results.html', result = res, passed = passed_num, total = len(temp.answers), file = content, time = time)
+            return render_template('results.html', result = res, passed = passed_num, total = len(temp.answers), file = to_test.replace(' ', '\xa0'), time = time)
 
         return redirect(request.url)
 
@@ -131,8 +131,8 @@ def summary_case(seminar_id, session_id, user_id, result_id):
     if not current_user.is_admin: return redirect('/')
     result = Result.query.filter_by(id = result_id).first()
     res = {case.case_num:case.reason for case in result.cases}
-    content = [c + '\n' for c in result.content.split('\n') if len(c) > 0]
-    return render_template('results.html', result = res, passed = result.passed_num, total = len(result.cases), file = content, time = result.runtime)
+
+    return render_template('results.html', result = res, passed = result.passed_num, total = len(result.cases), file = result.content.replace(' ', '\xa0'), time = result.runtime)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
