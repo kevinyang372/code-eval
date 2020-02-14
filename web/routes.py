@@ -14,7 +14,19 @@ import string
 import shutil
 
 import sys
-sys.path.append('web/tests')
+sys.path.append('web')
+
+def read_file(file, filename):
+    file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
+
+    content = []
+    with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as file:
+        for line in file:
+            content.append(line)
+    
+    os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+    return ''.join(content)
+
 
 # index page shows a list of all available seminars
 @app.route('/', methods=["GET", "POST"])
@@ -51,34 +63,19 @@ def seminar(seminar_num):
         if is_valid(form.filename.data.filename):
 
             filename = secure_filename(form.filename.data.filename)
-            form.filename.data.save(os.path.join(app.config["FILE_UPLOADS"], filename))
-
-            # import test cases
-            try:
-                i1, i2 = str(form.sessions.data).split('.')
-            except:
-                i1 = str(form.sessions.data)
-                i2 = 0
-                
-            test_cases = importlib.import_module('.session_%s_%s' % (i1, i2), 'web.tests.%s' % str(seminar_num))
-            content = []
-
-            # read in student submission
-            with open(os.path.join(app.config["FILE_UPLOADS"], filename), 'r') as file:
-                for line in file:
-                    content.append(line)
-            to_test = ''.join(content)
+            to_test = read_file(form.filename.data, filename)
 
             # fetch session settings
             setting = Session.query.filter(Session.seminar.has(seminar_num=seminar_num)).filter_by(session_num=form.sessions.data).first()
-            temp = test_cases.TestCases(to_test)
+
+            d = {}
+            exec(setting.test_code, d)
+
+            temp = d['TestCases'](to_test)
             res = temp.test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist())
 
             # record runtime
-            time = timeit.timeit(lambda: test_cases.TestCases(to_test).test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist()), number = 1)
-
-            # remove submission
-            os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+            time = timeit.timeit(lambda: d['TestCases'](to_test).test(runtime = setting.runtime, entry_point = setting.entry_point, blacklist = setting.get_blacklist()), number = 1)
 
             passed_num = sum([1 for case in res if res[case] == "Passed"])
 
@@ -166,23 +163,10 @@ def upload_session():
     if request.method == "POST":
 
         filename = secure_filename(form.filename.data.filename)
-
-        if int(form.session_num.data) == form.session_num.data:
-            i1 = str(form.session_num.data)
-            i2 = 0
-        else:
-            i1, i2 = str(form.session_num.data).split('.')
-
-        valid_name = 'session_%s_%s.py' % (i1, i2)
-
-        if os.path.exists(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name)):
-            os.remove(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
-
-        form.filename.data.save(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename))
-        os.rename(os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, filename), os.path.join(app.config["SESSION_UPLOADS"], form.seminar_num.data, valid_name))
+        test_code = read_file(form.filename.data, filename)
 
         seminar_id = Seminar.query.filter_by(seminar_num=form.seminar_num.data).first().id
-        to_add = {'seminar_id': seminar_id, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data}
+        to_add = {'seminar_id': seminar_id, 'entry_point': form.entry_point.data, 'runtime': form.runtime.data, 'blacklist': form.blacklist.data, 'session_num': form.session_num.data, 'test_code': test_code}
 
         # update / insert session settings
         if Session.query.filter_by(seminar_id=seminar_id, session_num=form.session_num.data).first():
@@ -285,7 +269,6 @@ def delete_course(seminar_id):
         flash('Course to delete does not exist')
         return redirect(url_for('all_settings'))
     else:
-        shutil.rmtree(os.path.join(app.config["SESSION_UPLOADS"], str(seminar.seminar_num)))
         db.session.delete(seminar)
         db.session.commit()
         return redirect(url_for('all_settings'))
@@ -300,11 +283,6 @@ def delete_session(session_id):
         flash('Session to delete does not exist')
         return redirect(url_for('/'))
     else:
-
-        i1, i2 = str(session.session_num).split('.')
-        valid_name = 'session_%s_%s.py' % (i1, i2)
-
-        os.remove(os.path.join(app.config["SESSION_UPLOADS"], str(session.seminar.seminar_num), valid_name))
         db.session.delete(session)
         db.session.commit()
         return redirect(url_for('all_settings'))
@@ -325,16 +303,7 @@ def change_course(seminar_id):
 
         form = AddSeminar()
 
-        if form.seminar_num.data != seminar.seminar_num:
-            try:
-                os.rename(os.path.join(app.config["SESSION_UPLOADS"], str(seminar.seminar_num)), os.path.join(app.config["SESSION_UPLOADS"], str(form.seminar_num.data)))
-            except Exception as e:
-                print(e)
-                flash('The modified seminar num already exists!')
-                return redirect('/')
-
-            seminar.seminar_num = form.seminar_num.data
-
+        seminar.seminar_num = form.seminar_num.data
         seminar.registration = form.registration_link.data
 
         db.session.commit()

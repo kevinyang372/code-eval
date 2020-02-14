@@ -49,6 +49,7 @@ class Session(db.Model):
     blacklist = db.Column(db.String)
     seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
     results = db.relationship('Result', backref='session', lazy=True)
+    test_code = db.Column(db.String)
 
     def get_blacklist(self):
         return list(filter(lambda x: x != '', self.blacklist.split(',')))

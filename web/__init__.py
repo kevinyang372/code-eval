@@ -35,6 +35,6 @@ db.session.merge(example_user)
 example_seminar = models.Seminar(id=1, seminar_num=156, registration="join156")
 db.session.merge(example_seminar)
 
-example_session = models.Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
-db.session.merge(example_session)
+# example_session = models.Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
+# db.session.merge(example_session)
 db.session.commit()
