@@ -4,7 +4,7 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Seminar</th>
+                <th>Course</th>
                 <th>Session Number</th>
                 <th>Entry Point</th>
                 <th>Run Time</th>
@@ -18,7 +18,7 @@
         <tbody>
             {% for s in session %}
             <tr>
-                <td>{{ s.seminar.seminar_num }}</td>
+                <td>{{ s.course.course_num }}</td>
                 <td>{{ s.session_num }}</td>
                 <td>{{ s.entry_point }}</td>
                 <td>{{ s.runtime }}</td>
@@ -26,7 +26,7 @@
                 <td>{{ s.get_blacklist() }}</td>
                 <td>{{ s.submitted_students }}</td>
                 <td>{{ s.passing_rate }}</td>
-                <td><a href="{{ url_for('delete_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
+                <td><a href="{{ url_for('session.delete_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
             </tr>
             {% endfor %}
         </tbody>

@@ -14,15 +14,15 @@
             <tr>
         </thead>
         <tbody>
-            {% for s in seminar %}
+            {% for s in course %}
             <tr>
-                <td>{{ s.seminar_num }}</td>
+                <td>{{ s.course_num }}</td>
                 <td>{{ s.sessions | length }}</td>
                 <td>{{ s.users | length }}</td>
                 <td>{{ s.registration }}</td>
-                <td><a href="{{ url_for('session_settings', seminar_id = s.id) }}", class="btn btn-secondary btn-lg">Details</a></td>
-                <td><a href="{{ url_for('change_course', seminar_id = s.id) }}", class="btn btn-secondary btn-lg">Change</a></td>
-                <td><a href="{{ url_for('delete_course', seminar_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
+                <td><a href="{{ url_for('setting.session_settings', course_id = s.id) }}", class="btn btn-secondary btn-lg">Details</a></td>
+                <td><a href="{{ url_for('course.change_course', course_id = s.id) }}", class="btn btn-secondary btn-lg">Change</a></td>
+                <td><a href="{{ url_for('course.delete_course', course_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
             </tr>
             {% endfor %}
         </tbody>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    {% for s in seminars %}
-        <a href="{{ url_for('summary_session', seminar_id = s.id) }}", class="btn btn-secondary btn-lg">Seminar {{ s.seminar_num }}</a><br>
+    {% for c in courses %}
+        <a href="{{ url_for('summary.summary_session', course_id = c.id) }}", class="btn btn-secondary btn-lg">Course {{ c.course_num }}</a><br>
     {% endfor %}
 {% endblock %}

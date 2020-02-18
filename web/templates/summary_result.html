@@ -5,7 +5,7 @@
         <thead>
             <tr>
                 <th>Email</th>
-                <th>Seminar</th>
+                <th>Course</th>
                 <th>Session</th>
                 <th>Passed</th>
                 <th>Run Time</th>
@@ -16,11 +16,11 @@
             {% for r in results %}
             <tr>
                 <td>{{ r.email }}</td>
-                <td>{{ r.session.seminar.seminar_num }}</td>
+                <td>{{ r.session.course.course_num }}</td>
                 <td>{{ r.session.session_num }}</td>
                 <td>{{ r.passed_num }}</td>
                 <td>{{ r.runtime }}</td>
-                <td><a href="{{ url_for('summary_case', seminar_id = seminar_id, session_id = session_id, user_id = user_id, result_id = r.id) }}", class="btn btn-secondary btn-lg">Details</td>
+                <td><a href="{{ url_for('summary.summary_case', course_id = course_id, session_id = session_id, user_id = user_id, result_id = r.id) }}", class="btn btn-secondary btn-lg">Details</td>
             </tr>
             {% endfor %}
         </tbody>

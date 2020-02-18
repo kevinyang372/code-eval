@@ -14,20 +14,20 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('index') }}">Autograder</a>
+                <a class="navbar-brand" href="{{ url_for('index.index') }}">Autograder</a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('index.index') }}">Home</a></li>
                     {% if current_user.is_admin %}
-                        <li><a href="{{ url_for('summary') }}">Summary</a></li>
-                        <li><a href="{{ url_for('upload_session') }}">Upload Session</a></li>
-                        <li><a href="{{ url_for('add_seminar') }}">Add Seminar</a></li>
-                        <li><a href="{{ url_for('all_settings') }}">All Settings</a></li>
+                        <li><a href="{{ url_for('summary.summary') }}">Summary</a></li>
+                        <li><a href="{{ url_for('session.upload_session') }}">Upload Session</a></li>
+                        <li><a href="{{ url_for('course.add_course') }}">Add Course</a></li>
+                        <li><a href="{{ url_for('setting.all_settings') }}">All Settings</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    <li><a href="{{ url_for('login.logout') }}">Logout</a></li>
                 </ul>
             </div>
         </div>

@@ -8,7 +8,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean)
     results = db.relationship('Result', backref='user', lazy=True)
-    seminars = db.relationship('Seminar', secondary='access')
+    courses = db.relationship('Course', secondary='access')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -34,11 +34,11 @@ class Case(db.Model):
     reason = db.Column(db.String)
     result_id = db.Column(db.Integer, db.ForeignKey('result.id'), nullable=False)
 
-class Seminar(db.Model):
+class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    seminar_num = db.Column(db.Integer)
+    course_num = db.Column(db.Integer)
     registration = db.Column(db.String)
-    sessions = db.relationship('Session', cascade="all,delete", backref='seminar', lazy=True)
+    sessions = db.relationship('Session', cascade="all,delete", backref='course', lazy=True)
     users = db.relationship('User', secondary='access')
 
 class Session(db.Model):
@@ -47,7 +47,7 @@ class Session(db.Model):
     entry_point = db.Column(db.String)
     runtime = db.Column(db.Float)
     blacklist = db.Column(db.String)
-    seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     results = db.relationship('Result', backref='session', lazy=True)
     test_code = db.Column(db.String)
 
@@ -57,10 +57,10 @@ class Session(db.Model):
 class Access(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    seminar_id = db.Column(db.Integer, db.ForeignKey('seminar.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
 
-    user = db.relationship('User', backref=db.backref("seminar", cascade="all, delete-orphan"))
-    seminar = db.relationship('Seminar', backref=db.backref("user", cascade="all, delete-orphan"))
+    user = db.relationship('User', backref=db.backref("course", cascade="all, delete-orphan"))
+    course = db.relationship('Course', backref=db.backref("user", cascade="all, delete-orphan"))
 
 @login.user_loader
 def load_user(id):
