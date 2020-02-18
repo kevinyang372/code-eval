@@ -51,7 +51,7 @@ def delete_session(session_id):
     else:
         db.session.delete(session)
         db.session.commit()
-        return redirect(url_for('all_settings'))
+        return redirect(url_for('setting.all_settings'))
 
 @session_template.route('/register/<link>', methods=["GET", "POST"])
 @login_required

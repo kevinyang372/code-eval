@@ -100,11 +100,11 @@ def delete_course(course_id):
     course = Course.query.filter_by(id=course_id).first()
     if not course:
         flash('Course to delete does not exist')
-        return redirect(url_for('all_settings'))
+        return redirect(url_for('setting.all_settings'))
     else:
         db.session.delete(course)
         db.session.commit()
-        return redirect(url_for('all_settings'))
+        return redirect(url_for('setting.all_settings'))
 
 @course_template.route('/change_course/<course_id>', methods=["GET", "POST"])
 @login_required
@@ -114,7 +114,7 @@ def change_course(course_id):
     course = Course.query.filter_by(id=course_id).first()
     if not course:
         flash('Course to change does not exist')
-        return redirect(url_for('all_settings'))
+        return redirect(url_for('setting.all_settings'))
     
     form = AddCourse(formdata=MultiDict({'registration_link': course.registration, 'course_num': course.course_num}))
 

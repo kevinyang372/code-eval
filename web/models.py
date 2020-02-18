@@ -25,7 +25,7 @@ class Result(db.Model):
     content = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
-    cases = db.relationship('Case', backref='result', lazy=True)
+    cases = db.relationship('Case', cascade="all,delete", backref='result', lazy=True)
 
 class Case(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +48,7 @@ class Session(db.Model):
     runtime = db.Column(db.Float)
     blacklist = db.Column(db.String)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
-    results = db.relationship('Result', backref='session', lazy=True)
+    results = db.relationship('Result', cascade="all,delete", backref='session', lazy=True)
     test_code = db.Column(db.String)
 
     def get_blacklist(self):
