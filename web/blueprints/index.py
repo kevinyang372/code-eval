@@ -11,5 +11,5 @@ def index():
     if current_user.is_admin:
         courses = sorted(Course.query.all(), key = lambda x: x.course_num)
     else:
-        courses = sorted(Course.query.filter(course.users.any(id=current_user.id)).all(), key = lambda x: x.course_num)
+        courses = sorted(Course.query.filter(Course.users.any(id=current_user.id)).all(), key = lambda x: x.course_num)
     return render_template('index.html', courses = courses)

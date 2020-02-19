@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from web.models import Course, Session, Result, Case
 from web.forms import CodeSumitForm, AddCourse
 from web import app, db
-from web.utils import read_file
+from web.utils import read_file, admin_required
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import MultiDict
 import timeit
@@ -69,10 +69,8 @@ def course(course_num):
     return render_template('courses.html', form = form)
 
 @course_template.route('/add_course', methods=["GET", "POST"])
-@login_required
+@admin_required
 def add_course():
-
-    if not current_user.is_admin: return redirect('/')
 
     random_generated = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
     form = AddCourse(formdata=MultiDict({'registration_link': random_generated}))
@@ -93,9 +91,8 @@ def add_course():
     return render_template('add_course.html', form = form)
 
 @course_template.route('/delete_course/<course_id>')
-@login_required
+@admin_required
 def delete_course(course_id):
-    if not current_user.is_admin: return redirect('/')
 
     course = Course.query.filter_by(id=course_id).first()
     if not course:
@@ -107,9 +104,8 @@ def delete_course(course_id):
         return redirect(url_for('setting.all_settings'))
 
 @course_template.route('/change_course/<course_id>', methods=["GET", "POST"])
-@login_required
+@admin_required
 def change_course(course_id):
-    if not current_user.is_admin: return redirect('/')
 
     course = Course.query.filter_by(id=course_id).first()
     if not course:

@@ -3,16 +3,14 @@ from flask_login import current_user, login_required
 from web.models import Course, Session, Access
 from web.forms import UploadForm
 from werkzeug.utils import secure_filename
-from web.utils import read_file
+from web.utils import read_file, admin_required
 from web import app, db
 
 session_template = Blueprint('session', __name__, template_folder = '../templates')
 
 @session_template.route('/upload_session', methods=["GET", "POST"])
-@login_required
+@admin_required
 def upload_session():
-
-    if not current_user.is_admin: return redirect('/')
 
     form = UploadForm()
     form.course_num.choices = sorted([(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
@@ -40,9 +38,8 @@ def upload_session():
     return render_template('upload_session.html', form = form)
 
 @session_template.route('/delete_session/<session_id>')
-@login_required
+@admin_required
 def delete_session(session_id):
-    if not current_user.is_admin: return redirect('/')
 
     session = Session.query.filter_by(id=session_id).first()
     if not session:
