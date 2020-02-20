@@ -1,3 +1,11 @@
+from blueprints.settings import setting_template
+from blueprints.sessions import session_template
+from blueprints.login import login_template
+from blueprints.courses import course_template
+from blueprints.summary import summary_template
+from blueprints.index import index_template
+
+from web import models
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -22,13 +30,6 @@ bootstrap = Bootstrap(app)
 login = LoginManager(app)
 login.login_view = 'login.login'
 
-from web import models
-from blueprints.index import index_template
-from blueprints.summary import summary_template
-from blueprints.courses import course_template
-from blueprints.login import login_template
-from blueprints.sessions import session_template
-from blueprints.settings import setting_template
 
 app.register_blueprint(index_template)
 app.register_blueprint(summary_template)
@@ -39,11 +40,13 @@ app.register_blueprint(setting_template)
 
 # add example user, seminar and session
 db.create_all()
-example_admin = models.User(id=1, email="example_admin_user@gmail.com", is_admin=True)
+example_admin = models.User(
+    id=1, email="example_admin_user@gmail.com", is_admin=True)
 example_admin.set_password("111")
 db.session.merge(example_admin)
 
-example_user = models.User(id=2, email="example_user@gmail.com", is_admin=False)
+example_user = models.User(
+    id=2, email="example_user@gmail.com", is_admin=False)
 example_user.set_password("111")
 db.session.merge(example_user)
 

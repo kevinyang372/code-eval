@@ -3,12 +3,14 @@ from flask_login import current_user, login_user, login_required, logout_user
 from web.models import User
 from web.forms import LoginForm
 
-login_template = Blueprint('login', __name__, template_folder = '../templates')
+login_template = Blueprint('login', __name__, template_folder='../templates')
+
 
 @login_template.route('/login', methods=['GET', 'POST'])
 def login():
 
-    if current_user.is_authenticated: return redirect('/')
+    if current_user.is_authenticated:
+        return redirect('/')
 
     form = LoginForm()
     if request.method == "POST":
@@ -18,7 +20,8 @@ def login():
             return redirect(url_for('login.login'))
         login_user(user)
         return redirect('/')
-    return render_template('login.html', form = form)
+    return render_template('login.html', form=form)
+
 
 @login_template.route('/logout')
 def logout():

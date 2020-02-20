@@ -5,7 +5,10 @@ from RestrictedPython.Guards import guarded_iter_unpack_sequence
 
 from multiprocessing import Process, Queue
 
-class TimeoutException(Exception): pass
+
+class TimeoutException(Exception):
+    pass
+
 
 class BaseTest(object):
 
@@ -29,7 +32,7 @@ class BaseTest(object):
         for item in blacklist:
             if item in list(safe_globals.keys()):
                 safe_globals.pop(item)
-        
+
         errs = {}
         try:
             exec(byte_code.code, safe_globals, safe_locals)
