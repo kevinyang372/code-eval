@@ -8,7 +8,7 @@ login_template = Blueprint('login', __name__, template_folder='../templates')
 
 @login_template.route('/login', methods=['GET', 'POST'])
 def login():
-
+    """Page for login"""
     if current_user.is_authenticated:
         return redirect('/')
 

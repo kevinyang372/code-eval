@@ -9,6 +9,10 @@ setting_template = Blueprint(
 @setting_template.route('/all_settings')
 @admin_required
 def all_settings():
+    """Setting index page
+
+    Required scope: Admin
+    """
     course = Course.query.all()
     return render_template('all_setting.html', course=course)
 
@@ -16,6 +20,10 @@ def all_settings():
 @setting_template.route('/all_settings/<course_id>')
 @admin_required
 def session_settings(course_id):
+    """Setting page for each session
+    
+    Required scope: Admin
+    """
     session = Session.query.filter_by(course_id=course_id).all()
 
     total_s = len(Course.query.filter_by(id=course_id).first().users)

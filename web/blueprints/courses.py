@@ -13,12 +13,16 @@ import os
 
 course_template = Blueprint('course', __name__, template_folder='../templates')
 
-# submission page
-
 
 @course_template.route('/courses/<course_num>', methods=["GET", "POST"])
 @login_required
 def course(course_num):
+    """Page for submitting code
+    
+    Required scope: User / Admin
+    User could submit their code here. Submission needs to include prespecified entry
+    function within the code
+    """
 
     # check if filename is valid
     def is_valid(filename):
@@ -81,6 +85,12 @@ def course(course_num):
 @course_template.route('/add_course', methods=["GET", "POST"])
 @admin_required
 def add_course():
+    """Page for adding new courses
+    
+    Required scope: Admin
+    User could choose to use the randomly generated registration link
+    or customize their own ones
+    """
 
     random_generated = ''.join(random.choice(
         string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
@@ -107,6 +117,12 @@ def add_course():
 @course_template.route('/delete_course/<course_id>')
 @admin_required
 def delete_course(course_id):
+    """Page for deleting courses
+    
+    Required scope: Admin
+    Note that all sessions and results attached to that session
+    will be deleted
+    """
 
     course = Course.query.filter_by(id=course_id).first()
     if not course:
@@ -121,6 +137,10 @@ def delete_course(course_id):
 @course_template.route('/change_course/<course_id>', methods=["GET", "POST"])
 @admin_required
 def change_course(course_id):
+    """Page for changing course details
+    
+    Required scope: Admin
+    """
 
     course = Course.query.filter_by(id=course_id).first()
     if not course:

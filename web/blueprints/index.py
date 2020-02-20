@@ -4,12 +4,15 @@ from web.models import Course
 
 index_template = Blueprint('index', __name__, template_folder='../templates')
 
-# index page shows a list of all available courses
-
 
 @index_template.route('/', methods=["GET", "POST"])
 @login_required
 def index():
+    """Page for the list of courses available to the user
+    
+    Required scope: User / Admin
+    This page only displays courses that the user has access to
+    """
     if current_user.is_admin:
         courses = sorted(Course.query.all(), key=lambda x: x.course_num)
     else:

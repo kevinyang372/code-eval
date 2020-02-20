@@ -6,6 +6,8 @@ import os
 
 
 def read_file(file, filename):
+    """Read user uploaded files"""
+
     file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
     content = []
@@ -18,6 +20,7 @@ def read_file(file, filename):
 
 
 def admin_required(f):
+    """Decorator for requiring admin access"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user or not current_user.is_admin:

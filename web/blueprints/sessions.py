@@ -13,7 +13,11 @@ session_template = Blueprint(
 @session_template.route('/upload_session', methods=["GET", "POST"])
 @admin_required
 def upload_session():
-
+    """Page for uploading new sessions
+    
+    Required scope: Admin
+    Prerequisites: Course exists
+    """
     form = UploadForm()
     form.course_num.choices = sorted(
         [(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
@@ -47,7 +51,11 @@ def upload_session():
 @session_template.route('/delete_session/<session_id>')
 @admin_required
 def delete_session(session_id):
-
+    """Page for delete sessions
+    
+    Required scope: Admin
+    Note that all results attached to the session will be deleted as well
+    """
     session = Session.query.filter_by(id=session_id).first()
     if not session:
         flash('Session to delete does not exist')
@@ -61,6 +69,13 @@ def delete_session(session_id):
 @session_template.route('/register/<link>', methods=["GET", "POST"])
 @login_required
 def register(link):
+    """Page for registering into new courses
+    
+    Required scope: User / Admin
+    This page is provided for students to register into the courses they
+    are invited to. The register link for specific courses could be found
+    at /all_settings
+    """
 
     if current_user.is_admin:
         flash('You are an admin! Enjoy your privileges.')
