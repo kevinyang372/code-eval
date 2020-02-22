@@ -100,14 +100,14 @@ def add_course():
     if request.method == "POST":
 
         form = AddCourse()
-        if Course.query.filter_by(course_num=form.course_num.data).first() is None:
+        if not Course.query.filter_by(course_num=form.course_num.data).first() and not Course.query.filter_by(registration=form.registration_link.data).first():
             new_course = Course(course_num=form.course_num.data,
                                 registration=form.registration_link.data)
             db.session.add(new_course)
             db.session.commit()
         else:
-            flash('course already exists')
-            return redirect(url_for('course.change_course', course_id=Course.query.filter_by(course_num=form.course_num.data).first().id))
+            flash('Course num or course registration link already exists')
+            return redirect(url_for('course.add_course'))
 
         return redirect('/')
 
@@ -153,6 +153,10 @@ def change_course(course_id):
     if request.method == "POST":
 
         form = AddCourse()
+
+        if Course.query.filter_by(registration=form.registration_link.data).first():
+            flash('Course with this registration link already exists')
+            return redirect(url_for('course.change_course', course_id = course_id))
 
         course.course_num = form.course_num.data
         course.registration = form.registration_link.data
