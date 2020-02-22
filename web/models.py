@@ -42,7 +42,7 @@ class Case(db.Model):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    course_num = db.Column(db.Integer)
+    course_num = db.Column(db.String)
     registration = db.Column(db.String)
     sessions = db.relationship('Session', cascade="all,delete", backref='course', lazy=True)
     users = db.relationship('User', secondary='access')

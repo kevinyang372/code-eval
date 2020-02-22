@@ -1,11 +1,3 @@
-from blueprints.settings import setting_template
-from blueprints.sessions import session_template
-from blueprints.login import login_template
-from blueprints.courses import course_template
-from blueprints.summary import summary_template
-from blueprints.index import index_template
-
-from web import models
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -30,6 +22,12 @@ bootstrap = Bootstrap(app)
 login = LoginManager(app)
 login.login_view = 'login.login'
 
+from blueprints.settings import setting_template
+from blueprints.sessions import session_template
+from blueprints.login import login_template
+from blueprints.courses import course_template
+from blueprints.summary import summary_template
+from blueprints.index import index_template
 
 app.register_blueprint(index_template)
 app.register_blueprint(summary_template)
@@ -37,6 +35,8 @@ app.register_blueprint(course_template)
 app.register_blueprint(login_template)
 app.register_blueprint(session_template)
 app.register_blueprint(setting_template)
+
+from web import models
 
 # add example user, seminar and session
 db.create_all()
@@ -50,7 +50,7 @@ example_user = models.User(
 example_user.set_password("111")
 db.session.merge(example_user)
 
-example_course = models.Course(id=1, course_num=156, registration="join156")
+example_course = models.Course(id=1, course_num='CS156', registration="join156")
 db.session.merge(example_course)
 
 # example_session = models.Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')

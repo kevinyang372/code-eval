@@ -22,6 +22,6 @@ class UploadForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class AddCourse(FlaskForm):
-    course_num = IntegerField('Course', validators=[DataRequired()])
+    course_num = StringField('Course', validators=[DataRequired()])
     registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[DataRequired()])
     submit = SubmitField('Submit')
