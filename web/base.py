@@ -38,7 +38,7 @@ class BaseTest(object):
             exec(byte_code.code, safe_globals, safe_locals)
         except Exception as e:
             for ind in range(len(self.parameters)):
-                errs[ind] = e
+                errs[ind] = str(e)
             return errs
 
         for i, params in enumerate(self.parameters):
@@ -46,7 +46,7 @@ class BaseTest(object):
                 try:
                     r.put((0, safe_locals[entry_point](*params)))
                 except Exception as e:
-                    r.put((1, e))
+                    r.put((1, str(e)))
 
             result = Queue()
             p = Process(target=getResult, args=(result,))
