@@ -12,6 +12,7 @@
                 <th>Total Submissions</th>
                 <th>Submitted Students</th>
                 <th>Passing Rate</th>
+                <th>Change Session</th>
                 <th>Delete Session</th>
             <tr>
         </thead>
@@ -22,10 +23,11 @@
                 <td>{{ s.session_num }}</td>
                 <td>{{ s.entry_point }}</td>
                 <td>{{ s.runtime }}</td>
-                <td>{{ s.results | length }}</td>
                 <td>{{ s.get_blacklist() }}</td>
+                <td>{{ s.results | length }}</td>
                 <td>{{ s.submitted_students }}</td>
                 <td>{{ s.passing_rate }}</td>
+                <td><a href="{{ url_for('session.change_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Details</a></td>
                 <td><a href="{{ url_for('session.delete_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
             </tr>
             {% endfor %}

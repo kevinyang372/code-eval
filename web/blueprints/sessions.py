@@ -4,6 +4,7 @@ from web.models import Course, Session, Access
 from web.forms import UploadForm
 from werkzeug.utils import secure_filename
 from web.utils import read_file, admin_required
+from werkzeug.datastructures import MultiDict
 from web import app, db
 
 session_template = Blueprint(
@@ -64,6 +65,51 @@ def delete_session(session_id):
         db.session.delete(session)
         db.session.commit()
         return redirect(url_for('setting.all_settings'))
+
+
+@session_template.route('/change_session/<session_id>', methods=["GET", "POST"])
+@admin_required
+def change_session(session_id):
+    """Page for changing session settings
+    
+    Required scope: Admin
+    """
+    session = Session.query.filter_by(id=session_id).first()
+
+    if not session:
+        flash('Session to change does not exist')
+        return redirect(url_for('/'))
+    
+    form = UploadForm(formdata=MultiDict({
+        'session_num': session.session_num,
+        'course_num': session.course.course_num, 
+        'runtime': session.runtime,
+        'entry_point': session.entry_point,
+        'blacklist': session.blacklist
+    }))
+
+    form.course_num.choices = sorted(
+        [(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
+
+    if request.method == "POST":
+
+        form = UploadForm()
+
+        if form.filename.data:
+            filename = secure_filename(form.filename.data.filename)
+            test_code = read_file(form.filename.data, filename)
+            session.test_code = test_code
+
+        session.session_num = form.session_num.data
+        session.course.course_num = form.course_num.data
+        session.runtime = form.runtime.data
+        session.entry_point = form.entry_point.data
+        session.blacklist = form.blacklist.data
+        
+        db.session.commit()
+        return redirect(url_for('setting.session_settings', course_id=session.course.id))
+
+    return render_template('upload_session.html', form=form)
 
 
 @session_template.route('/register/<link>', methods=["GET", "POST"])
