@@ -23,7 +23,7 @@ def upload_session():
     form.course_num.choices = sorted(
         [(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
 
-    if request.method == "POST":
+    if form.validate_on_submit():
 
         filename = secure_filename(form.filename.data.filename)
         test_code = read_file(form.filename.data, filename)
@@ -80,18 +80,18 @@ def change_session(session_id):
         flash('Session to change does not exist')
         return redirect(url_for('/'))
     
-    form = UploadForm(formdata=MultiDict({
-        'session_num': session.session_num,
-        'course_num': session.course.course_num, 
-        'runtime': session.runtime,
-        'entry_point': session.entry_point,
-        'blacklist': session.blacklist
-    }))
+    form = UploadForm(
+        session_num = session.session_num,
+        course_num = session.course.course_num, 
+        runtime = session.runtime,
+        entry_point = session.entry_point,
+        blacklist = session.blacklist
+    )
 
     form.course_num.choices = sorted(
         [(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
 
-    if request.method == "POST":
+    if form.validate_on_submit():
 
         form = UploadForm()
 

@@ -42,7 +42,7 @@ def course(course_num):
     form.sessions.choices = sorted(
         [(i.session_num, 'session %s' % i.session_num) for i in available])
 
-    if request.method == "POST":
+    if form.validate_on_submit():
         if is_valid(form.filename.data.filename):
 
             filename = secure_filename(form.filename.data.filename)
@@ -94,12 +94,12 @@ def add_course():
 
     random_generated = ''.join(random.choice(
         string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
-    form = AddCourse(formdata=MultiDict(
-        {'registration_link': random_generated}))
+    form = AddCourse(registration_link = random_generated)
 
-    if request.method == "POST":
+    if form.validate_on_submit():
 
         form = AddCourse()
+
         if not Course.query.filter_by(course_num=form.course_num.data).first() and not Course.query.filter_by(registration=form.registration_link.data).first():
             new_course = Course(course_num=form.course_num.data,
                                 registration=form.registration_link.data)
@@ -147,10 +147,9 @@ def change_course(course_id):
         flash('Course to change does not exist')
         return redirect(url_for('setting.all_settings'))
 
-    form = AddCourse(formdata=MultiDict(
-        {'registration_link': course.registration, 'course_num': course.course_num}))
+    form = AddCourse(registration_link = course.registration, course_num = course.course_num)
 
-    if request.method == "POST":
+    if form.validate_on_submit():
 
         form = AddCourse()
 
