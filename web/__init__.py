@@ -16,6 +16,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["FILE_UPLOADS"] = "web/tmp"
 app.config["SESSION_UPLOADS"] = "web/tests"
 app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024
 
 csrf = CSRFProtect()
 db = SQLAlchemy(app)
