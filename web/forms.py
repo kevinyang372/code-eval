@@ -4,7 +4,6 @@ from wtforms.validators import DataRequired, Email, NumberRange, Regexp, Optiona
 
 class CodeSumitForm(FlaskForm):
     filename = FileField()
-    sessions = SelectField('Choose Sessions', coerce = float)
     submit = SubmitField('Submit')
 
 class LoginForm(FlaskForm):

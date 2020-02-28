@@ -1,85 +1,13 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import current_user, login_required
-from web.models import Course, Session, Result, Case
-from web.forms import CodeSumitForm, AddCourse
+from web.models import Course
+from web.forms import AddCourse
 from web import app, db
-from web.utils import read_file, admin_required
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import MultiDict
-import timeit
+from web.utils import admin_required
 import random
 import string
-import os
 
 course_template = Blueprint('course', __name__, template_folder='../templates')
-
-
-@course_template.route('/courses/<course_num>', methods=["GET", "POST"])
-@login_required
-def course(course_num):
-    """Page for submitting code
-    
-    Required scope: User / Admin
-    User could submit their code here. Submission needs to include prespecified entry
-    function within the code
-    """
-
-    # check if filename is valid
-    def is_valid(filename):
-        if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
-            return True
-        return False
-
-    if not current_user.is_admin and not any(int(course_num) == i.course_num for i in current_user.courses):
-        flash('You have no access to this course!')
-        return redirect(url_for('index'))
-
-    form = CodeSumitForm()
-
-    # list available sessions
-    available = Session.query.filter(
-        Session.course.has(course_num=course_num)).all()
-    form.sessions.choices = sorted(
-        [(i.session_num, 'session %s' % i.session_num) for i in available])
-
-    if form.validate_on_submit():
-        if is_valid(form.filename.data.filename):
-
-            filename = secure_filename(form.filename.data.filename)
-            to_test = read_file(form.filename.data, filename)
-
-            # fetch session settings
-            setting = Session.query.filter(Session.course.has(
-                course_num=course_num)).filter_by(session_num=form.sessions.data).first()
-
-            d = {}
-            exec(setting.test_code, d)
-
-            temp = d['TestCases'](to_test)
-            res = temp.test(runtime=setting.runtime,
-                            entry_point=setting.entry_point, blacklist=setting.get_blacklist())
-
-            # record runtime
-            time = timeit.timeit(lambda: d['TestCases'](to_test).test(
-                runtime=setting.runtime, entry_point=setting.entry_point, blacklist=setting.get_blacklist()), number=1)
-
-            passed_num = sum([1 for case in res if res[case] == "Passed"])
-
-            to_add = Result(user_id=current_user.id, email=current_user.email, session_id=setting.id,
-                            passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers))
-            db.session.add(to_add)
-
-            for case in res:
-                to_add.cases.append(
-                    Case(case_num=case, success=res[case] == "Passed", reason=res[case]))
-
-            db.session.commit()
-
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=to_test.replace(' ', '\xa0'), time=time)
-
-        return redirect(request.url)
-
-    return render_template('courses.html', form=form)
 
 
 @course_template.route('/add_course', methods=["GET", "POST"])

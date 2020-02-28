@@ -32,6 +32,7 @@ from blueprints.login import login_template
 from blueprints.courses import course_template
 from blueprints.summary import summary_template
 from blueprints.index import index_template
+from blueprints.submissions import submission_template
 
 app.register_blueprint(index_template)
 app.register_blueprint(summary_template)
@@ -39,6 +40,7 @@ app.register_blueprint(course_template)
 app.register_blueprint(login_template)
 app.register_blueprint(session_template)
 app.register_blueprint(setting_template)
+app.register_blueprint(submission_template)
 
 from web import models
 

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    {% for s in sessions %}
+        <a href="{{ url_for('submission.submission', course_id = course_id, session_id = s.id) }}", class="btn btn-secondary btn-lg">Session {{ s.session_num }}</a><br>
+    {% endfor %}
+{% endblock %}

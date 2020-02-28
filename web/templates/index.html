@@ -4,6 +4,6 @@
 {% block app_content %}
     <h2>Code Submission</h2>
     {% for s in courses %}
-        <a href="{{ url_for('course.course', course_num = s.course_num) }}", class="btn btn-secondary btn-lg">Course {{ s.course_num }}</a><br>
+        <a href="{{ url_for('submission.submission_index', course_id = s.id) }}", class="btn btn-secondary btn-lg">Course {{ s.course_num }}</a><br>
     {% endfor %}
 {% endblock %}
