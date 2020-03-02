@@ -1,5 +1,16 @@
 # CodeEval
 
+## Build
+The application could be build with Docker
+
+First navigate to the project root directory and build the image:
+
+    $ docker build -t code_eval:latest .
+    
+After build completes, we can run the container:
+
+    $ docker run -d -p 5000:5000 code_eval
+
 ## Sample Login Credentials
 Default Admin
 > Email: example_admin_user@gmail.com </br>
