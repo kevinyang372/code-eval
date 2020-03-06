@@ -38,7 +38,7 @@ def submission(course_id, session_id):
             return True
         return False
 
-    if not current_user.is_admin and not any(int(course_num) == i.course_num for i in current_user.courses):
+    if not current_user.is_admin and not any(int(course_id) == i.id for i in current_user.courses):
         flash('You have no access to this course!')
         return redirect(url_for('index.index'))
 
