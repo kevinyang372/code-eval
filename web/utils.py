@@ -3,6 +3,8 @@ from flask import redirect, url_for
 from functools import wraps
 from web import app
 import os
+import nbformat
+from nbconvert import PythonExporter
 
 
 def read_file(file, filename):
@@ -27,3 +29,17 @@ def admin_required(f):
             return redirect(url_for('index.index'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def convert_jupyter(file, filename):
+
+    file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
+
+    with open(os.path.join(app.config["FILE_UPLOADS"], filename)) as f:
+        nb = nbformat.reads(f.read(), nbformat.NO_CONVERT)
+
+    exporter = PythonExporter()
+    source, _ = exporter.from_notebook_node(nb)
+
+    os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+    return source

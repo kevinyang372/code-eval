@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from web.models import Session, Result, Case
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import read_file
+from web.utils import read_file, convert_jupyter
 from web import app, db
 import timeit
 
@@ -49,7 +49,11 @@ def submission(course_id, session_id):
         if is_valid(form.filename.data.filename):
 
             filename = secure_filename(form.filename.data.filename)
-            to_test = read_file(form.filename.data, filename)
+
+            if filename.split('.')[1] == 'py':
+                to_test = read_file(form.filename.data, filename)
+            else:
+                to_test = convert_jupyter(form.filename.data, filename)
 
             d = {}
             exec(setting.test_code, d)
