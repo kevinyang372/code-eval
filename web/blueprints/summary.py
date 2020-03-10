@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 from web.models import Course, Session, Result
-from web.utils import admin_required
+from web.utils import admin_required, highlight_python
 
 summary_template = Blueprint(
     'summary', __name__, template_folder='../templates')
@@ -47,4 +47,4 @@ def summary_case(course_id, session_id, user_id, result_id):
     result = Result.query.filter_by(id=result_id).first()
     res = {case.case_num: case.reason for case in result.cases}
 
-    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.cases), file=result.content.replace(' ', '\xa0'), time=result.runtime)
+    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.cases), file=highlight_python(result.content), time=result.runtime)

@@ -5,7 +5,7 @@ from web import app
 import os
 import nbformat
 from nbconvert import PythonExporter
-
+import pygments
 
 def read_file(file, filename):
     """Read user uploaded files"""
@@ -32,6 +32,7 @@ def admin_required(f):
 
 
 def convert_jupyter(file, filename):
+    """Read jupyter notebook uploads"""
 
     file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
@@ -43,3 +44,12 @@ def convert_jupyter(file, filename):
 
     os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
     return source
+
+
+def highlight_python(code):
+    """highlight python code to html"""
+
+    formatter = pygments.formatters.HtmlFormatter(style="emacs", cssclass="codehilite")
+    css_string = "<style>" + formatter.get_style_defs() + "</style>"
+
+    return css_string + pygments.highlight(code, pygments.lexers.PythonLexer(), formatter)

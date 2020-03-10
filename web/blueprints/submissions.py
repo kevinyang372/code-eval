@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from web.models import Session, Result, Case
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import read_file, convert_jupyter
+from web.utils import read_file, convert_jupyter, highlight_python
 from web import app, db
 import timeit
 
@@ -78,7 +78,8 @@ def submission(course_id, session_id):
 
             db.session.commit()
 
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=to_test.replace(' ', '\xa0'), time=time)
+            # return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=to_test.replace(' ', '\xa0'), time=time)
+            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time)
 
         return redirect(request.url)
 
