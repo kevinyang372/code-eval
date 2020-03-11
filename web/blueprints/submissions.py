@@ -46,14 +46,17 @@ def submission(course_id, session_id):
     form = CodeSumitForm()
 
     if form.validate_on_submit():
-        if is_valid(form.filename.data.filename):
+        if (form.filename.data and is_valid(form.filename.data.filename)) or form.text.data:
 
-            filename = secure_filename(form.filename.data.filename)
+            if form.filename.data and is_valid(form.filename.data.filename):
+                filename = secure_filename(form.filename.data.filename)
 
-            if filename.split('.')[1] == 'py':
-                to_test = read_file(form.filename.data, filename)
+                if filename.split('.')[1] == 'py':
+                    to_test = read_file(form.filename.data, filename)
+                else:
+                    to_test = convert_jupyter(form.filename.data, filename)
             else:
-                to_test = convert_jupyter(form.filename.data, filename)
+                to_test = form.text.data
 
             d = {}
             exec(setting.test_code, d)

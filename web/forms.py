@@ -1,9 +1,11 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, FileField, BooleanField, SubmitField, PasswordField, StringField, DecimalField, IntegerField
 from wtforms.validators import DataRequired, Email, NumberRange, Regexp, Optional
+from flask_codemirror.fields import CodeMirrorField
 
 class CodeSumitForm(FlaskForm):
     filename = FileField()
+    text = CodeMirrorField(language='python', config={'lineNumbers': 'true'})
     submit = SubmitField('Submit')
 
 class LoginForm(FlaskForm):

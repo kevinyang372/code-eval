@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+from flask_codemirror import CodeMirror
 import os
 import sys
 
@@ -17,6 +18,8 @@ app.config["FILE_UPLOADS"] = "web/tmp"
 app.config["SESSION_UPLOADS"] = "web/tests"
 app.config["ALLOWED_EXTENSIONS"] = ["py", "ipynb"]
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024
+app.config['CODEMIRROR_LANGUAGES'] = ['python']
+app.config['WTF_CSRF_ENABLED'] = True
 
 csrf = CSRFProtect()
 db = SQLAlchemy(app)
@@ -25,6 +28,7 @@ bootstrap = Bootstrap(app)
 login = LoginManager(app)
 login.login_view = 'login.login'
 csrf.init_app(app)
+codemirror = CodeMirror(app)
 
 from blueprints.settings import setting_template
 from blueprints.sessions import session_template
