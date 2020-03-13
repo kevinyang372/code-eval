@@ -58,13 +58,20 @@ class TestCases(BaseTest):
     def __init__(self, func):
         super().__init__(func)
         
-        # parameters should have the same length as answers
-        self.parameters = [(1, 2), (3, 4), (7, 10), (5, 6)]
-        self.answers = [3, 7, 17, 11]
+        # each key represent a separate question
+        self.parameters = {
+            'add': [(1, 2), (3, 4), (7, 10), (5, 6)],
+            'subtract': [(1, 2), (3, 4), (7, 10), (5, 6)],
+            'multiply': [(1, 2), (3, 4), (7, 10), (5, 6)]
+        }
+        self.answers = {
+            'add': [3, 7, 17, 11],
+            'subtract': [-1, -1, -3, -1],
+            'multiply': [2, 12, 70, 30]
+        }
 ```
 * Session Number: Should be a positive decimal (e.g. 1.1).
 * Course: Choose from available courses.
-* Entry Point: Entry function to run in student submissions.
 * Blacklist: Libraries that students should not use in submissions.
 
 ### Add Course
