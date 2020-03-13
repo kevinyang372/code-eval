@@ -27,8 +27,18 @@ class Result(db.Model):
     content = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
+    questions = db.relationship('Question', cascade="all,delete",
+                            backref='result', lazy=True)
+
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    passed_num = db.Column(db.Integer)
+    name = db.Column(db.String)
     cases = db.relationship('Case', cascade="all,delete",
                             backref='result', lazy=True)
+    result_id = db.Column(db.Integer, db.ForeignKey(
+        'result.id'), nullable=False)
 
 
 class Case(db.Model):
@@ -36,8 +46,8 @@ class Case(db.Model):
     case_num = db.Column(db.Integer)
     success = db.Column(db.Boolean)
     reason = db.Column(db.String)
-    result_id = db.Column(db.Integer, db.ForeignKey(
-        'result.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey(
+        'question.id'), nullable=False)
 
 
 class Course(db.Model):
@@ -51,7 +61,6 @@ class Course(db.Model):
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_num = db.Column(db.Float)
-    entry_point = db.Column(db.String)
     runtime = db.Column(db.Float)
     blacklist = db.Column(db.String)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)

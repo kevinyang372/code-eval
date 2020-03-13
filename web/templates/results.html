@@ -4,22 +4,25 @@
     <h3> Failed Test Cases: {{ total - passed }} / {{ total }} </h1>
     <h3> Total Run Time: {{ time }}</h3>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Test Case</th>
-                <th>Result</th>
-            <tr>
-        </thead>
-        <tbody>
-            {% for err in result %}
-            <tr>
-                <td>{{ err }}</td>
-                <td>{{ result[err] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% for question in result %}
+        <p> Question: {{ question }} </p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Test Case</th>
+                    <th>Result</th>
+                <tr>
+            </thead>
+            <tbody>
+                {% for err in result[question] %}
+                <tr>
+                    <td>{{ err }}</td>
+                    <td>{{ result[question][err] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
 
     <div class="card">
       <div class="card-body">

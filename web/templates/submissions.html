@@ -3,7 +3,6 @@
 
 {% block app_content %}
 {{ codemirror.include_codemirror() }}
-<p><b>Entry Function</b>: {{ session.entry_point }}</p>
 <p><b>Runtime</b>: {{session.runtime }}</p>
 {{ wtf.quick_form(form) }}
 {% endblock %}

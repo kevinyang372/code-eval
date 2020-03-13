@@ -53,3 +53,17 @@ def highlight_python(code):
     css_string = "<style>" + formatter.get_style_defs() + "</style>"
 
     return css_string + pygments.highlight(code, pygments.lexers.PythonLexer(), formatter)
+
+
+def compile_results(res):
+    """compile results into models"""
+
+    compiled = {}
+    for question in res:
+        compiled[question] = {}
+
+        compiled[question]['total_num'] = len(res[question])
+        compiled[question]['passed_num'] = sum([1 for case in res[question] if res[question][case] == "Passed"])
+        compiled[question]['reason'] = res[question]
+
+    return compiled

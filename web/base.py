@@ -4,6 +4,7 @@ from RestrictedPython.Eval import default_guarded_getiter
 from RestrictedPython.Guards import guarded_iter_unpack_sequence
 
 from multiprocessing import Process, Queue
+import collections
 
 
 class TimeoutException(Exception):
@@ -15,7 +16,13 @@ class BaseTest(object):
     def __init__(self, func):
         self.func = func
 
-    def test(self, runtime, entry_point, blacklist):
+    def test(self, runtime, blacklist):
+        result = {}
+        for entry_point in self.parameters:
+            result[entry_point] = self._test_question(runtime, entry_point, blacklist)
+        return result
+
+    def _test_question(self, runtime, entry_point, blacklist):
 
         byte_code = compile_restricted_exec(
             self.func,
@@ -37,11 +44,11 @@ class BaseTest(object):
         try:
             exec(byte_code.code, safe_globals, safe_locals)
         except Exception as e:
-            for ind in range(len(self.parameters)):
+            for ind in range(len(self.parameters[entry_point])):
                 errs[ind] = str(e)
             return errs
 
-        for i, params in enumerate(self.parameters):
+        for i, params in enumerate(self.parameters[entry_point]):
             def getResult(r):
                 try:
                     r.put((0, safe_locals[entry_point](*params)))
@@ -60,7 +67,7 @@ class BaseTest(object):
                 output = result.get()
                 if output[0] == 1:
                     errs[i] = output[1]
-                elif output[1] != self.answers[i]:
+                elif output[1] != self.answers[entry_point][i]:
                     errs[i] = "Wrong Answers"
                 else:
                     errs[i] = "Passed"

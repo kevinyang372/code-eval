@@ -45,6 +45,6 @@ def summary_result(course_id, session_id, user_id):
 def summary_case(course_id, session_id, user_id, result_id):
     """Individual submission details"""
     result = Result.query.filter_by(id=result_id).first()
-    res = {case.case_num: case.reason for case in result.cases}
+    res = {question.name: {case.case_num: case.reason for case in question.cases} for question in result.questions}
 
-    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.cases), file=highlight_python(result.content), time=result.runtime)
+    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.questions), file=highlight_python(result.content), time=result.runtime)

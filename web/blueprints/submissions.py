@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import current_user, login_required
-from web.models import Session, Result, Case
+from web.models import Session, Result, Question, Case
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import read_file, convert_jupyter, highlight_python
+from web.utils import read_file, convert_jupyter, highlight_python, compile_results
 from web import app, db
 import timeit
 
@@ -62,22 +62,25 @@ def submission(course_id, session_id):
             exec(setting.test_code, d)
 
             temp = d['TestCases'](to_test)
-            res = temp.test(runtime=setting.runtime,
-                            entry_point=setting.entry_point, blacklist=setting.get_blacklist())
+            res = temp.test(runtime=setting.runtime, blacklist=setting.get_blacklist())
 
             # record runtime
             time = timeit.timeit(lambda: d['TestCases'](to_test).test(
-                runtime=setting.runtime, entry_point=setting.entry_point, blacklist=setting.get_blacklist()), number=1)
+                runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1)
 
-            passed_num = sum([1 for case in res if res[case] == "Passed"])
+            compiled = compile_results(res)
+            passed_num = sum([1 for question in compiled if compiled[question]['passed_num'] == compiled[question]['total_num']])
 
             to_add = Result(user_id=current_user.id, email=current_user.email, session_id=setting.id,
                             passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers))
             db.session.add(to_add)
 
-            for case in res:
-                to_add.cases.append(
-                    Case(case_num=case, success=res[case] == "Passed", reason=res[case]))
+            for question in compiled:
+                q = Question(passed_num=compiled[question]['passed_num'], name=question)
+                for reason in compiled[question]['reason']:
+                    r = compiled[question]['reason'][reason]
+                    q.cases.append(Case(case_num=reason, success=r == "Passed", reason=r))
+                to_add.questions.append(q)
 
             db.session.commit()
 
