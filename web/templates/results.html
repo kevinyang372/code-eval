@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <h3> Failed Test Cases: {{ total - passed }} / {{ total }} </h1>
+    <h3> Passed Test Cases: {{ passed }} / {{ total }} </h1>
     <h3> Total Run Time: {{ time }}</h3>
 
     {% for question in result %}
@@ -17,7 +17,11 @@
                 {% for err in result[question] %}
                 <tr>
                     <td>{{ err }}</td>
-                    <td>{{ result[question][err] }}</td>
+                    {% if result[question][err] == 'Passed' %}
+                        <td><font color="green">{{ result[question][err] }}</font></td>
+                    {% else %}
+                        <td><font color="red">{{ result[question][err] }}</font></td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>

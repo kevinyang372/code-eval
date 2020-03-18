@@ -65,8 +65,8 @@ def submission(course_id, session_id):
             res = temp.test(runtime=setting.runtime, blacklist=setting.get_blacklist())
 
             # record runtime
-            time = timeit.timeit(lambda: d['TestCases'](to_test).test(
-                runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1)
+            time = round(timeit.timeit(lambda: d['TestCases'](to_test).test(
+                runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1), 3)
 
             compiled = compile_results(res)
             passed_num = sum([1 for question in compiled if compiled[question]['passed_num'] == compiled[question]['total_num']])
