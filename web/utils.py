@@ -1,5 +1,5 @@
 from flask_login import current_user
-from flask import redirect, url_for
+from flask import redirect, url_for, flash
 from functools import wraps
 from web import app
 import os
@@ -26,6 +26,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user or not current_user.is_admin:
+            flash('You have no access to this page')
             return redirect(url_for('index.index'))
         return f(*args, **kwargs)
     return decorated_function
