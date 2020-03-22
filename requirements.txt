@@ -24,3 +24,4 @@ Werkzeug==0.15.5
 WTForms==2.2.1
 Pygments==2.6.1
 flask-codemirror==1.1
+nbformat==4.4.0
