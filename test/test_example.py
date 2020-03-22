@@ -1,4 +1,5 @@
 import os
+import io
 import sys
 import unittest
 
@@ -38,15 +39,53 @@ class FlaskTestCase(unittest.TestCase):
 
     # admin access
     def test_admin_access(self):
-        self.test_login_admin();
+        self.test_login_admin()
         response = self.app.get('/summary', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
     # student access
     def test_student_access(self):
-        self.test_login_student();
+        self.test_login_student()
         response = self.app.get('/summary', follow_redirects=True)
         assert "You have no access to this page" in str(response.data)
+
+    # test create session
+    def test_create_session(self):
+        self.test_login_admin()
+
+        to_test = ''
+        with open('sample_test.py', 'r') as file:
+            for line in file:
+                to_test += line
+
+        response = self.app.post('/upload_session', data = dict(filename=(io.BytesIO(to_test.encode()), 'test_sample.py'), session_num=1.1, course_num="CS156", runtime=1.0), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+    # test submitting files
+    def test_upload_file(self):
+        self.test_create_session()
+
+        to_test = ''
+        with open('sample.py', 'r') as file:
+            for line in file:
+                to_test += line
+
+        response = self.app.post('/submit/1/1', data = dict(filename=(io.BytesIO(to_test.encode()), 'test.py')), follow_redirects=True)
+        assert "Passed Test Cases: 3 / 3" in str(response.data)
+
+    # test submitting malicious files
+    def test_upload_malicious(self):
+        self.test_create_session()
+
+        import glob
+        for filename in glob.glob('malicious/*'):
+            to_test = ''
+            with open(filename, 'r') as file:
+                for line in file:
+                    to_test += line
+
+            response = self.app.post('/submit/1/1', data = dict(filename=(io.BytesIO(to_test.encode()), 'test.py')), follow_redirects=True)
+            assert "Passed Test Cases: 3 / 3" not in str(response.data)
 
 if __name__ == '__main__':
     unittest.main()
