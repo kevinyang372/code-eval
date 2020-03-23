@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import current_user, login_required
-from web.models import Session, Result, Question, Case
+from web.models import Session, Result, Question, Case, Codecacher
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
 from web.utils import read_file, convert_jupyter, highlight_python, compile_results
-from web import app, db
+from web import app, db, csrf
 import timeit
 
 submission_template = Blueprint('submission', __name__, template_folder='../templates')
@@ -42,8 +42,14 @@ def submission(course_id, session_id):
         flash('You have no access to this course!')
         return redirect(url_for('index.index'))
 
+    cache = Codecacher.query.filter_by(user_id=current_user.id, session_id=session_id).first()
     setting = Session.query.filter_by(id=session_id).first()
-    form = CodeSumitForm()
+
+    pre_filled = cache.text if cache else '#Welcome'
+    print(pre_filled)
+    form = CodeSumitForm(
+        text = pre_filled
+    )
 
     if form.validate_on_submit():
         if (form.filename.data and is_valid(form.filename.data.filename)) or form.text.data:
@@ -90,3 +96,20 @@ def submission(course_id, session_id):
         return redirect(request.url)
 
     return render_template('submissions.html', form=form, session=setting)
+
+
+@submission_template.route('/codecacher/<session_id>', methods=["POST"])
+@login_required
+@csrf.exempt
+def codecacher(session_id):
+
+    text = request.json['data']
+
+    codecacher = Codecacher.query.filter_by(user_id=current_user.id, session_id=int(session_id)).first()
+    if codecacher:
+        codecacher.text = text
+    else:
+        codecacher = Codecacher(user_id=current_user.id, session_id=int(session_id), text=text)
+        db.session.add(codecacher)
+    db.session.commit()
+    return jsonify(data={'message': 'Successfully cached content'})

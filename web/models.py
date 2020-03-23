@@ -80,6 +80,16 @@ class Access(db.Model):
     course = db.relationship('Course', backref=db.backref("user", cascade="all, delete-orphan"))
 
 
+class Codecacher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
+    text = db.Column(db.String)
+
+    user = db.relationship('User', cascade="all,delete", backref='codecacher', lazy=True)
+    session = db.relationship('Session', cascade="all,delete", backref='codecacher', lazy=True)
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
