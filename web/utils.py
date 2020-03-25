@@ -1,11 +1,12 @@
 from flask_login import current_user
-from flask import redirect, url_for, flash
+from flask import redirect, url_for, flash, request, jsonify
 from functools import wraps
 from web import app
 import os
 import nbformat
 from nbconvert import PythonExporter
 import pygments
+from web.models import User
 
 def read_file(file, filename):
     """Read user uploaded files"""
@@ -31,6 +32,19 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+def admin_required_api(f):
+    """Decorator for requiring admin access in api"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        email = str(request.json['credentials']['email'])
+        password = str(request.json['credentials']['password'])
+
+        user = User.query.filter_by(email=email).first()
+        if user is None or not user.check_password(password) or not user.is_admin:
+            return jsonify(data={'message': 'Fails to verify user credentials'})
+        return f(*args, **kwargs)
+    return decorated_function
 
 def convert_jupyter(file, filename):
     """Read jupyter notebook uploads"""

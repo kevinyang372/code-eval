@@ -37,6 +37,7 @@ from blueprints.courses import course_template
 from blueprints.summary import summary_template
 from blueprints.index import index_template
 from blueprints.submissions import submission_template
+from blueprints.apis import api_template
 
 app.register_blueprint(index_template)
 app.register_blueprint(summary_template)
@@ -45,6 +46,7 @@ app.register_blueprint(login_template)
 app.register_blueprint(session_template)
 app.register_blueprint(setting_template)
 app.register_blueprint(submission_template)
+app.register_blueprint(api_template, url_prefix="/apis")
 
 from web import models
 

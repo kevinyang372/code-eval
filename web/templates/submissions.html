@@ -3,7 +3,6 @@
 
 {% block app_content %}
 {{ codemirror.include_codemirror() }}
-<meta name="csrf-token" content="{{ csrf_token() }}">
 <p><b>Runtime</b>: {{session.runtime }}</p>
 <p>You could choose to upload your code as a file or paste into the code snippet below</p>
 {{ wtf.quick_form(form) }}

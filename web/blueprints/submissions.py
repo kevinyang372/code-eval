@@ -102,6 +102,10 @@ def submission(course_id, session_id):
 @login_required
 @csrf.exempt
 def codecacher(session_id):
+    """Page for caching student code submissions
+    
+    Everytime user made an input in the code submission form, the changes will be saved into the database here
+    """
 
     text = request.json['data']
 
