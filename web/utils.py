@@ -7,6 +7,15 @@ import nbformat
 from nbconvert import PythonExporter
 import pygments
 from web.models import User
+import json
+
+
+def is_valid(filename):
+    """Validate user uploaded files' filename"""
+    if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
+        return True
+    return False
+
 
 def read_file(file, filename):
     """Read user uploaded files"""
@@ -29,6 +38,25 @@ def admin_required(f):
         if not current_user or not current_user.is_admin:
             flash('You have no access to this page')
             return redirect(url_for('index.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def user_required_api(f):
+    """Decorator for requiring user access in api"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        
+        if request.json:
+            email = str(request.json['credentials']['email'])
+            password = str(request.json['credentials']['password'])
+        elif request.form:
+            email = str(request.form['email'])
+            password = str(request.form['password'])
+
+        user = User.query.filter_by(email=email).first()
+        if user is None or not user.check_password(password):
+            return jsonify(data={'message': 'Fails to verify user credentials'})
         return f(*args, **kwargs)
     return decorated_function
 

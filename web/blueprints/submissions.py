@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from web.models import Session, Result, Question, Case, Codecacher
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import read_file, convert_jupyter, highlight_python, compile_results
+from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results
 from web import app, db, csrf
 import timeit
 
@@ -33,10 +33,6 @@ def submission(course_id, session_id):
     """
 
     # check if filename is valid
-    def is_valid(filename):
-        if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
-            return True
-        return False
 
     if not current_user.is_admin and not any(int(course_id) == i.id for i in current_user.courses):
         flash('You have no access to this course!')
