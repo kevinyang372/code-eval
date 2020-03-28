@@ -30,7 +30,7 @@ def upload_session():
 
         course_id = Course.query.filter_by(
             course_num=form.course_num.data).first().id
-        to_add = {'course_id': course_id, 'runtime': form.runtime.data,
+        to_add = {'course_id': course_id, 'runtime': form.runtime.data, 'description': form.description.data,
                   'blacklist': form.blacklist.data, 'session_num': form.session_num.data, 'test_code': test_code}
 
         # update / insert session settings
@@ -82,7 +82,8 @@ def change_session(session_id):
     
     form = UploadForm(
         session_num = session.session_num,
-        course_num = session.course.course_num, 
+        course_num = session.course.course_num,
+        description = session.description,
         runtime = session.runtime,
         blacklist = session.blacklist
     )
@@ -100,6 +101,7 @@ def change_session(session_id):
             session.test_code = test_code
 
         session.session_num = form.session_num.data
+        session.description = form.description.data
         session.course.course_num = form.course_num.data
         session.runtime = form.runtime.data
         session.blacklist = form.blacklist.data

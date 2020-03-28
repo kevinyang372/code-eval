@@ -63,6 +63,7 @@ class Session(db.Model):
     session_num = db.Column(db.Float)
     runtime = db.Column(db.Float)
     blacklist = db.Column(db.String)
+    description = db.Column(db.String)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     results = db.relationship('Result', cascade="all,delete", backref='session', lazy=True)
     test_code = db.Column(db.String)

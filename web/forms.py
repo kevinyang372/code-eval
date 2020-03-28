@@ -17,6 +17,7 @@ class UploadForm(FlaskForm):
     filename = FileField()
     session_num = DecimalField('Session Number', validators=[NumberRange(min=0.0, max=20.0, message='Session number must be a positive decimal')])
     course_num = SelectField('Choose Course', coerce = str)
+    description = StringField('Description of the question', validators=[DataRequired()])
     runtime = DecimalField('Run Time', default = 1.0, validators=[NumberRange(min=0.0, max=600.0, message='Runtime restriction must be a positive decimal')])
     blacklist = StringField('Blacklist (List of packages to ban, separated by comma, no space in between)', default = '', validators=[Optional(), Regexp(regex=r'^[a-z|A-Z|_|\d+|-|,]+$', message="Entry function must not contain any spaces in between")])
     submit = SubmitField('Submit')

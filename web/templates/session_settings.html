@@ -6,7 +6,6 @@
             <tr>
                 <th>Course</th>
                 <th>Session Number</th>
-                <th>Entry Point</th>
                 <th>Run Time</th>
                 <th>Black List</th>
                 <th>Total Submissions</th>
@@ -21,7 +20,6 @@
             <tr>
                 <td>{{ s.course.course_num }}</td>
                 <td>{{ s.session_num }}</td>
-                <td>{{ s.entry_point }}</td>
                 <td>{{ s.runtime }}</td>
                 <td>{{ s.get_blacklist() }}</td>
                 <td>{{ s.results | length }}</td>
