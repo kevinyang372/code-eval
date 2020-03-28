@@ -59,7 +59,7 @@ class FlaskTestCase(unittest.TestCase):
             for line in file:
                 to_test += line
 
-        response = self.app.post('/upload_session', data = dict(filename=(io.BytesIO(to_test.encode()), 'test_sample.py'), session_num=1.1, course_num="CS156", runtime=1.0), follow_redirects=True)
+        response = self.app.post('/upload_session', data = dict(filename=(io.BytesIO(to_test.encode()), 'test_sample.py'), description="test", session_num=1.1, course_num="CS156", runtime=1.0), follow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
     # test submitting files
