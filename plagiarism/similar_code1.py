@@ -1,2 +1,3 @@
-def func(a, b):
-    return a + b
+def func(c, d):
+    # this is just a comment
+    return c + d
