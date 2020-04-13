@@ -69,6 +69,25 @@ def ast_match_ignoring_variables(node1, node2):
         return node1 == node2
 
 
+# reordering
+def ast_match_reordering(node1, node2):
+    if type(node1) is not type(node2):
+        return False
+    if isinstance(node1, ast.AST):
+        for k, v in vars(node1).items():
+            if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
+                continue
+            elif not ast_match_reordering(v, getattr(node2, k)):
+                return False
+
+        return True
+    elif isinstance(node1, list):
+        if len(node1) != len(node2): return False
+        return any(all(itertools.starmap(ast_match_reordering, zip(node1, i))) for i in itertools.permutations(node2))
+    else:
+        return node1 == node2
+
+
 def traverse(node):
     for k, v in vars(node).items():
         print(k, v)
@@ -84,3 +103,4 @@ def traverse(node):
 print(exact_match(tree1, tree2))
 print(unifying_ast_match(tree1, tree2))
 print(ast_match_ignoring_variables(tree1, tree2))
+print(ast_match_reordering(tree1, tree2))
