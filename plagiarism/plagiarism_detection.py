@@ -88,19 +88,46 @@ def ast_match_reordering(node1, node2):
         return node1 == node2
 
 
-def traverse(node):
+def traverse(node, level = 0):
+    print(type(node).__name__)
     for k, v in vars(node).items():
-        print(k, v)
         if isinstance(v, list):
             for p in v:
                 if isinstance(p, ast.AST):
-                    traverse(p)
+                    traverse(p, level + 1)
         elif isinstance(v, ast.AST):
-            traverse(v)
-
+            traverse(v, level + 1)
 
 
 print(exact_match(tree1, tree2))
 print(unifying_ast_match(tree1, tree2))
 print(ast_match_ignoring_variables(tree1, tree2))
 print(ast_match_reordering(tree1, tree2))
+
+from zss import simple_distance, Node
+
+def copyTree(node, dummy):
+    t = type(node).__name__
+
+    if 'name' in node._fields:
+        t += ':' + node.name
+    elif 'id' in node._fields:
+        t += ':' + node.id
+    
+    curr = Node(t)
+    if dummy is not None: dummy.addkid(curr)
+
+    for k, v in vars(node).items():
+        if isinstance(v, list):
+            for p in v:
+                if isinstance(p, ast.AST):
+                    copyTree(p, curr)
+        elif isinstance(v, ast.AST):
+            copyTree(v, curr)
+
+    return curr
+
+
+A = (copyTree(tree1, None))
+B = (copyTree(tree2, None))
+print(simple_distance(A, B))
