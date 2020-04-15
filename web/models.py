@@ -29,6 +29,11 @@ class Result(db.Model):
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
     questions = db.relationship('Question', cascade="all,delete",
                             backref='result', lazy=True)
+    plagiarisms = db.relationship('Plagiarism', 
+        secondary = "plagiarism",
+        primaryjoin="Result.id == Plagiarism.first_result_id",
+        secondaryjoin="Result.id == Plagiarism.second_result_id",
+        cascade="all,delete", backref='result', lazy=True)
 
 
 class Question(db.Model):
@@ -89,6 +94,22 @@ class Codecacher(db.Model):
 
     user = db.relationship('User', cascade="all,delete", backref='codecacher', lazy=True)
     session = db.relationship('Session', cascade="all,delete", backref='codecacher', lazy=True)
+
+
+class Plagiarism(db.Model):
+    __tablename__ = 'plagiarism'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    exact_match = db.Column(db.Boolean)
+    unifying_ast = db.Column(db.Boolean)
+    ignore_variables = db.Column(db.Boolean)
+    reordering_ast = db.Column(db.Boolean)
+    edit_tree = db.Column(db.Float)
+
+    first_result_id = db.Column(db.Integer, db.ForeignKey(
+        'result.id'), nullable=False)
+    second_result_id = db.Column(db.Integer, db.ForeignKey(
+        'result.id'), nullable=False)
 
 
 @login.user_loader
