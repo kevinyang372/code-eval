@@ -30,9 +30,9 @@ class Result(db.Model):
     questions = db.relationship('Question', cascade="all,delete",
                             backref='result', lazy=True)
     plagiarisms = db.relationship('Plagiarism', 
-        secondary = "plagiarism",
-        primaryjoin="Result.id == Plagiarism.first_result_id",
-        secondaryjoin="Result.id == Plagiarism.second_result_id",
+        # secondary = "plagiarism",
+        primaryjoin="or_(Result.id == Plagiarism.first_result_id, Result.id == Plagiarism.second_result_id)",
+        # secondaryjoin="Result.id == Plagiarism.second_result_id",
         cascade="all,delete", backref='result', lazy=True)
 
 

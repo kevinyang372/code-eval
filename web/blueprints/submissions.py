@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import current_user, login_required
-from web.models import Session, Result, Question, Case, Codecacher
+from web.models import Session, Result, Question, Case, Codecacher, Plagiarism
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results
+from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results, compile_plagarism_report
 from web import app, db, csrf
 import timeit
 
@@ -86,8 +86,27 @@ def submission(course_id, session_id):
 
             db.session.commit()
 
+            id = max(i.id for i in Result.query.filter_by(user_id=current_user.id).all())
+            plr = compile_plagarism_report(to_test, current_user.id, setting.id)
+            temp_r = []
+            for r in plr:
+                t = Plagiarism(
+                    exact_match = r['result'][0],
+                    unifying_ast = r['result'][1],
+                    ignore_variables = r['result'][2],
+                    reordering_ast = r['result'][3],
+                    edit_tree = r['result'][4],
+                    first_result_id = r['result_id'],
+                    second_result_id = id
+                )
+                temp_r.append(t)
+                db.session.add(t)
+
+            db.session.commit()
+            p = sorted(temp_r, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
+
             # return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=to_test.replace(' ', '\xa0'), time=time)
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time)
+            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, plagiarism=p)
 
         return redirect(request.url)
 

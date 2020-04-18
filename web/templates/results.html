@@ -28,6 +28,41 @@
         </table>
     {% endfor %}
 
+    {% if current_user.is_admin %}
+        {% for p in plagiarism %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Test</th>
+                        <th>Result</th>
+                    <tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Exact Match</td>
+                        <td>{{ p.exact_match }}</td>
+                    </tr>
+                    <tr>
+                        <td>Unifying AST</td>
+                        <td>{{ p.unifying_ast }}</td>
+                    </tr>
+                    <tr>
+                        <td>Ignore variables</td>
+                        <td>{{ p.ignore_variables }}</td>
+                    </tr>
+                    <tr>
+                        <td>Reordering AST</td>
+                        <td>{{ p.reordering_ast }}</td>
+                    </tr>
+                    <tr>
+                        <td>Edit Tree</td>
+                        <td>{{ p.edit_tree }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endif %}
+
     <div class="card">
       <div class="card-body">
         {{ file|safe }}
