@@ -30,6 +30,13 @@
 
     {% if current_user.is_admin %}
         {% for p in plagiarism %}
+        
+            {% if i == p.first_result_id %}
+                <a href="{{ url_for('summary.summary_case', result_id = p.second_result_id) }}">code link</a>
+            {% else %}
+                <a href="{{ url_for('summary.summary_case', result_id = p.first_result_id) }}">code link</a>
+            {% endif %}
+
             <table class="table">
                 <thead>
                     <tr>

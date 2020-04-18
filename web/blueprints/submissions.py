@@ -105,8 +105,7 @@ def submission(course_id, session_id):
             db.session.commit()
             p = sorted(temp_r, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
 
-            # return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=to_test.replace(' ', '\xa0'), time=time)
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, plagiarism=p)
+            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, plagiarism=p, i = id)
 
         return redirect(request.url)
 
