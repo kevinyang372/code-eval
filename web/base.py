@@ -28,6 +28,12 @@ class BaseTest(object):
             self.func,
             filename='<inline code>'
         )
+        errs = {}
+
+        if not byte_code.code:
+            for ind in range(len(self.parameters[entry_point])):
+                errs[ind] = 'Failed to parse input'
+            return errs
 
         safe_locals = {}
         safe_globals['_print_'] = PrintCollector
@@ -40,7 +46,6 @@ class BaseTest(object):
             if item in list(safe_globals.keys()):
                 safe_globals.pop(item)
 
-        errs = {}
         try:
             exec(byte_code.code, safe_globals, safe_locals)
         except Exception as e:

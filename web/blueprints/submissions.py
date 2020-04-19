@@ -42,7 +42,6 @@ def submission(course_id, session_id):
     setting = Session.query.filter_by(id=session_id).first()
 
     pre_filled = cache.text if cache else '#Welcome'
-    print(pre_filled)
     form = CodeSumitForm(
         text = pre_filled
     )

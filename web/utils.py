@@ -118,7 +118,12 @@ def compile_results(res):
 def compile_plagarism_report(code, user_id, session_id):
 
     results = Result.query.filter(Result.user_id != user_id, Result.session_id == session_id).all()
-    tree1 = ast.parse(code)
+
+    try:
+        tree1 = ast.parse(code)
+    except Exception as e:
+        return []
+        
     res = []
 
     for result in results:
