@@ -38,6 +38,7 @@ from blueprints.summary import summary_template
 from blueprints.index import index_template
 from blueprints.submissions import submission_template
 from blueprints.apis import api_template
+from blueprints.error import error_template
 
 app.register_blueprint(index_template)
 app.register_blueprint(summary_template)
@@ -47,6 +48,7 @@ app.register_blueprint(session_template)
 app.register_blueprint(setting_template)
 app.register_blueprint(submission_template)
 app.register_blueprint(api_template, url_prefix="/apis")
+app.register_blueprint(error_template)
 
 from web import models
 

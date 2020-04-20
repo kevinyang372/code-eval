@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    {% if error == '404' %}
+        <h2>Sorry the page you are looking for is not found</h2>
+    {% else %}
+        <h2>Oops something went wrong</h2>
+    {% endif %}
+{% endblock %}
