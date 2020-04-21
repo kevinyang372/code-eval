@@ -31,11 +31,7 @@
     {% if current_user.is_admin %}
         {% for p in plagiarism %}
         
-            {% if i == p.first_result_id %}
-                <a href="{{ url_for('summary.summary_case', result_id = p.second_result_id) }}">code link</a>
-            {% else %}
-                <a href="{{ url_for('summary.summary_case', result_id = p.first_result_id) }}">code link</a>
-            {% endif %}
+            <a href="{{ url_for('compare.compare', result_id1 = p.first_result_id, result_id2 = p.second_result_id) }}">code link</a>
 
             <table class="table">
                 <thead>
