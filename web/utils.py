@@ -10,6 +10,7 @@ from web.models import User, Result
 import json
 import itertools
 import ast
+import difflib
 from zss import simple_distance, Node
 
 
@@ -99,6 +100,38 @@ def highlight_python(code):
     css_string = "<style>" + formatter.get_style_defs() + "</style>"
 
     return css_string + pygments.highlight(code, pygments.lexers.PythonLexer(), formatter)
+
+
+def highlight_diff(file_names, file_contents):
+
+    class Formatter(pygments.formatters.HtmlFormatter):
+        def wrap(self, source, outfile):
+            return source
+
+    f = Formatter(style="emacs", cssclass="codehilite")
+    colored = [pygments.highlight(fc, pygments.lexers.PythonLexer(), f).splitlines(keepends=True) for fc in file_contents]
+
+    addition = '.codehilite .diff_plus { background-color: rgba(0, 255, 0, 0.3) }'
+    deletion = '.codehilite .diff_minus { background-color: rgba(255, 0, 0, 0.3) }'
+    special = '.codehilite .diff_special { background-color: rgba(128, 128, 128, 0.3) }'
+    res = '<style>%s%s%s%s</style>' % (f.get_style_defs(), addition, deletion, special)
+
+    res += '<pre class="codehilite">'
+    c = 0
+
+    for line in difflib.unified_diff(*(colored+file_names)):
+        # For each line we output a <div> with the original content,
+        # but if it starts with a special diff symbol, we apply a class to it
+        cls = {'+': 'diff_plus', '-': 'diff_minus', '@': 'diff_special'}.get(line[:1], '')
+        if cls: cls = ' class="{}"'.format(cls)
+        line = '<div{}>{}</div>'.format(cls, line.rstrip('\n'))
+        res += line
+        c += 1
+
+    if not c: return '<div>Two pieces of code are exactly the same</div>'
+    
+    res += '</pre>'
+    return res
 
 
 def compile_results(res):
