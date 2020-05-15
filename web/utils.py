@@ -160,7 +160,10 @@ def compile_plagarism_report(code, user_id, session_id):
     res = []
 
     for result in results:
-        tree2 = ast.parse(result.content)
+        try:
+            tree2 = ast.parse(result.content)
+        except Exception as e:
+            continue
 
         comparison = [0] * 5
         comparison[0] = 1 if exact_match(tree1, tree2) else 0
@@ -193,7 +196,7 @@ def exact_match(node1, node2):
 
 
 # unifying ast match detecting naive variable renaming
-def unifying_ast_match(node1, node2):
+def unifying_ast_match(node1, node2, mapping = {}):
     if type(node1) is not type(node2):
         return False
     if isinstance(node1, ast.AST):
@@ -206,12 +209,12 @@ def unifying_ast_match(node1, node2):
                     mapping[v] = getattr(node2, k)
                 elif mapping[v] != getattr(node2, k):
                     return False
-            elif not unifying_ast_match(v, getattr(node2, k)):
+            elif not unifying_ast_match(v, getattr(node2, k), mapping):
                 return False
 
         return True
     elif isinstance(node1, list):
-        return all(itertools.starmap(unifying_ast_match, zip(node1, node2)))
+        return all(itertools.starmap(unifying_ast_match, zip(node1, node2, mapping)))
     else:
         return node1 == node2
 
