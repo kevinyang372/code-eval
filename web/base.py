@@ -74,7 +74,6 @@ class BaseTest(object):
                 errs[i] = "Time Out"
             else:
                 output = result.get()
-
                 if output[0] == 1:
                     errs[i] = output[1]
                 elif isinstance(output[1], (list, np.ndarray)):

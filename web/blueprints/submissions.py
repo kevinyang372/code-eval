@@ -63,6 +63,7 @@ def submission(course_id, session_id):
             exec(setting.test_code, d)
 
             temp = d['TestCases'](to_test)
+
             res = temp.test(runtime=setting.runtime, blacklist=setting.get_blacklist())
 
             # record runtime
