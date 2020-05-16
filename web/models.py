@@ -88,12 +88,12 @@ class Access(db.Model):
 
 class Codecacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
     text = db.Column(db.String)
 
-    user = db.relationship('User', cascade="all,delete", backref='codecacher', lazy=True)
-    session = db.relationship('Session', cascade="all,delete", backref='codecacher', lazy=True)
+    user = db.relationship('User', cascade="all,delete,delete-orphan", backref='codecacher', lazy=True, single_parent=True)
+    session = db.relationship('Session', cascade="all,delete,delete-orphan", backref='codecacher', lazy=True, single_parent=True)
 
 
 class Plagiarism(db.Model):
