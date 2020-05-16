@@ -62,6 +62,27 @@ class FlaskTestCase(unittest.TestCase):
         response = self.app.post('/upload_session', data = dict(filename=(io.BytesIO(to_test.encode()), 'test_sample.py'), description="test", session_num=1.1, course_num="CS156", runtime=1.0), follow_redirects=True)
         self.assertEqual(response.status_code, 200)
 
+    # test delete session
+    def test_delete_session(self):
+        self.test_create_session()
+
+        response = self.app.get('/delete_session/1', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+    # test add course
+    def test_add_course(self):
+        self.test_login_admin()
+
+        response = self.app.post('/add_course', data = dict(course_num="CS166", registration_link="abcd"), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+    # test delete course
+    def test_delete_course(self):
+        self.test_add_course()
+
+        response = self.app.get('/delete_course/2', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
     # test submitting files
     def test_upload_file(self):
         self.test_create_session()
