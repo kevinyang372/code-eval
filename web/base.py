@@ -39,11 +39,15 @@ class BaseTest(object):
         def _hook_getitem(obj, attr):
             return obj.__getitem__(attr)
 
+        def _hook_write(obj):
+            return obj
+
         safe_locals = {}
         safe_globals['_print_'] = PrintCollector
         safe_globals['_getiter_'] = default_guarded_getiter
         safe_globals['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
         safe_globals['_getitem_'] = _hook_getitem
+        safe_globals['_write_'] = _hook_write
         safe_globals['np'] = np
 
         for item in blacklist:
@@ -69,6 +73,16 @@ class BaseTest(object):
             p.start()
             p.join(runtime)
 
+            def compare_lists(a, b):
+                if not isinstance(a, (list, np.ndarray)) and not isinstance(b, (list, np.ndarray)):
+                    if isinstance(a, (float, np.float64)) and isinstance(b, (float, np.float64)):
+                        return np.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)
+                    return a == b
+                if type(a) != type(b): return False
+                if len(a) == len(b) == 0: return True
+                if len(a) != len(b): return False
+                return all(map(compare_lists, a, b))
+
             if result.empty():
                 p.terminate()
                 errs[i] = "Time Out"
@@ -76,14 +90,9 @@ class BaseTest(object):
                 output = result.get()
                 if output[0] == 1:
                     errs[i] = output[1]
-                elif isinstance(output[1], (list, np.ndarray)):
-                    if all(output[1] == self.answers[entry_point][i]):
-                        errs[i] = "Passed"
-                    else:
-                        errs[i] = "Wrong Answers"
-                elif output[1] != self.answers[entry_point][i]:
-                    errs[i] = "Wrong Answers"
-                else:
+                elif compare_lists(output[1], self.answers[entry_point][i]):
                     errs[i] = "Passed"
+                else:
+                    errs[i] = "Wrong Answer"
 
         return errs
