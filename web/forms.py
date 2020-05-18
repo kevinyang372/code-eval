@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, FileField, BooleanField, SubmitField, PasswordField, StringField, DecimalField, IntegerField
-from wtforms.validators import DataRequired, Email, NumberRange, Regexp, Optional
+from wtforms.validators import DataRequired, Email, NumberRange, Regexp, Optional, ValidationError
 from flask_codemirror.fields import CodeMirrorField
+from web.models import Course, Session
 
 class CodeSumitForm(FlaskForm):
     filename = FileField()
@@ -22,7 +23,23 @@ class UploadForm(FlaskForm):
     blacklist = StringField('Blacklist (List of packages to ban, separated by comma, no space in between)', default = '', validators=[Optional(), Regexp(regex=r'^[a-z|A-Z|_|\d+|-|,]+$', message="Entry function must not contain any spaces in between")])
     submit = SubmitField('Submit')
 
+    def validate(self):
+        if not FlaskForm.validate(self): return False
+        course_id = Course.query.filter_by(course_num = self.course_num.data).first().id
+        session = Session.query.filter_by(course_id = course_id, session_num = self.session_num.data).first()
+
+        if session:
+            self.session_num.errors.append("That session number is taken. Please choose another.")
+            return False
+
+        return True
+
 class AddCourse(FlaskForm):
     course_num = StringField('Course', validators=[DataRequired()])
     registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[Regexp(regex=r'^[a-z|A-Z|_|\d+|-]+$', message="Invitation link must have no / in between")])
     submit = SubmitField('Submit')
+
+    def validate_course_num(form, field):
+        course = Course.query.filter_by(course_num = field.data).first()
+        if course:
+            raise ValidationError('That course number is taken. Please choose another.')
