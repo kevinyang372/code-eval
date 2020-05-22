@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    {% for r in results %}
+        <a href="{{ url_for('compare.compare', result_id1 = r1, result_id2 = r.id) }}", class="btn btn-secondary btn-lg">Author {{ r.user.email }}</a><br>
+    {% endfor %}
+{% endblock %}
