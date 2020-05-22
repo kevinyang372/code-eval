@@ -1,7 +1,7 @@
 from RestrictedPython import compile_restricted_exec, safe_globals, limited_builtins, utility_builtins
 from RestrictedPython.PrintCollector import PrintCollector
 from RestrictedPython.Eval import default_guarded_getiter
-from RestrictedPython.Guards import guarded_iter_unpack_sequence
+from RestrictedPython.Guards import guarded_iter_unpack_sequence, guarded_unpack_sequence
 
 import numpy as np
 from multiprocessing import Process, Queue
@@ -46,6 +46,7 @@ class BaseTest(object):
         safe_globals['_print_'] = PrintCollector
         safe_globals['_getiter_'] = default_guarded_getiter
         safe_globals['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
+        safe_globals['_unpack_sequence_'] = guarded_unpack_sequence
         safe_globals['_getitem_'] = _hook_getitem
         safe_globals['_write_'] = _hook_write
         safe_globals['np'] = np
