@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
 from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results, compile_plagarism_report
 from web import app, db, csrf
+from time import gmtime, strftime
 import timeit
 
 submission_template = Blueprint('submission', __name__, template_folder='../templates')
@@ -73,8 +74,9 @@ def submission(course_id, session_id):
             compiled = compile_results(res)
             passed_num = sum([1 for question in compiled if compiled[question]['passed_num'] == compiled[question]['total_num']])
 
+            ts = strftime("%Y-%m-%d %H:%M:%S", gmtime())
             to_add = Result(user_id=current_user.id, email=current_user.email, session_id=setting.id,
-                            passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers))
+                            passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers),ts=ts)
             db.session.add(to_add)
 
             for question in compiled:

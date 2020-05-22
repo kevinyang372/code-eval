@@ -29,6 +29,7 @@ class Result(db.Model):
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
     questions = db.relationship('Question', cascade="all,delete",
                             backref='result', lazy=True)
+    ts = db.Column(db.String)
     plagiarisms = db.relationship('Plagiarism', 
         # secondary = "plagiarism",
         primaryjoin="or_(Result.id == Plagiarism.first_result_id, Result.id == Plagiarism.second_result_id)",

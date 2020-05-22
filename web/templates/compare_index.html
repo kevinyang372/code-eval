@@ -3,6 +3,6 @@
 
 {% block app_content %}
     {% for r in results %}
-        <a href="{{ url_for('compare.compare', result_id1 = r1, result_id2 = r.id) }}", class="btn btn-secondary btn-lg">Author {{ r.user.email }}</a><br>
+        <a href="{{ url_for('compare.compare', result_id1 = r1, result_id2 = r.id) }}", class="btn btn-secondary btn-lg"> {{ r.user.email }} {{ r.ts }}</a><br>
     {% endfor %}
 {% endblock %}
