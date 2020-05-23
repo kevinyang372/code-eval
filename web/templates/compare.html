@@ -2,9 +2,24 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <div class="card">
-      <div class="card-body">
-        {{ content|safe }}
-      </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                {% for line in parsed1 %}
+                    {{ line|safe }}
+                {% endfor %}
+              </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                {% for line in parsed2 %}
+                    {{ line|safe }}
+                {% endfor %}
+              </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

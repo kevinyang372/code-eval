@@ -4,4 +4,7 @@ def func(c, d):
 
 
 def func2(c, d):
+    string = ['1',
+    '2',
+    '3']
     return c * d

@@ -52,6 +52,7 @@ def unifying_ast_match(node1, node2):
 
 
 # ignore variables
+d = {}
 def ast_match_ignoring_variables(node1, node2):
     if type(node1) is not type(node2):
         return False
@@ -61,6 +62,12 @@ def ast_match_ignoring_variables(node1, node2):
                 continue
             elif not ast_match_ignoring_variables(v, getattr(node2, k)):
                 return False
+
+        if 'lineno' in vars(node1):
+            if 'end_lineno' in vars(node1):
+                d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')] = getattr(node2, 'lineno'), getattr(node2, 'end_lineno')
+            else:
+                d[getattr(node1, 'lineno'), getattr(node1, 'lineno')] = getattr(node2, 'lineno'), getattr(node2, 'lineno')
 
         return True
     elif isinstance(node1, list):
@@ -103,6 +110,7 @@ print(exact_match(tree1, tree2))
 print(unifying_ast_match(tree1, tree2))
 print(ast_match_ignoring_variables(tree1, tree2))
 print(ast_match_reordering(tree1, tree2))
+print(d)
 
 from zss import simple_distance, Node
 

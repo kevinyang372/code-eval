@@ -102,6 +102,32 @@ def highlight_python(code):
     return css_string + pygments.highlight(code, pygments.lexers.PythonLexer(), formatter)
 
 
+def highlight_diff_temp(file_contents):
+    try:
+        tree1 = ast.parse(file_contents[0])
+        tree2 = ast.parse(file_contents[1])
+    except Exception as e:
+        return ['Could not parse Python file', 'Could not parse Python file']
+
+    d = ast_match_wrapper(tree1, tree2)
+    pre = '<style>.diff_plus { background-color: rgba(0, 255, 0, 0.3) }</style>'
+
+    parsed1 = [pre] + file_contents[0].split('\n')
+    parsed2 = [pre] + file_contents[1].split('\n')
+
+    for n1, n2 in d.items():
+        for t in range(n1[0] - 1, n1[1]):
+            parsed1[t] = '<div class={}>{}</div>'.format('diff_plus', parsed1[t])
+        for j in range(n2[0] - 1, n2[1]):
+            parsed2[j] = '<div class={}>{}</div>'.format('diff_plus', parsed2[j])
+
+    for instance in [parsed1, parsed2]:
+        for i in range(len(instance)):
+            if not instance[i].startswith('<div'):
+                instance[i] = '<div>{}</div>'.format(instance[i])
+
+    return parsed1, parsed2
+
 def highlight_diff(file_names, file_contents):
 
     class Formatter(pygments.formatters.HtmlFormatter):
@@ -254,6 +280,36 @@ def ast_match_reordering(node1, node2):
         return any(all(itertools.starmap(ast_match_reordering, zip(node1, i))) for i in itertools.permutations(node2))
     else:
         return node1 == node2
+
+
+# ignore variable with line highlighting
+def ast_match_wrapper(node1, node2):
+    d = {}
+    def func(node1, node2):
+        if type(node1) is not type(node2):
+            return False
+        if isinstance(node1, ast.AST):
+            for k, v in vars(node1).items():
+                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
+                    continue
+                elif not func(v, getattr(node2, k)):
+                    return False
+
+            if 'lineno' in vars(node1):
+                if 'end_lineno' in vars(node1):
+                    d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')] = getattr(node2, 'lineno'), getattr(node2, 'end_lineno')
+                else:
+                    d[getattr(node1, 'lineno'), getattr(node1, 'lineno')] = getattr(node2, 'lineno'), getattr(node2, 'lineno')
+
+            return True
+        elif isinstance(node1, list):
+            return all(itertools.starmap(func, zip(node1, node2)))
+        else:
+            return node1 == node2
+
+    res = func(node1, node2)
+    return d
+
 
 def copyTree(node, dummy):
     t = type(node).__name__

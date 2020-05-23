@@ -49,6 +49,7 @@ class BaseTest(object):
         safe_globals['_unpack_sequence_'] = guarded_unpack_sequence
         safe_globals['_getitem_'] = _hook_getitem
         safe_globals['_write_'] = _hook_write
+        safe_globals['list'] = list
         safe_globals['np'] = np
 
         for item in blacklist:
