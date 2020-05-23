@@ -116,13 +116,13 @@ def highlight_diff_temp(file_contents):
     parsed2 = [pre] + file_contents[1].split('\n')
 
     for n1, n2 in d.items():
-        for t in range(n1[0] - 1, n1[1]):
+        for t in range(n1[0], n1[1] + 1):
             parsed1[t] = '<div class={}>{}</div>'.format('diff_plus', parsed1[t])
-        for j in range(n2[0] - 1, n2[1]):
+        for j in range(n2[0], n2[1] + 1):
             parsed2[j] = '<div class={}>{}</div>'.format('diff_plus', parsed2[j])
 
     for instance in [parsed1, parsed2]:
-        for i in range(len(instance)):
+        for i in range(1, len(instance)):
             if not instance[i].startswith('<div'):
                 instance[i] = '<div>{}</div>'.format(instance[i])
 
@@ -201,6 +201,23 @@ def compile_plagarism_report(code, user_id, session_id):
         res.append({'result': comparison, 'result_id': result.id})
 
     return res
+
+
+def compile_plagarism_report_two(file_contents):
+    try:
+        tree1 = ast.parse(file_contents[0])
+        tree2 = ast.parse(file_contents[1])
+    except Exception as e:
+        return []
+
+    comparison = []
+    comparison.append(exact_match(tree1, tree2))
+    comparison.append(unifying_ast_match(tree1, tree2))
+    comparison.append(ast_match_ignoring_variables(tree1, tree2))
+    comparison.append(ast_match_reordering(tree1, tree2))
+    comparison.append(simple_distance((copyTree(tree1, None)), (copyTree(tree2, None))))
+
+    return comparison
 
 
 # Exact match between two pieces of code

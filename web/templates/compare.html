@@ -4,6 +4,7 @@
 {% block app_content %}
     <div class="row">
         <div class="col-md-6">
+            <p>{{ email1 }}</p>
             <div class="card">
               <div class="card-body">
                 {% for line in parsed1 %}
@@ -13,6 +14,7 @@
             </div>
         </div>
         <div class="col-md-6">
+            <p>{{ email2 }}</p>
             <div class="card">
               <div class="card-body">
                 {% for line in parsed2 %}
@@ -22,4 +24,34 @@
             </div>
         </div>
     </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Test</th>
+                <th>Result</th>
+            <tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Exact Match</td>
+                <td>{{ comparison[0] }}</td>
+            </tr>
+            <tr>
+                <td>Unifying AST</td>
+                <td>{{ comparison[1] }}</td>
+            </tr>
+            <tr>
+                <td>Ignore variables</td>
+                <td>{{ comparison[2] }}</td>
+            </tr>
+            <tr>
+                <td>Reordering AST</td>
+                <td>{{ comparison[3] }}</td>
+            </tr>
+            <tr>
+                <td>Edit Tree</td>
+                <td>{{ comparison[4] }}</td>
+            </tr>
+        </tbody>
+    </table>
 {% endblock %}
