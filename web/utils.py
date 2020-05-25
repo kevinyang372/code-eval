@@ -12,6 +12,7 @@ import itertools
 import ast
 import difflib
 from zss import simple_distance, Node
+import collections
 
 
 def is_valid(filename):
@@ -114,12 +115,16 @@ def highlight_diff_temp(file_contents):
 
     parsed1 = [pre] + file_contents[0].split('\n')
     parsed2 = [pre] + file_contents[1].split('\n')
+    visited = set()
 
-    for n1, n2 in d.items():
+    for n1, nodes in d.items():
         for t in range(n1[0], n1[1] + 1):
             parsed1[t] = '<div class={}>{}</div>'.format('diff_plus', parsed1[t])
-        for j in range(n2[0], n2[1] + 1):
-            parsed2[j] = '<div class={}>{}</div>'.format('diff_plus', parsed2[j])
+        for n2 in nodes:
+            for j in range(n2[0], n2[1] + 1):
+                if j not in visited:
+                    parsed2[j] = '<div class={}>{}</div>'.format('diff_plus', parsed2[j])
+                    visited.add(j)
 
     for instance in [parsed1, parsed2]:
         for i in range(1, len(instance)):
@@ -301,26 +306,47 @@ def ast_match_reordering(node1, node2):
 
 # ignore variable with line highlighting
 def ast_match_wrapper(node1, node2):
-    d = {}
-    def func(node1, node2):
+    d = collections.defaultdict(set)
+    def func(node1, node2, is_parent = True):
         if type(node1) is not type(node2):
             return False
         if isinstance(node1, ast.AST):
+
+            next_parent = is_parent and 'lineno' not in vars(node1)
+
             for k, v in vars(node1).items():
-                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
+                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name'):
                     continue
-                elif not func(v, getattr(node2, k)):
+                elif not func(v, getattr(node2, k), next_parent):
                     return False
 
-            if 'lineno' in vars(node1):
+            if 'lineno' in vars(node1) and is_parent:
                 if 'end_lineno' in vars(node1):
-                    d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')] = getattr(node2, 'lineno'), getattr(node2, 'end_lineno')
+                    d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add((getattr(node2, 'lineno'), getattr(node2, 'end_lineno')))
                 else:
-                    d[getattr(node1, 'lineno'), getattr(node1, 'lineno')] = getattr(node2, 'lineno'), getattr(node2, 'lineno')
+                    d[getattr(node1, 'lineno'), getattr(node1, 'lineno')].add((getattr(node2, 'lineno'), getattr(node2, 'lineno')))
 
             return True
         elif isinstance(node1, list):
-            return all(itertools.starmap(func, zip(node1, node2)))
+            if len(node1) <= len(node2):
+                for n1 in node1:
+                    f = False
+                    for n2 in node2:
+                        if func(n1, n2): f = True
+                    
+                    if not f: return  False
+
+                return True
+
+            else:
+                for n2 in node2:
+                    f = False
+                    for n1 in node1:
+                        if func(n1, n2): f = True
+                    
+                    if not f: return False
+
+                return True
         else:
             return node1 == node2
 
