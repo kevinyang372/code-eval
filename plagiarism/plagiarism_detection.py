@@ -1,5 +1,6 @@
 import ast
 import itertools
+import collections
 
 with open("similar_code1.py", "r") as source:
     tree1 = ast.parse(source.read())
@@ -52,7 +53,7 @@ def unifying_ast_match(node1, node2):
 
 
 # ignore variables
-d = {}
+d = collections.defaultdict(set)
 def ast_match_ignoring_variables(node1, node2):
     if type(node1) is not type(node2):
         return False
@@ -77,20 +78,46 @@ def ast_match_ignoring_variables(node1, node2):
 
 
 # reordering
-def ast_match_reordering(node1, node2):
+def ast_match_reordering(node1, node2, is_parent = True):
     if type(node1) is not type(node2):
         return False
     if isinstance(node1, ast.AST):
+
+        next_parent = is_parent and 'lineno' not in vars(node1)
+
         for k, v in vars(node1).items():
-            if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
+            if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name'):
                 continue
-            elif not ast_match_reordering(v, getattr(node2, k)):
+            elif not ast_match_reordering(v, getattr(node2, k), next_parent):
                 return False
+
+        if 'lineno' in vars(node1) and is_parent:
+            if 'end_lineno' in vars(node1):
+                d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add((getattr(node2, 'lineno'), getattr(node2, 'end_lineno')))
+            else:
+                d[getattr(node1, 'lineno'), getattr(node1, 'lineno')].add((getattr(node2, 'lineno'), getattr(node2, 'lineno')))
 
         return True
     elif isinstance(node1, list):
-        if len(node1) != len(node2): return False
-        return any(all(itertools.starmap(ast_match_reordering, zip(node1, i))) for i in itertools.permutations(node2))
+        if len(node1) <= len(node2):
+            for n1 in node1:
+                f = False
+                for n2 in node2:
+                    if ast_match_reordering(n1, n2): f = True
+                
+                if not f: return  False
+
+            return True
+
+        else:
+            for n2 in node2:
+                f = False
+                for n1 in node1:
+                    if ast_match_reordering(n1, n2): f = True
+                
+                if not f: return False
+
+            return True
     else:
         return node1 == node2
 
@@ -108,7 +135,7 @@ def traverse(node, level = 0):
 
 print(exact_match(tree1, tree2))
 print(unifying_ast_match(tree1, tree2))
-print(ast_match_ignoring_variables(tree1, tree2))
+# print(ast_match_ignoring_variables(tree1, tree2))
 print(ast_match_reordering(tree1, tree2))
 print(d)
 
