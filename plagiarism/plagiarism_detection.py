@@ -162,7 +162,12 @@ def copyTree(node, dummy):
 
     return curr
 
+def getTreeSize(root):
+    return 1 + sum(getTreeSize(node) for node in root.children)
+
 
 A = (copyTree(tree1, None))
 B = (copyTree(tree2, None))
+print(getTreeSize(A))
+print(getTreeSize(B))
 print(simple_distance(A, B))
