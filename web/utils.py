@@ -220,7 +220,13 @@ def compile_plagarism_report_two(file_contents):
     comparison.append(unifying_ast_match(tree1, tree2))
     comparison.append(ast_match_ignoring_variables(tree1, tree2))
     comparison.append(ast_match_reordering(tree1, tree2))
-    comparison.append(simple_distance((copyTree(tree1, None)), (copyTree(tree2, None))))
+
+    node_1, node_2 = (copyTree(tree1, None)), (copyTree(tree2, None))
+    distance = simple_distance(node_1, node_2)
+    comparison.append(distance)
+
+    percentage = '%.3f' % (1 - float(distance) / max(getTreeSize(node_1), getTreeSize(node_2)))
+    comparison.append(percentage)
 
     return comparison
 
@@ -374,3 +380,7 @@ def copyTree(node, dummy):
             copyTree(v, curr)
 
     return curr
+
+
+def getTreeSize(root):
+    return 1 + sum(getTreeSize(node) for node in root.children)
