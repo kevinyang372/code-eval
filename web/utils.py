@@ -200,8 +200,8 @@ def compile_plagarism_report(code, user_id, session_id):
         comparison[0] = 1 if exact_match(tree1, tree2) else 0
         comparison[1] = 1 if unifying_ast_match(tree1, tree2) else 0
         comparison[2] = 1 if ast_match_ignoring_variables(tree1, tree2) else 0
-        comparison[3] = 1 if ast_match_reordering(tree1, tree2) else 0
-        comparison[4] = simple_distance((copyTree(tree1, None)), (copyTree(tree2, None)))
+        # comparison[3] = 1 if ast_match_reordering(tree1, tree2) else 0
+        comparison[3] = simple_distance((copyTree(tree1, None)), (copyTree(tree2, None)))
 
         res.append({'result': comparison, 'result_id': result.id})
 
@@ -219,14 +219,14 @@ def compile_plagarism_report_two(file_contents):
     comparison.append(exact_match(tree1, tree2))
     comparison.append(unifying_ast_match(tree1, tree2))
     comparison.append(ast_match_ignoring_variables(tree1, tree2))
-    comparison.append(ast_match_reordering(tree1, tree2))
+    # comparison.append(ast_match_reordering(tree1, tree2))
 
-    node_1, node_2 = (copyTree(tree1, None)), (copyTree(tree2, None))
-    distance = simple_distance(node_1, node_2)
-    comparison.append(distance)
+    # node_1, node_2 = (copyTree(tree1, None)), (copyTree(tree2, None))
+    # distance = simple_distance(node_1, node_2)
+    # comparison.append(distance)
 
-    percentage = '%.3f' % (1 - float(distance) / max(getTreeSize(node_1), getTreeSize(node_2)))
-    comparison.append(percentage)
+    # percentage = '%.3f' % (1 - float(distance) / max(getTreeSize(node_1), getTreeSize(node_2)))
+    # comparison.append(percentage)
 
     return comparison
 
@@ -291,23 +291,23 @@ def ast_match_ignoring_variables(node1, node2):
         return node1 == node2
 
 
-# reordering
-def ast_match_reordering(node1, node2):
-    if type(node1) is not type(node2):
-        return False
-    if isinstance(node1, ast.AST):
-        for k, v in vars(node1).items():
-            if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
-                continue
-            elif not ast_match_reordering(v, getattr(node2, k)):
-                return False
+# # reordering
+# def ast_match_reordering(node1, node2):
+#     if type(node1) is not type(node2):
+#         return False
+#     if isinstance(node1, ast.AST):
+#         for k, v in vars(node1).items():
+#             if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
+#                 continue
+#             elif not ast_match_reordering(v, getattr(node2, k)):
+#                 return False
 
-        return True
-    elif isinstance(node1, list):
-        if len(node1) != len(node2): return False
-        return any(all(itertools.starmap(ast_match_reordering, zip(node1, i))) for i in itertools.permutations(node2))
-    else:
-        return node1 == node2
+#         return True
+#     elif isinstance(node1, list):
+#         if len(node1) != len(node2): return False
+#         return any(all(itertools.starmap(ast_match_reordering, zip(node1, i))) for i in itertools.permutations(node2))
+#     else:
+#         return node1 == node2
 
 
 # ignore variable with line highlighting
@@ -335,20 +335,20 @@ def ast_match_wrapper(node1, node2):
             return True
         elif isinstance(node1, list):
             if len(node1) <= len(node2):
-                for n1 in node1:
+                for i, n1 in enumerate(node1):
                     f = False
-                    for n2 in node2:
-                        if func(n1, n2): f = True
+                    for di in range(-1, 2):
+                        if 0 <= i + di < len(node2) and func(n1, node2[i + di]): f = True
                     
                     if not f: return  False
 
                 return True
 
             else:
-                for n2 in node2:
+                for i, n2 in enumerate(node2):
                     f = False
-                    for n1 in node1:
-                        if func(n1, n2): f = True
+                    for di in range(-1, 2):
+                        if 0 <= i + di < len(node1) and func(node1[i + di], n2): f = True
                     
                     if not f: return False
 

@@ -2,7 +2,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <p>Similarity Percentage: {{ comparison[5] }}</p>
+<!--     <p>Similarity Percentage: {{ comparison[5] }}</p> -->
     <div class="row">
         <div class="col-md-6">
             <p>{{ email1 }}</p>
@@ -44,14 +44,6 @@
             <tr>
                 <td>Ignore variables</td>
                 <td>{{ comparison[2] }}</td>
-            </tr>
-            <tr>
-                <td>Reordering AST</td>
-                <td>{{ comparison[3] }}</td>
-            </tr>
-            <tr>
-                <td>Edit Tree</td>
-                <td>{{ comparison[4] }}</td>
             </tr>
         </tbody>
     </table>
