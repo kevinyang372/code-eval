@@ -3,6 +3,8 @@ from RestrictedPython.PrintCollector import PrintCollector
 from RestrictedPython.Eval import default_guarded_getiter
 from RestrictedPython.Guards import guarded_iter_unpack_sequence, guarded_unpack_sequence
 
+from restricted_guard import get_safe_globals
+
 import numpy as np
 from multiprocessing import Process, Queue
 import collections
@@ -25,43 +27,40 @@ class BaseTest(object):
 
     def _test_question(self, runtime, entry_point, blacklist):
 
-        # byte_code = compile_restricted_exec(
-        #     self.func,
-        #     filename='<inline code>'
-        # )
+        byte_code = compile_restricted_exec(
+            self.func,
+            filename='<inline code>'
+        )
         errs = {}
 
-        # if not byte_code.code:
-        #     for ind in range(len(self.parameters[entry_point])):
-        #         errs[ind] = 'Failed to parse input'
-        #     return errs
+        if not byte_code.code:
+            for ind in range(len(self.parameters[entry_point])):
+                errs[ind] = 'Failed to parse input'
+            return errs
 
-        # def _hook_getitem(obj, attr):
-        #     return obj.__getitem__(attr)
+        def _hook_getitem(obj, attr):
+            return obj.__getitem__(attr)
 
-        # def _hook_write(obj):
-        #     return obj
+        def _hook_write(obj):
+            return obj
 
-        # safe_locals = {}
-        # safe_globals['_print_'] = PrintCollector
-        # safe_globals['_getiter_'] = default_guarded_getiter
-        # safe_globals['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
-        # safe_globals['_unpack_sequence_'] = guarded_unpack_sequence
-        # safe_globals['_getitem_'] = _hook_getitem
-        # safe_globals['_write_'] = _hook_write
-        # safe_globals['list'] = list
-        # safe_globals['np'] = np
+        safe_globals = get_safe_globals()
+        safe_globals['_print_'] = PrintCollector
+        safe_globals['_getiter_'] = default_guarded_getiter
+        safe_globals['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
+        safe_globals['_unpack_sequence_'] = guarded_unpack_sequence
+        safe_globals['_getitem_'] = _hook_getitem
+        safe_globals['_write_'] = _hook_write
+        safe_globals['list'] = list
+        safe_globals['np'] = np
 
-        # for item in blacklist:
-        #     if item in list(safe_globals.keys()):
-        #         safe_globals.pop(item)
+        for item in blacklist:
+            if item in list(safe_globals.keys()):
+                safe_globals.pop(item)
 
-        # try:
-        #     exec(byte_code.code, safe_globals, safe_locals)
-
-        glob = {}
+        safe_locals = safe_globals.copy()
         try:
-            exec(self.func, glob)
+            exec(byte_code.code, safe_locals)
         except Exception as e:
             for ind in range(len(self.parameters[entry_point])):
                 errs[ind] = str(e)
@@ -70,8 +69,8 @@ class BaseTest(object):
         for i, params in enumerate(self.parameters[entry_point]):
             def getResult(r):
                 try:
-                    # r.put((0, safe_locals[entry_point](*params)))
-                    r.put((0, glob[entry_point](*params)))
+                    r.put((0, safe_locals[entry_point](*params)))
+                    # r.put((0, glob[entry_point](*params)))
                 except Exception as e:
                     r.put((1, str(e)))
 
