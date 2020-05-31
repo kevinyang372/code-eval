@@ -201,7 +201,7 @@ def compile_plagarism_report(code, user_id, session_id):
         comparison[1] = 1 if unifying_ast_match(tree1, tree2) else 0
         comparison[2] = 1 if ast_match_ignoring_variables(tree1, tree2) else 0
         # comparison[3] = 1 if ast_match_reordering(tree1, tree2) else 0
-        comparison[3] = simple_distance((copyTree(tree1, None)), (copyTree(tree2, None)))
+        # comparison[3] = simple_distance((copyTree(tree1, None)), (copyTree(tree2, None)))
 
         res.append({'result': comparison, 'result_id': result.id})
 

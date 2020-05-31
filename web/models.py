@@ -49,7 +49,7 @@ class Question(db.Model):
 
 class Case(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    case_num = db.Column(db.Integer)
+    case_content = db.Column(db.String)
     success = db.Column(db.Boolean)
     reason = db.Column(db.String)
     question_id = db.Column(db.Integer, db.ForeignKey(
@@ -104,8 +104,6 @@ class Plagiarism(db.Model):
     exact_match = db.Column(db.Boolean)
     unifying_ast = db.Column(db.Boolean)
     ignore_variables = db.Column(db.Boolean)
-    reordering_ast = db.Column(db.Boolean)
-    edit_tree = db.Column(db.Float)
 
     first_result_id = db.Column(db.Integer, db.ForeignKey(
         'result.id'), nullable=False)

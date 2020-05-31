@@ -91,14 +91,14 @@ class BaseTest(object):
 
             if result.empty():
                 p.terminate()
-                errs[i] = "Time Out"
+                errs[str(params)] = "Time Out"
             else:
                 output = result.get()
                 if output[0] == 1:
-                    errs[i] = output[1]
+                    errs[str(params)] = output[1]
                 elif compare_lists(output[1], self.answers[entry_point][i]):
-                    errs[i] = "Passed"
+                    errs[str(params)] = "Passed"
                 else:
-                    errs[i] = "Wrong Answer"
+                    errs[str(params)] = "Wrong Answer"
 
         return errs

@@ -66,6 +66,11 @@ example_user = models.User(
 example_user.set_password("111")
 db.session.merge(example_user)
 
+example_user = models.User(
+    id=3, email="example_user_2@gmail.com", is_admin=False)
+example_user.set_password("111")
+db.session.merge(example_user)
+
 example_course = models.Course(id=1, course_num='CS156', registration="join156")
 db.session.merge(example_course)
 

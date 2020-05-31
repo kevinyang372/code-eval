@@ -83,7 +83,7 @@ def submission(course_id, session_id):
                 q = Question(passed_num=compiled[question]['passed_num'], name=question)
                 for reason in compiled[question]['reason']:
                     r = compiled[question]['reason'][reason]
-                    q.cases.append(Case(case_num=reason, success=r == "Passed", reason=r))
+                    q.cases.append(Case(case_content=reason, success=r == "Passed", reason=r))
                 to_add.questions.append(q)
 
             db.session.commit()
