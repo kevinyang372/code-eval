@@ -12,10 +12,10 @@ def compare(result_id1, result_id2):
     r1 = Result.query.filter_by(id=result_id1).first()
     r2 = Result.query.filter_by(id=result_id2).first()
 
-    parsed1, parsed2 = highlight_diff_temp([r1.content, r2.content])
+    parsed1, parsed2, similiarity = highlight_diff_temp([r1.content, r2.content])
     comparison = compile_plagarism_report_two([r1.content, r2.content])
 
-    return render_template('compare.html', email1 = r1.email, email2 = r2.email, parsed1 = parsed1, parsed2 = parsed2, comparison = comparison)
+    return render_template('compare.html', email1 = r1.email, email2 = r2.email, parsed1 = parsed1, parsed2 = parsed2, comparison = comparison, similiarity = similiarity)
 
 
 @compare_template.route('/compare/<result_id1>')

@@ -13,25 +13,25 @@ mapping = {}
 # Exact match between two pieces of code
 def exact_match(node1, node2):
     if type(node1) is not type(node2):
-        return False
+        return 0
     if isinstance(node1, ast.AST):
         for k, v in vars(node1).items():
             if k in ('lineno', 'col_offset', 'ctx'):
                 continue
             if not exact_match(v, getattr(node2, k)):
-                return False
+                return 0
 
-        return True
+        return 1
     elif isinstance(node1, list):
-        return all(itertools.starmap(exact_match, zip(node1, node2)))
+        return sum(itertools.starmap(exact_match, zip(node1, node2))) / float(len(node1))
     else:
-        return node1 == node2
+        return 1 if node1 == node2 else 0
 
 
 # unifying ast match detecting naive variable renaming
 def unifying_ast_match(node1, node2):
     if type(node1) is not type(node2):
-        return False
+        return 0
     if isinstance(node1, ast.AST):
         for k, v in vars(node1).items():
             if k in ('lineno', 'col_offset', 'ctx'):
@@ -41,15 +41,15 @@ def unifying_ast_match(node1, node2):
                 if v not in mapping:
                     mapping[v] = getattr(node2, k)
                 elif mapping[v] != getattr(node2, k):
-                    return False
+                    return 0
             elif not unifying_ast_match(v, getattr(node2, k)):
-                return False
+                return 0
 
-        return True
+        return 1
     elif isinstance(node1, list):
-        return all(itertools.starmap(unifying_ast_match, zip(node1, node2)))
+        return sum(itertools.starmap(unifying_ast_match, zip(node1, node2))) / float(len(node1))
     else:
-        return node1 == node2
+        return 1 if node1 == node2 else 0
 
 
 # ignore variables

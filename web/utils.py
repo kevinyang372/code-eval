@@ -111,6 +111,13 @@ def highlight_diff_temp(file_contents):
         return ['Could not parse Python file', 'Could not parse Python file']
 
     d = ast_match_wrapper(tree1, tree2)
+    size = traverseAST(tree1)
+
+    if len(size) == 0:
+        similarity = 0.0
+    else:
+        similarity = len(d) / float(len(size))
+
     pre = '<style>.diff_plus { background-color: rgba(0, 255, 0, 0.3) }</style>'
 
     parsed1 = [pre] + file_contents[0].split('\n')
@@ -131,7 +138,7 @@ def highlight_diff_temp(file_contents):
             if not instance[i].startswith('<div'):
                 instance[i] = '<div>{}</div>'.format(instance[i])
 
-    return parsed1, parsed2
+    return parsed1, parsed2, similarity
 
 def highlight_diff(file_names, file_contents):
 
@@ -358,6 +365,26 @@ def ast_match_wrapper(node1, node2):
 
     res = func(node1, node2)
     return d
+
+
+def traverseAST(node):
+    d = set()
+    def func(node):
+        if isinstance(node, ast.AST):
+
+            for k, v in vars(node).items():
+                func(v)
+
+            if 'lineno' in vars(node):
+                if 'end_lineno' in vars(node):
+                    d.add((getattr(node, 'lineno'), getattr(node, 'end_lineno')))
+                else:
+                    d.add((getattr(node, 'lineno'), getattr(node, 'lineno')))
+        elif isinstance(node, list):
+            for i in node: func(i)
+    func(node)
+    return d
+
 
 
 def copyTree(node, dummy):
