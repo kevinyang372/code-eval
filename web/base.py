@@ -99,6 +99,6 @@ class BaseTest(object):
                 elif compare_lists(output[1], self.answers[entry_point][i]):
                     errs[str(params)] = "Passed"
                 else:
-                    errs[str(params)] = "Wrong Answer"
+                    errs[str(params)] = "Wrong Answer: %s" % (output[1])
 
         return errs
