@@ -43,3 +43,7 @@ class AddCourse(FlaskForm):
         course = Course.query.filter_by(course_num = field.data).first()
         if course:
             raise ValidationError('That course number is taken. Please choose another.')
+
+class FilterResult(FlaskForm):
+    threshold = DecimalField('Threshold', validators=[NumberRange(min=0.0, max=1.0, message='Threshold must be between 0 and 1')])
+    submit = SubmitField('Submit')

@@ -2,6 +2,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
+    {{ wtf.quick_form(form) }}
     {% for r in results %}
         <a href="{{ url_for('compare.compare', result_id1 = r1, result_id2 = r.id) }}", class="btn btn-secondary btn-lg"> {{ r.user.email }} {{ r.ts }}</a><br>
     {% endfor %}

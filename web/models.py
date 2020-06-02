@@ -104,6 +104,7 @@ class Plagiarism(db.Model):
     exact_match = db.Column(db.Boolean)
     unifying_ast = db.Column(db.Boolean)
     ignore_variables = db.Column(db.Boolean)
+    similarity = db.Column(db.Float)
 
     first_result_id = db.Column(db.Integer, db.ForeignKey(
         'result.id'), nullable=False)
