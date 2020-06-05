@@ -28,7 +28,7 @@
         </table>
     {% endfor %}
 
-    {% if current_user.is_admin %}
+    <!-- {% if current_user.is_admin %}
         {% for p in plagiarism %}
         
             <a href="{{ url_for('compare.compare', result_id1 = p.first_result_id, result_id2 = p.second_result_id) }}">code link</a>
@@ -56,7 +56,7 @@
                 </tbody>
             </table>
         {% endfor %}
-    {% endif %}
+    {% endif %} -->
 
     <div class="card">
       <div class="card-body">

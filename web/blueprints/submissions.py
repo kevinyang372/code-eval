@@ -88,26 +88,26 @@ def submission(course_id, session_id):
 
             db.session.commit()
 
-            id = max(i.id for i in Result.query.filter_by(user_id=current_user.id).all())
-            plr = compile_plagarism_report(to_test, current_user.id, setting.id)
-            temp_r = []
-            for r in plr:
-                t = Plagiarism(
-                    exact_match = r['result'][0],
-                    unifying_ast = r['result'][1],
-                    ignore_variables = r['result'][2],
-                    reordering_ast = r['result'][3],
-                    edit_tree = r['result'][4],
-                    first_result_id = r['result_id'],
-                    second_result_id = id
-                )
-                temp_r.append(t)
-                db.session.add(t)
+            # id = max(i.id for i in Result.query.filter_by(user_id=current_user.id).all())
+            # plr = compile_plagarism_report(to_test, current_user.id, setting.id)
+            # temp_r = []
+            # for r in plr:
+            #     t = Plagiarism(
+            #         exact_match = r['result'][0],
+            #         unifying_ast = r['result'][1],
+            #         ignore_variables = r['result'][2],
+            #         reordering_ast = r['result'][3],
+            #         edit_tree = r['result'][4],
+            #         first_result_id = r['result_id'],
+            #         second_result_id = id
+            #     )
+            #     temp_r.append(t)
+            #     db.session.add(t)
 
-            db.session.commit()
-            p = sorted(temp_r, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
+            # db.session.commit()
+            # p = sorted(temp_r, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
 
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, plagiarism=p, i = id)
+            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, i = id)
 
         return redirect(request.url)
 
