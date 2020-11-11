@@ -3,6 +3,7 @@ web/web.db
 venv_unit/
 venv_integration/
 .vscode/
+.deployment
 .env
 web.db
 web/test.db
