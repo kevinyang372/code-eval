@@ -10,6 +10,12 @@ from multiprocessing import Process, Queue
 import collections
 
 
+def getResult(result_queue, result):
+    try:
+        result_queue.put((0, result))
+    except Exception as e:
+        result_queue.put((1, str(e)))
+
 class TimeoutException(Exception):
     pass
 
@@ -67,15 +73,9 @@ class BaseTest(object):
             return errs
 
         for i, params in enumerate(self.parameters[entry_point]):
-            def getResult(r):
-                try:
-                    r.put((0, safe_locals[entry_point](*params)))
-                    # r.put((0, glob[entry_point](*params)))
-                except Exception as e:
-                    r.put((1, str(e)))
 
             result = Queue()
-            p = Process(target=getResult, args=(result,))
+            p = Process(target=getResult, args=(result, safe_locals[entry_point](*params),))
             p.start()
             p.join(runtime)
 
