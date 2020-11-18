@@ -21,7 +21,7 @@ def all_settings():
 @admin_required
 def session_settings(course_id):
     """Setting page for each session
-    
+
     Required scope: Admin
     """
     session = Session.query.filter_by(course_id=course_id).all()

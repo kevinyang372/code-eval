@@ -15,7 +15,7 @@ session_template = Blueprint(
 @admin_required
 def upload_session():
     """Page for uploading new sessions
-    
+
     Required scope: Admin
     Prerequisites: Course exists
     """
@@ -53,7 +53,7 @@ def upload_session():
 @admin_required
 def delete_session(session_id):
     """Page for delete sessions
-    
+
     Required scope: Admin
     Note that all results attached to the session will be deleted as well
     """
@@ -71,7 +71,7 @@ def delete_session(session_id):
 @admin_required
 def change_session(session_id):
     """Page for changing session settings
-    
+
     Required scope: Admin
     """
     session = Session.query.filter_by(id=session_id).first()
@@ -79,13 +79,13 @@ def change_session(session_id):
     if not session:
         flash('Session to change does not exist')
         return redirect(url_for('/'))
-    
+
     form = UploadForm(
-        session_num = session.session_num,
-        course_num = session.course.course_num,
-        description = session.description,
-        runtime = session.runtime,
-        blacklist = session.blacklist
+        session_num=session.session_num,
+        course_num=session.course.course_num,
+        description=session.description,
+        runtime=session.runtime,
+        blacklist=session.blacklist
     )
 
     form.course_num.choices = sorted(
@@ -105,7 +105,7 @@ def change_session(session_id):
         session.course.course_num = form.course_num.data
         session.runtime = form.runtime.data
         session.blacklist = form.blacklist.data
-        
+
         db.session.commit()
         return redirect(url_for('setting.session_settings', course_id=session.course.id))
 
@@ -116,7 +116,7 @@ def change_session(session_id):
 @login_required
 def register(link):
     """Page for registering into new courses
-    
+
     Required scope: User / Admin
     This page is provided for students to register into the courses they
     are invited to. The register link for specific courses could be found

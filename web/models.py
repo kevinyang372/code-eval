@@ -26,15 +26,16 @@ class Result(db.Model):
     success = db.Column(db.Boolean)
     content = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    session_id = db.Column(db.Integer, db.ForeignKey('session.id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey(
+        'session.id'), nullable=False)
     questions = db.relationship('Question', cascade="all,delete",
-                            backref='result', lazy=True)
+                                backref='result', lazy=True)
     ts = db.Column(db.String)
-    plagiarisms = db.relationship('Plagiarism', 
-        # secondary = "plagiarism",
-        primaryjoin="or_(Result.id == Plagiarism.first_result_id, Result.id == Plagiarism.second_result_id)",
-        # secondaryjoin="Result.id == Plagiarism.second_result_id",
-        cascade="all,delete", backref='result', lazy=True)
+    plagiarisms = db.relationship('Plagiarism',
+                                  # secondary = "plagiarism",
+                                  primaryjoin="or_(Result.id == Plagiarism.first_result_id, Result.id == Plagiarism.second_result_id)",
+                                  # secondaryjoin="Result.id == Plagiarism.second_result_id",
+                                  cascade="all,delete", backref='result', lazy=True)
 
 
 class Question(db.Model):
@@ -60,7 +61,8 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     course_num = db.Column(db.String)
     registration = db.Column(db.String)
-    sessions = db.relationship('Session', cascade="all,delete", backref='course', lazy=True)
+    sessions = db.relationship(
+        'Session', cascade="all,delete", backref='course', lazy=True)
     users = db.relationship('User', secondary='access')
 
 
@@ -70,8 +72,10 @@ class Session(db.Model):
     runtime = db.Column(db.Float)
     blacklist = db.Column(db.String)
     description = db.Column(db.String)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
-    results = db.relationship('Result', cascade="all,delete", backref='session', lazy=True)
+    course_id = db.Column(db.Integer, db.ForeignKey(
+        'course.id'), nullable=False)
+    results = db.relationship(
+        'Result', cascade="all,delete", backref='session', lazy=True)
     test_code = db.Column(db.String)
 
     def get_blacklist(self):
@@ -81,10 +85,13 @@ class Session(db.Model):
 class Access(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey(
+        'course.id'), nullable=False)
 
-    user = db.relationship('User', backref=db.backref("course", cascade="all, delete-orphan"))
-    course = db.relationship('Course', backref=db.backref("user", cascade="all, delete-orphan"))
+    user = db.relationship('User', backref=db.backref(
+        "course", cascade="all, delete-orphan"))
+    course = db.relationship('Course', backref=db.backref(
+        "user", cascade="all, delete-orphan"))
 
 
 class Codecacher(db.Model):
@@ -93,13 +100,15 @@ class Codecacher(db.Model):
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
     text = db.Column(db.String)
 
-    user = db.relationship('User', cascade="all,delete,delete-orphan", backref='codecacher', lazy=True, single_parent=True)
-    session = db.relationship('Session', cascade="all,delete,delete-orphan", backref='codecacher', lazy=True, single_parent=True)
+    user = db.relationship('User', cascade="all,delete,delete-orphan",
+                           backref='codecacher', lazy=True, single_parent=True)
+    session = db.relationship('Session', cascade="all,delete,delete-orphan",
+                              backref='codecacher', lazy=True, single_parent=True)
 
 
 class Plagiarism(db.Model):
     __tablename__ = 'plagiarism'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     exact_match = db.Column(db.Boolean)
     unifying_ast = db.Column(db.Boolean)

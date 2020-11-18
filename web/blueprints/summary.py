@@ -45,8 +45,9 @@ def summary_result(course_id, session_id, user_id):
 def summary_case(result_id):
     """Individual submission details"""
     result = Result.query.filter_by(id=result_id).first()
-    res = {question.name: {case.case_content: case.reason for case in question.cases} for question in result.questions}
+    res = {question.name: {case.case_content: case.reason for case in question.cases}
+           for question in result.questions}
 
     # p = sorted(result.plagiarisms, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
-    
-    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.questions), file=highlight_python(result.content), time=result.runtime, i = result.id)
+
+    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.questions), file=highlight_python(result.content), time=result.runtime, i=result.id)

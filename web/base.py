@@ -5,19 +5,21 @@ from RestrictedPython.Guards import guarded_iter_unpack_sequence, guarded_unpack
 
 from restricted_guard import get_safe_globals
 
-import numpy as np
-from pathos.pools import ProcessPool
-import multiprocess
 import collections
+import numpy as np
+import multiprocess
+from pathos.pools import ProcessPool
 
 
 def getResult(function_lib, function_name, params):
-    if function_name not in function_lib: return (1, f"Function {function_name} not found")
+    if function_name not in function_lib:
+        return (1, f"Function {function_name} not found")
     try:
         result = function_lib[function_name](*params)
         return (0, result)
     except Exception as e:
         return (1, str(e))
+
 
 class TimeoutException(Exception):
     pass
@@ -31,7 +33,8 @@ class BaseTest(object):
     def test(self, runtime, blacklist):
         result = {}
         for entry_point in self.parameters:
-            result[entry_point] = self._test_question(runtime, entry_point, blacklist)
+            result[entry_point] = self._test_question(
+                runtime, entry_point, blacklist)
         return result
 
     def _test_question(self, runtime, entry_point, blacklist):
@@ -98,9 +101,12 @@ class BaseTest(object):
                     if isinstance(a, (float, np.float64)) and isinstance(b, (float, np.float64)):
                         return np.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)
                     return a == b
-                if type(a) != type(b): return False
-                if len(a) == len(b) == 0: return True
-                if len(a) != len(b): return False
+                if type(a) != type(b):
+                    return False
+                if len(a) == len(b) == 0:
+                    return True
+                if len(a) != len(b):
+                    return False
                 return all(map(compare_lists, a, b))
 
             if result[0] == 1:

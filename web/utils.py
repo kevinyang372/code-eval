@@ -51,7 +51,7 @@ def user_required_api(f):
     """Decorator for requiring user access in api"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        
+
         if request.json:
             email = str(request.json['credentials']['email'])
             password = str(request.json['credentials']['password'])
@@ -79,6 +79,7 @@ def admin_required_api(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def convert_jupyter(file, filename):
     """Read jupyter notebook uploads"""
 
@@ -97,7 +98,8 @@ def convert_jupyter(file, filename):
 def highlight_python(code):
     """highlight python code to html"""
 
-    formatter = pygments.formatters.HtmlFormatter(style="emacs", cssclass="codehilite")
+    formatter = pygments.formatters.HtmlFormatter(
+        style="emacs", cssclass="codehilite")
     css_string = "<style>" + formatter.get_style_defs() + "</style>"
 
     return css_string + pygments.highlight(code, pygments.lexers.PythonLexer(), formatter)
@@ -126,11 +128,13 @@ def highlight_diff_temp(file_contents):
 
     for n1, nodes in d.items():
         for t in range(n1[0], n1[1] + 1):
-            parsed1[t] = '<div class={}>{}</div>'.format('diff_plus', parsed1[t])
+            parsed1[t] = '<div class={}>{}</div>'.format(
+                'diff_plus', parsed1[t])
         for n2 in nodes:
             for j in range(n2[0], n2[1] + 1):
                 if j not in visited:
-                    parsed2[j] = '<div class={}>{}</div>'.format('diff_plus', parsed2[j])
+                    parsed2[j] = '<div class={}>{}</div>'.format(
+                        'diff_plus', parsed2[j])
                     visited.add(j)
 
     for instance in [parsed1, parsed2]:
@@ -140,6 +144,7 @@ def highlight_diff_temp(file_contents):
 
     return parsed1, parsed2, similarity
 
+
 def highlight_diff(file_names, file_contents):
 
     class Formatter(pygments.formatters.HtmlFormatter):
@@ -147,12 +152,14 @@ def highlight_diff(file_names, file_contents):
             return source
 
     f = Formatter(style="emacs", cssclass="codehilite")
-    colored = [pygments.highlight(fc, pygments.lexers.PythonLexer(), f).splitlines(keepends=True) for fc in file_contents]
+    colored = [pygments.highlight(fc, pygments.lexers.PythonLexer(), f).splitlines(
+        keepends=True) for fc in file_contents]
 
     addition = '.codehilite .diff_plus { background-color: rgba(0, 255, 0, 0.3) }'
     deletion = '.codehilite .diff_minus { background-color: rgba(255, 0, 0, 0.3) }'
     special = '.codehilite .diff_special { background-color: rgba(128, 128, 128, 0.3) }'
-    res = '<style>%s%s%s%s</style>' % (f.get_style_defs(), addition, deletion, special)
+    res = '<style>%s%s%s%s</style>' % (f.get_style_defs(),
+                                       addition, deletion, special)
 
     res += '<pre class="codehilite">'
     c = 0
@@ -160,14 +167,17 @@ def highlight_diff(file_names, file_contents):
     for line in difflib.unified_diff(*(colored+file_names)):
         # For each line we output a <div> with the original content,
         # but if it starts with a special diff symbol, we apply a class to it
-        cls = {'+': 'diff_plus', '-': 'diff_minus', '@': 'diff_special'}.get(line[:1], '')
-        if cls: cls = ' class="{}"'.format(cls)
+        cls = {'+': 'diff_plus', '-': 'diff_minus',
+               '@': 'diff_special'}.get(line[:1], '')
+        if cls:
+            cls = ' class="{}"'.format(cls)
         line = '<div{}>{}</div>'.format(cls, line.rstrip('\n'))
         res += line
         c += 1
 
-    if not c: return '<div>Two pieces of code are exactly the same</div>'
-    
+    if not c:
+        return '<div>Two pieces of code are exactly the same</div>'
+
     res += '</pre>'
     return res
 
@@ -180,7 +190,8 @@ def compile_results(res):
         compiled[question] = {}
 
         compiled[question]['total_num'] = len(res[question])
-        compiled[question]['passed_num'] = sum([1 for case in res[question] if res[question][case] == "Passed"])
+        compiled[question]['passed_num'] = sum(
+            [1 for case in res[question] if res[question][case] == "Passed"])
         compiled[question]['reason'] = res[question]
 
     return compiled
@@ -188,13 +199,14 @@ def compile_results(res):
 
 def compile_plagarism_report(code, user_id, session_id):
 
-    results = Result.query.filter(Result.user_id != user_id, Result.session_id == session_id).all()
+    results = Result.query.filter(
+        Result.user_id != user_id, Result.session_id == session_id).all()
 
     try:
         tree1 = ast.parse(code)
     except Exception as e:
         return []
-        
+
     res = []
 
     for result in results:
@@ -257,7 +269,7 @@ def exact_match(node1, node2):
 
 
 # unifying ast match detecting naive variable renaming
-def unifying_ast_match(node1, node2, mapping = {}):
+def unifying_ast_match(node1, node2, mapping={}):
     if type(node1) is not type(node2):
         return False
     if isinstance(node1, ast.AST):
@@ -320,7 +332,8 @@ def ast_match_ignoring_variables(node1, node2):
 # ignore variable with line highlighting
 def ast_match_wrapper(node1, node2):
     d = collections.defaultdict(set)
-    def func(node1, node2, is_parent = True):
+
+    def func(node1, node2, is_parent=True):
         if type(node1) is not type(node2):
             return False
         if isinstance(node1, ast.AST):
@@ -335,9 +348,11 @@ def ast_match_wrapper(node1, node2):
 
             if 'lineno' in vars(node1) and is_parent:
                 if 'end_lineno' in vars(node1):
-                    d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add((getattr(node2, 'lineno'), getattr(node2, 'end_lineno')))
+                    d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add(
+                        (getattr(node2, 'lineno'), getattr(node2, 'end_lineno')))
                 else:
-                    d[getattr(node1, 'lineno'), getattr(node1, 'lineno')].add((getattr(node2, 'lineno'), getattr(node2, 'lineno')))
+                    d[getattr(node1, 'lineno'), getattr(node1, 'lineno')].add(
+                        (getattr(node2, 'lineno'), getattr(node2, 'lineno')))
 
             return True
         elif isinstance(node1, list):
@@ -345,9 +360,11 @@ def ast_match_wrapper(node1, node2):
                 for i, n1 in enumerate(node1):
                     f = False
                     for di in range(-1, 2):
-                        if 0 <= i + di < len(node2) and func(n1, node2[i + di]): f = True
-                    
-                    if not f: return  False
+                        if 0 <= i + di < len(node2) and func(n1, node2[i + di]):
+                            f = True
+
+                    if not f:
+                        return False
 
                 return True
 
@@ -355,9 +372,11 @@ def ast_match_wrapper(node1, node2):
                 for i, n2 in enumerate(node2):
                     f = False
                     for di in range(-1, 2):
-                        if 0 <= i + di < len(node1) and func(node1[i + di], n2): f = True
-                    
-                    if not f: return False
+                        if 0 <= i + di < len(node1) and func(node1[i + di], n2):
+                            f = True
+
+                    if not f:
+                        return False
 
                 return True
         else:
@@ -369,6 +388,7 @@ def ast_match_wrapper(node1, node2):
 
 def traverseAST(node):
     d = set()
+
     def func(node):
         if isinstance(node, ast.AST):
 
@@ -381,10 +401,10 @@ def traverseAST(node):
                 else:
                     d.add((getattr(node, 'lineno'), getattr(node, 'lineno')))
         elif isinstance(node, list):
-            for i in node: func(i)
+            for i in node:
+                func(i)
     func(node)
     return d
-
 
 
 def copyTree(node, dummy):
@@ -394,9 +414,10 @@ def copyTree(node, dummy):
         t += ':' + node.name
     elif 'id' in node._fields:
         t += ':' + node.id
-    
+
     curr = Node(t)
-    if dummy is not None: dummy.addkid(curr)
+    if dummy is not None:
+        dummy.addkid(curr)
 
     for k, v in vars(node).items():
         if isinstance(v, list):

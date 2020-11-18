@@ -9,7 +9,7 @@ index_template = Blueprint('index', __name__, template_folder='../templates')
 @login_required
 def index():
     """Page for the list of courses available to the user
-    
+
     Required scope: User / Admin
     This page only displays courses that the user has access to
     """

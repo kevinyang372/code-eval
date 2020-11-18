@@ -8,26 +8,27 @@ from web import app, db, csrf
 from time import gmtime, strftime
 import timeit
 
-submission_template = Blueprint('submission', __name__, template_folder='../templates')
+submission_template = Blueprint(
+    'submission', __name__, template_folder='../templates')
 
 
 @submission_template.route('/submit/<course_id>', methods=["GET", "POST"])
 @login_required
 def submission_index(course_id):
     """Index page for submitting code
-    
+
     Required scope: User / Admin
     Index page for showing all available sessions user can submit to.
     """
     available = Session.query.filter_by(course_id=course_id).all()
-    return render_template('submission_index.html', sessions = available, course_id = course_id)
-    
+    return render_template('submission_index.html', sessions=available, course_id=course_id)
+
 
 @submission_template.route('/submit/<course_id>/<session_id>', methods=["GET", "POST"])
 @login_required
 def submission(course_id, session_id):
     """Page for submitting code
-    
+
     Required scope: User / Admin
     User could submit their code here. Submission needs to include prespecified entry
     function within the code
@@ -39,12 +40,13 @@ def submission(course_id, session_id):
         flash('You have no access to this course!')
         return redirect(url_for('index.index'))
 
-    cache = Codecacher.query.filter_by(user_id=current_user.id, session_id=session_id).first()
+    cache = Codecacher.query.filter_by(
+        user_id=current_user.id, session_id=session_id).first()
     setting = Session.query.filter_by(id=session_id).first()
 
     pre_filled = cache.text if cache else '#Welcome'
     form = CodeSumitForm(
-        text = pre_filled
+        text=pre_filled
     )
 
     if form.validate_on_submit():
@@ -65,25 +67,29 @@ def submission(course_id, session_id):
 
             temp = d['TestCases'](to_test)
 
-            res = temp.test(runtime=setting.runtime, blacklist=setting.get_blacklist())
+            res = temp.test(runtime=setting.runtime,
+                            blacklist=setting.get_blacklist())
 
             # record runtime
             time = round(timeit.timeit(lambda: d['TestCases'](to_test).test(
                 runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1), 3)
 
             compiled = compile_results(res)
-            passed_num = sum([1 for question in compiled if compiled[question]['passed_num'] == compiled[question]['total_num']])
+            passed_num = sum([1 for question in compiled if compiled[question]
+                              ['passed_num'] == compiled[question]['total_num']])
 
             ts = strftime("%Y-%m-%d %H:%M:%S", gmtime())
             to_add = Result(user_id=current_user.id, email=current_user.email, session_id=setting.id,
-                            passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers),ts=ts)
+                            passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers), ts=ts)
             db.session.add(to_add)
 
             for question in compiled:
-                q = Question(passed_num=compiled[question]['passed_num'], name=question)
+                q = Question(
+                    passed_num=compiled[question]['passed_num'], name=question)
                 for reason in compiled[question]['reason']:
                     r = compiled[question]['reason'][reason]
-                    q.cases.append(Case(case_content=reason, success=r == "Passed", reason=r))
+                    q.cases.append(
+                        Case(case_content=reason, success=r == "Passed", reason=r))
                 to_add.questions.append(q)
 
             db.session.commit()
@@ -107,7 +113,7 @@ def submission(course_id, session_id):
             # db.session.commit()
             # p = sorted(temp_r, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
 
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, i = id)
+            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, i=id)
 
         return redirect(request.url)
 
@@ -119,17 +125,19 @@ def submission(course_id, session_id):
 @csrf.exempt
 def codecacher(session_id):
     """Page for caching student code submissions
-    
+
     Everytime user made an input in the code submission form, the changes will be saved into the database here
     """
 
     text = request.json['data']
 
-    codecacher = Codecacher.query.filter_by(user_id=current_user.id, session_id=int(session_id)).first()
+    codecacher = Codecacher.query.filter_by(
+        user_id=current_user.id, session_id=int(session_id)).first()
     if codecacher:
         codecacher.text = text
     else:
-        codecacher = Codecacher(user_id=current_user.id, session_id=int(session_id), text=text)
+        codecacher = Codecacher(user_id=current_user.id,
+                                session_id=int(session_id), text=text)
         db.session.add(codecacher)
     db.session.commit()
     return jsonify(data={'message': 'Successfully cached content'})

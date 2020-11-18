@@ -19,8 +19,10 @@ def check_alive():
 @csrf.exempt
 def get_score(student_email, session_id):
     user = User.query.filter_by(email=student_email).first()
-    if not user: return jsonify(data={'message': 'Fails to find user email'})
-    results = Result.query.filter_by(user_id = user.id, session_id=session_id).all()
+    if not user:
+        return jsonify(data={'message': 'Fails to find user email'})
+    results = Result.query.filter_by(
+        user_id=user.id, session_id=session_id).all()
     return jsonify(data={'result': str(list(i.passed_num for i in results))})
 
 
@@ -35,11 +37,12 @@ def submit(session_id):
     user = User.query.filter_by(email=request.form['email']).first()
     setting = Session.query.filter_by(id=session_id).first()
 
-    if not setting: return jsonify(data={'message': 'Session not found'})
+    if not setting:
+        return jsonify(data={'message': 'Session not found'})
 
     if file and is_valid(file.filename):
         filename = secure_filename(file.filename)
-        
+
         if filename.split('.')[1] == 'py':
             to_test = read_file(file, filename)
         else:
@@ -49,24 +52,28 @@ def submit(session_id):
         exec(setting.test_code, d)
 
         temp = d['TestCases'](to_test)
-        res = temp.test(runtime=setting.runtime, blacklist=setting.get_blacklist())
+        res = temp.test(runtime=setting.runtime,
+                        blacklist=setting.get_blacklist())
 
         # record runtime
         time = round(timeit.timeit(lambda: d['TestCases'](to_test).test(
             runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1), 3)
 
         compiled = compile_results(res)
-        passed_num = sum([1 for question in compiled if compiled[question]['passed_num'] == compiled[question]['total_num']])
+        passed_num = sum([1 for question in compiled if compiled[question]
+                          ['passed_num'] == compiled[question]['total_num']])
 
         to_add = Result(user_id=user.id, email=user.email, session_id=setting.id,
                         passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers))
         db.session.add(to_add)
 
         for question in compiled:
-            q = Question(passed_num=compiled[question]['passed_num'], name=question)
+            q = Question(
+                passed_num=compiled[question]['passed_num'], name=question)
             for reason in compiled[question]['reason']:
                 r = compiled[question]['reason'][reason]
-                q.cases.append(Case(case_content=reason, success=r == "Passed", reason=r))
+                q.cases.append(
+                    Case(case_content=reason, success=r == "Passed", reason=r))
             to_add.questions.append(q)
 
         db.session.commit()

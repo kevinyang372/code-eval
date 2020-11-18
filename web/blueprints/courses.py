@@ -14,7 +14,7 @@ course_template = Blueprint('course', __name__, template_folder='../templates')
 @admin_required
 def add_course():
     """Page for adding new courses
-    
+
     Required scope: Admin
     User could choose to use the randomly generated registration link
     or customize their own ones
@@ -22,7 +22,7 @@ def add_course():
 
     random_generated = ''.join(random.choice(
         string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
-    form = AddCourse(registration_link = random_generated)
+    form = AddCourse(registration_link=random_generated)
 
     if form.validate_on_submit():
 
@@ -46,7 +46,7 @@ def add_course():
 @admin_required
 def delete_course(course_id):
     """Page for deleting courses
-    
+
     Required scope: Admin
     Note that all sessions and results attached to that session
     will be deleted
@@ -66,7 +66,7 @@ def delete_course(course_id):
 @admin_required
 def change_course(course_id):
     """Page for changing course details
-    
+
     Required scope: Admin
     """
 
@@ -75,7 +75,8 @@ def change_course(course_id):
         flash('Course to change does not exist')
         return redirect(url_for('setting.all_settings'))
 
-    form = AddCourse(registration_link = course.registration, course_num = course.course_num)
+    form = AddCourse(registration_link=course.registration,
+                     course_num=course.course_num)
 
     if form.validate_on_submit():
 
@@ -83,7 +84,7 @@ def change_course(course_id):
 
         if Course.query.filter_by(registration=form.registration_link.data).first():
             flash('Course with this registration link already exists')
-            return redirect(url_for('course.change_course', course_id = course_id))
+            return redirect(url_for('course.change_course', course_id=course_id))
 
         course.course_num = form.course_num.data
         course.registration = form.registration_link.data
