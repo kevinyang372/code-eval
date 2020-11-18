@@ -6,15 +6,18 @@ from RestrictedPython.Guards import guarded_iter_unpack_sequence, guarded_unpack
 from restricted_guard import get_safe_globals
 
 import numpy as np
-from multiprocessing import Process, Queue
+from pathos.pools import ProcessPool
+import multiprocess
 import collections
 
 
-def getResult(result_queue, result):
+def getResult(function_lib, function_name, params):
+    if function_name not in function_lib: return (1, f"Function {function_name} not found")
     try:
-        result_queue.put((0, result))
+        result = function_lib[function_name](*params)
+        return (0, result)
     except Exception as e:
-        result_queue.put((1, str(e)))
+        return (1, str(e))
 
 class TimeoutException(Exception):
     pass
@@ -74,10 +77,21 @@ class BaseTest(object):
 
         for i, params in enumerate(self.parameters[entry_point]):
 
-            result = Queue()
-            p = Process(target=getResult, args=(result, safe_locals[entry_point](*params),))
-            p.start()
-            p.join(runtime)
+            p = ProcessPool()
+
+            # make sure process will initialize
+            p.terminate()
+            p.restart()
+
+            res = p.amap(getResult, [safe_locals], [entry_point], [params])
+
+            try:
+                result = res.get(timeout=runtime)[0]
+            except multiprocess.context.TimeoutError as e:
+                result = (1, "Time Out")
+
+            p.close()
+            p.join()
 
             def compare_lists(a, b):
                 if not isinstance(a, (list, np.ndarray)) and not isinstance(b, (list, np.ndarray)):
@@ -89,16 +103,11 @@ class BaseTest(object):
                 if len(a) != len(b): return False
                 return all(map(compare_lists, a, b))
 
-            if result.empty():
-                p.terminate()
-                errs[str(params)] = "Time Out"
+            if result[0] == 1:
+                errs[str(params)] = result[1]
+            elif compare_lists(result[1], self.answers[entry_point][i]):
+                errs[str(params)] = "Passed"
             else:
-                output = result.get()
-                if output[0] == 1:
-                    errs[str(params)] = output[1]
-                elif compare_lists(output[1], self.answers[entry_point][i]):
-                    errs[str(params)] = "Passed"
-                else:
-                    errs[str(params)] = "Wrong Answer: %s" % (output[1])
+                errs[str(params)] = f"Wrong Answer: {result[1]}"
 
         return errs

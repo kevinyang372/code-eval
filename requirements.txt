@@ -13,6 +13,7 @@ Click==7.0
 cycler==0.10.0
 DateTime==4.3
 defusedxml==0.6.0
+dill==0.3.3
 dnspython==2.0.0
 dominate==2.4.0
 email-validator==1.1.2
@@ -36,6 +37,7 @@ jupyterlab-pygments==0.1.2
 Mako==1.1.0
 MarkupSafe==1.1.1
 mistune==0.8.4
+multiprocess==0.70.11.1
 nbclient==0.5.1
 nbconvert==6.0.7
 nbformat==5.0.8
@@ -43,8 +45,11 @@ nest-asyncio==1.4.2
 numpy==1.18.4
 packaging==20.4
 pandocfilters==1.4.3
+pathos==0.2.7
 Persistence==3.0
 persistent==4.6.4
+pox==0.2.9
+ppft==1.6.6.3
 pycparser==2.20
 Pygments==2.6.1
 pyparsing==2.4.5
