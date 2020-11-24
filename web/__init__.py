@@ -12,7 +12,8 @@ sys.path.append('web')
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'you-will-never-guess'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/code_eval'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["FILE_UPLOADS"] = "web/tmp"
 app.config["SESSION_UPLOADS"] = "web/tests"
