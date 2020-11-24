@@ -57,6 +57,7 @@ Persistence==3.0
 persistent==4.6.4
 pox==0.2.9
 ppft==1.6.6.3
+psycopg2==2.8.6
 pycodestyle==2.6.0
 pycparser==2.20
 Pygments==2.6.1
