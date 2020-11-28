@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block app_content %}
+    {% if sessions|length == 0 %}
+        <p>Oops there is no sessions available for this course yet!</p>
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('session.upload_session') }}">Upload Session</a>
+        {% endif %}
+    {% endif %}
     {% for s in sessions %}
         <a href="{{ url_for('submission.submission', course_id = course_id, session_id = s.id) }}", class="btn btn-secondary btn-lg">Session {{ s.session_num }}</a><br>
     {% endfor %}
