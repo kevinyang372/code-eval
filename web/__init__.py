@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
+from flask_breadcrumbs import Breadcrumbs
 from flask_codemirror import CodeMirror
 import os
 import sys
@@ -29,6 +30,7 @@ login = LoginManager(app)
 login.login_view = 'login.login'
 csrf.init_app(app)
 codemirror = CodeMirror(app)
+Breadcrumbs(app=app)
 
 from blueprints.settings import setting_template
 from blueprints.sessions import session_template

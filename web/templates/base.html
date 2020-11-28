@@ -44,6 +44,12 @@
         {% endif %}
         {% endwith %}
 
+        <div>
+        {%- for breadcrumb in breadcrumbs -%}
+            <a href="{{ breadcrumb.url }}">{{ breadcrumb.text }}</a>
+            {{ '/' if not loop.last }}
+        {%- endfor -%}
+        </div>
         {% block app_content %}{% endblock %}
     </div>
 {% endblock %}

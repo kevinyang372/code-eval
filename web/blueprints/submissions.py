@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import current_user, login_required
+from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from web.models import Session, Result, Question, Case, Codecacher, Plagiarism
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
@@ -10,9 +11,22 @@ import timeit
 
 submission_template = Blueprint(
     'submission', __name__, template_folder='../templates')
+default_breadcrumb_root(submission_template, '.index')
+
+
+def view_course_dlc(*args, **kwargs):
+    course_id = request.view_args['course_id']
+    return [{'text': ' Courses', 'url': f'/submit/{course_id}'}]
+
+
+def view_session_dlc(*args, **kwargs):
+    course_id = request.view_args['course_id']
+    session_id = request.view_args['session_id']
+    return [{'text': ' Sessions', 'url': f'/submit/{course_id}/{session_id}'}]
 
 
 @submission_template.route('/submit/<course_id>', methods=["GET", "POST"])
+@register_breadcrumb(submission_template, '.', '', dynamic_list_constructor=view_course_dlc)
 @login_required
 def submission_index(course_id):
     """Index page for submitting code
@@ -25,6 +39,7 @@ def submission_index(course_id):
 
 
 @submission_template.route('/submit/<course_id>/<session_id>', methods=["GET", "POST"])
+@register_breadcrumb(submission_template, '.course', '', dynamic_list_constructor=view_session_dlc)
 @login_required
 def submission(course_id, session_id):
     """Page for submitting code
