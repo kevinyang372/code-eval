@@ -6,16 +6,11 @@ orbs:
 jobs:
   build-and-test:
     executor: python/default
-    docker:
-      - image: circleci/postgres:9.6.20
-        environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: code_eval
-      - image: circleci/python:3.8.5
     steps:
       - checkout
-      - run: brew install pyenv
+      - python/load-cache
       - python/install-deps
+      - python/save-cache
       - run:
           command: python -m unittest test.test_example
           name: Test

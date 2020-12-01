@@ -4,7 +4,7 @@ import sys
 import json
 import unittest
 
-os.environ["DATABASE_URL"] = "postgresql://localhost/code_eval"
+os.environ["DATABASE_URL"] = "sqlite:///test.db"
 from web import app, db, models
 
 class FlaskTestCase(unittest.TestCase):
@@ -13,7 +13,7 @@ class FlaskTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['DEBUG'] = False
-        app.config['DATABASE_URL'] = 'postgresql://localhost/code_eval'
+        app.config['DATABASE_URL'] = 'sqlite:///test.db'
 
         example_admin = models.User(
             id=1, email="example_admin_user@gmail.com", is_admin=True)
