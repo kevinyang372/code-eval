@@ -11,7 +11,7 @@ jobs:
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: code_eval
-      - image: cimg/python:3.8
+      - image: circleci/python:3.8.5
     steps:
       - checkout
       - python/install-deps
