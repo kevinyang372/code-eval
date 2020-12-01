@@ -12,6 +12,7 @@ import sys
 sys.path.append('web')
 app = Flask(__name__)
 
+# Configuration for the application.
 app.config['SECRET_KEY'] = 'you-will-never-guess'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -22,6 +23,7 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024
 app.config['CODEMIRROR_LANGUAGES'] = ['python']
 app.config['WTF_CSRF_ENABLED'] = True
 
+# Initialize the dependencies for Flask app.
 csrf = CSRFProtect()
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -43,6 +45,7 @@ from blueprints.apis import api_template
 from blueprints.error import error_template
 from blueprints.compare import compare_template
 
+# Register the blueprints.
 app.register_blueprint(index_template)
 app.register_blueprint(summary_template)
 app.register_blueprint(course_template)
@@ -56,26 +59,5 @@ app.register_blueprint(compare_template)
 
 from web import models
 
-# add example user, seminar and session
+# Create the database if it does not exist yet.
 db.create_all()
-# example_admin = models.User(
-#     id=1, email="example_admin_user@gmail.com", is_admin=True)
-# example_admin.set_password("111")
-# db.session.merge(example_admin)
-
-# example_user = models.User(
-#     id=2, email="example_user@gmail.com", is_admin=False)
-# example_user.set_password("111")
-# db.session.merge(example_user)
-
-# example_user = models.User(
-#     id=3, email="example_user_2@gmail.com", is_admin=False)
-# example_user.set_password("111")
-# db.session.merge(example_user)
-
-# example_course = models.Course(id=1, course_num='CS156', registration="join156")
-# db.session.merge(example_course)
-
-# example_session = models.Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
-# db.session.merge(example_session)
-# db.session.commit()

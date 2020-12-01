@@ -16,14 +16,14 @@ import collections
 
 
 def is_valid(filename):
-    """Validate user uploaded files' filename"""
+    """Validate user uploaded files' filename."""
     if filename and '.' in filename and filename.split('.')[1] in app.config["ALLOWED_EXTENSIONS"]:
         return True
     return False
 
 
 def read_file(file, filename):
-    """Read user uploaded files"""
+    """Read user uploaded files."""
 
     file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
@@ -37,7 +37,7 @@ def read_file(file, filename):
 
 
 def admin_required(f):
-    """Decorator for requiring admin access"""
+    """Decorator for requiring admin access."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user or not current_user.is_admin:
@@ -48,7 +48,7 @@ def admin_required(f):
 
 
 def user_required_api(f):
-    """Decorator for requiring user access in api"""
+    """Decorator for requiring user access in api."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
@@ -67,7 +67,7 @@ def user_required_api(f):
 
 
 def admin_required_api(f):
-    """Decorator for requiring admin access in api"""
+    """Decorator for requiring admin access in api."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         email = str(request.json['credentials']['email'])
@@ -81,22 +81,26 @@ def admin_required_api(f):
 
 
 def convert_jupyter(file, filename):
-    """Read jupyter notebook uploads"""
+    """Read jupyter notebook uploads."""
 
+    # Save the uploaded jupyter notebook into a temporary folder.
     file.save(os.path.join(app.config["FILE_UPLOADS"], filename))
 
+    # Read in jupyter notebooks as plain text.
     with open(os.path.join(app.config["FILE_UPLOADS"], filename)) as f:
         nb = nbformat.reads(f.read(), nbformat.NO_CONVERT)
 
+    # Use exporter to convert jupyter notebook to Python.
     exporter = PythonExporter()
     source, _ = exporter.from_notebook_node(nb)
 
+    # Remove the temporary file.
     os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
     return source
 
 
 def highlight_python(code):
-    """highlight python code to html"""
+    """Highlight python code to html."""
 
     formatter = pygments.formatters.HtmlFormatter(
         style="emacs", cssclass="codehilite")
@@ -106,6 +110,9 @@ def highlight_python(code):
 
 
 def highlight_diff_temp(file_contents):
+    """Highlight the difference between two Python files."""
+
+    # Parse each file to AST trees.
     try:
         tree1 = ast.parse(file_contents[0])
         tree2 = ast.parse(file_contents[1])
@@ -120,6 +127,7 @@ def highlight_diff_temp(file_contents):
     else:
         similarity = len(d) / float(len(size))
 
+    # Wrapper for difference highlight style.
     pre = '<style>.diff_plus { background-color: rgba(0, 255, 0, 0.3) }</style>'
 
     parsed1 = [pre] + file_contents[0].split('\n')
@@ -183,7 +191,7 @@ def highlight_diff(file_names, file_contents):
 
 
 def compile_results(res):
-    """compile results into models"""
+    """Compile results into models."""
 
     compiled = {}
     for question in res:

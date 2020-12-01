@@ -6,12 +6,14 @@ from web.models import Course, Session
 
 
 class CodeSumitForm(FlaskForm):
+    """Code submission form for students."""
     filename = FileField()
-    text = CodeMirrorField(language='python', config={'lineNumbers': 'true'})
+    text = CodeMirrorField(language='python', config={'lineNumbers': 'true'})   # CodeMirror plugin here.
     submit = SubmitField('Submit')
 
 
 class LoginForm(FlaskForm):
+    """User login form."""
     email = StringField('Email', validators=[Email()])
     password = PasswordField('Password', validators=[
                              DataRequired(message="Password is required")])
@@ -19,6 +21,7 @@ class LoginForm(FlaskForm):
 
 
 class UploadForm(FlaskForm):
+    """Create a new session."""
     filename = FileField()
     session_num = DecimalField('Session Number', validators=[NumberRange(
         min=0.0, max=20.0, message='Session number must be a positive decimal')])
@@ -32,6 +35,7 @@ class UploadForm(FlaskForm):
     submit = SubmitField('Submit')
 
     def validate(self):
+        """Validation against the database."""
         if not FlaskForm.validate(self):
             return False
         course_id = Course.query.filter_by(
@@ -48,12 +52,14 @@ class UploadForm(FlaskForm):
 
 
 class AddCourse(FlaskForm):
+    """Add course form."""
     course_num = StringField('Course', validators=[DataRequired()])
     registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[
                                     Regexp(regex=r'^[a-z|A-Z|_|\d+|-]+$', message="Invitation link must have no / in between")])
     submit = SubmitField('Submit')
 
     def validate_course_num(form, field):
+        """Validation against the database."""
         course = Course.query.filter_by(course_num=field.data).first()
         if course:
             raise ValidationError(
@@ -61,6 +67,7 @@ class AddCourse(FlaskForm):
 
 
 class FilterResult(FlaskForm):
+    """Filter result for plagiarism report."""
     threshold = DecimalField('Threshold', validators=[NumberRange(
         min=0.0, max=1.0, message='Threshold must be between 0 and 1')])
     submit = SubmitField('Submit')

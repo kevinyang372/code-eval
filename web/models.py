@@ -4,6 +4,7 @@ from web import app, db, login
 
 
 class User(UserMixin, db.Model):
+    """Data model for users."""
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     password_hash = db.Column(db.String(128))
@@ -19,6 +20,7 @@ class User(UserMixin, db.Model):
 
 
 class Result(db.Model):
+    """Data model for submission results."""
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String)
     passed_num = db.Column(db.Integer)
@@ -32,13 +34,12 @@ class Result(db.Model):
                                 backref='result', lazy=True)
     ts = db.Column(db.String)
     plagiarisms = db.relationship('Plagiarism',
-                                  # secondary = "plagiarism",
                                   primaryjoin="or_(Result.id == Plagiarism.first_result_id, Result.id == Plagiarism.second_result_id)",
-                                  # secondaryjoin="Result.id == Plagiarism.second_result_id",
                                   cascade="all,delete", backref='result', lazy=True)
 
 
 class Question(db.Model):
+    """Data model for tests."""
     id = db.Column(db.Integer, primary_key=True)
     passed_num = db.Column(db.Integer)
     name = db.Column(db.String)
@@ -49,6 +50,7 @@ class Question(db.Model):
 
 
 class Case(db.Model):
+    """Data model for each individual test cases."""
     id = db.Column(db.Integer, primary_key=True)
     case_content = db.Column(db.String)
     success = db.Column(db.Boolean)
@@ -58,6 +60,7 @@ class Case(db.Model):
 
 
 class Course(db.Model):
+    """Data model for each course."""
     id = db.Column(db.Integer, primary_key=True)
     course_num = db.Column(db.String)
     registration = db.Column(db.String)
@@ -67,6 +70,7 @@ class Course(db.Model):
 
 
 class Session(db.Model):
+    """Data model for individual sessions in a course."""
     id = db.Column(db.Integer, primary_key=True)
     session_num = db.Column(db.Float)
     runtime = db.Column(db.Float)
@@ -83,6 +87,7 @@ class Session(db.Model):
 
 
 class Access(db.Model):
+    """Data model for the accessibility of a course."""
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey(
@@ -95,6 +100,7 @@ class Access(db.Model):
 
 
 class Codecacher(db.Model):
+    """Data model for code caches."""
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     session_id = db.Column(db.Integer, db.ForeignKey('session.id'))
@@ -107,6 +113,7 @@ class Codecacher(db.Model):
 
 
 class Plagiarism(db.Model):
+    """Data model for plagiarism check results."""
     __tablename__ = 'plagiarism'
 
     id = db.Column(db.Integer, primary_key=True)
