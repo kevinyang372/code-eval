@@ -13,9 +13,7 @@ jobs:
           POSTGRES_DB: code_eval
     steps:
       - checkout
-      - python/load-cache
       - python/install-deps
-      - python/save-cache
       - run:
           command: python -m unittest test.test_example
           name: Test
