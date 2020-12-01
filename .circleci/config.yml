@@ -14,6 +14,7 @@ jobs:
       - image: circleci/python:3.8.5
     steps:
       - checkout
+      - run: brew install pyenv
       - python/install-deps
       - run:
           command: python -m unittest test.test_example
