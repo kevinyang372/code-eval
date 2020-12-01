@@ -78,4 +78,4 @@ db.create_all()
 
 # example_session = models.Session(id = 1, session_num=1.1, seminar_id=1, entry_point="entry", runtime=1.0, blacklist='')
 # db.session.merge(example_session)
-db.session.commit()
+# db.session.commit()

@@ -4,8 +4,8 @@ import sys
 import json
 import unittest
 
-os.environ["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
-from web import app, db
+os.environ["DATABASE_URL"] = "postgresql://localhost/code_eval"
+from web import app, db, models
 
 class FlaskTestCase(unittest.TestCase):
 
@@ -13,7 +13,35 @@ class FlaskTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['DEBUG'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+        app.config['DATABASE_URL'] = 'postgresql://localhost/code_eval'
+
+        example_admin = models.User(
+            id=1, email="example_admin_user@gmail.com", is_admin=True)
+        example_admin.set_password("111")
+        db.session.merge(example_admin)
+
+        example_user = models.User(
+            id=2, email="example_user@gmail.com", is_admin=False)
+        example_user.set_password("111")
+        db.session.merge(example_user)
+
+        example_user = models.User(
+            id=3, email="example_user_2@gmail.com", is_admin=False)
+        example_user.set_password("111")
+        db.session.merge(example_user)
+
+        example_course = models.Course(id=1, course_num='CS156', registration="join156")
+        db.session.merge(example_course)
+
+        to_test = ''
+        with open('sample_test.py', 'r') as file:
+            for line in file:
+                to_test += line
+
+        example_session = models.Session(id=1, session_num=1.1, course_id=1, test_code=to_test, runtime=1.0, blacklist='')
+        db.session.merge(example_session)
+        db.session.commit()
+        
         self.app = app.test_client()
 
     def tearDown(self):
