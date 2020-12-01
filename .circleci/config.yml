@@ -8,7 +8,7 @@ jobs:
   install-db:
     executor:
       name: postgres-rspec/default
-      python-version: '3.8'
+      python-version: '3.6.2-stretch-browsers'
     steps:
       - postgres-rspec/install
   build-and-test:
