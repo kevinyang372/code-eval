@@ -2,15 +2,15 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
-  postgres-rspec: sbc-orbs/postgres-rspec@0.0.28
 
 jobs:
-  install-db:
-    executor: postgres-rspec/default
-    steps:
-      - postgres-rspec/install
   build-and-test:
     executor: python/default
+    docker:
+      - image: circleci/postgres:9.6.20
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: code_eval
     steps:
       - checkout
       - python/load-cache
@@ -23,5 +23,4 @@ jobs:
 workflows:
   main:
     jobs:
-      - install-db
       - build-and-test
