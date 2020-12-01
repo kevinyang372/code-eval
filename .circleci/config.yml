@@ -2,13 +2,18 @@ version: 2.1
 
 orbs:
   python: circleci/python@0.2.1
-  postgres: onehq/postgres@1.1.0
+  postgres-rspec: sbc-orbs/postgres-rspec@0.0.28
 
 jobs:
+  install-db:
+    executor:
+      name: postgres-rspec/default
+      python-version: '3.8'
+    steps:
+      - postgres-rspec/install
   build-and-test:
     executor: python/default
     steps:
-      - postgres/install_postgres_client
       - checkout
       - python/load-cache
       - python/install-deps
@@ -20,4 +25,5 @@ jobs:
 workflows:
   main:
     jobs:
+      - install-db
       - build-and-test
