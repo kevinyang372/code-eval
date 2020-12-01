@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import current_user, login_required
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
-from web.models import Session, Result, Question, Case, Codecacher, Plagiarism
+from web.models import Session, Result, Question, Case, Codecacher, Course, Plagiarism
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
 from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results, compile_plagarism_report
@@ -35,7 +35,8 @@ def submission_index(course_id):
     Index page for showing all available sessions user can submit to.
     """
     available = Session.query.filter_by(course_id=course_id).all()
-    return render_template('submission_index.html', sessions=available, course_id=course_id)
+    course = Course.query.filter_by(id=course_id).first()
+    return render_template('submission_index.html', sessions=available, course=course)
 
 
 @submission_template.route('/submit/<course_id>/<session_id>', methods=["GET", "POST"])
