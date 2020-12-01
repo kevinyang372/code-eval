@@ -5,6 +5,12 @@ orbs:
 
 jobs:
   build-and-test:
+    docker:
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: code_eval
+          POSTGRES_PASSWORD: ""
     executor: python/default
     steps:
       - checkout
