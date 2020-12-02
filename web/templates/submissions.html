@@ -9,12 +9,43 @@
         <h2>Session {{ session.session_num }}</h2>
       </div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">Number of Submitted Students: {{ session.get_submission_students()|length }}</li>
+        <li class="list-group-item">
+            Number of Submitted Students: {{ session.get_submission_students()|length }}
+            {% if current_user.is_admin %}
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                    See Full List
+                </button>
+            {% endif %}
+        </li>
         <li class="list-group-item">Number of Submissions: {{ session.results|length }}</li>
         <li class="list-group-item">Number of Passed Submissions: {{ session.get_passed_submissions()|length }}</li>
         <li class="list-group-item">Submission Passage Rate: {{ session.get_passed_rate() }}%</li>
       </ul>
     </div>
+
+    {% if current_user.is_admin %}
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="exampleModalLongTitle">Submitted Students</h4>
+          </div>
+          <div class="modal-body">
+            {% for student in session.get_submission_students() %}
+                {% if student in session.get_passed_submission_students() %}
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }} - Passed</a>
+                {% else %}
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a>
+                {% endif %}
+            {% endfor %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
 
     <p><b>Runtime</b>: {{ session.runtime }}</p>
     <p><b>Description</b>: {{ session.description}}</p>

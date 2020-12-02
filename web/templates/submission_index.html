@@ -7,9 +7,32 @@
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item">Number of Sessions: {{ sessions|length }}</li>
-        <li class="list-group-item">Number of Students: {{ course.users|length }}</li>
+        <li class="list-group-item">
+          Number of Students: {{ course.users|length }}
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+            See Full List
+          </button>
+        </li>
         <li class="list-group-item">Registration Link: /register/{{ course.registration }}</li>
       </ul>
+    </div>
+
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="exampleModalLongTitle">Students</h4>
+          </div>
+          <div class="modal-body">
+            {% for student in course.users %}
+                <p>{{ student.email }}</p>
+            {% endfor %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
     {% if sessions|length == 0 %}
         <p>Oops there is no sessions available for this course yet!</p>

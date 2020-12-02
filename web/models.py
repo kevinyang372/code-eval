@@ -87,8 +87,11 @@ class Session(db.Model):
         return list(filter(lambda x: x != '', self.blacklist.split(',')))
 
     def get_submission_students(self):
-        """Get a list of students who have submitted."""
-        return set(result.user_id for result in self.results)
+        """Get a list of students who have submitted.
+        
+        The list is sorted with the students that haven't passed shown first and then those who passed.
+        """
+        return sorted(list(set(result.user for result in self.results)), key=lambda x: x in self.get_passed_submission_students())
 
     def get_passed_submissions(self):
         """Get a list of passed results."""
@@ -96,7 +99,7 @@ class Session(db.Model):
 
     def get_passed_submission_students(self):
         """Get a list students who have submitted and passed."""
-        return set(result.user_id for result in self.results if result.success)
+        return set(result.user for result in self.results if result.success)
 
     def get_passed_rate(self):
         """Get the passage rate for submissions."""
