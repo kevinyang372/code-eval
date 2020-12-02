@@ -38,9 +38,9 @@
           <div class="modal-body">
             {% for student in session.get_submission_students() %}
                 {% if student in session.get_passed_submission_students() %}
-                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }} - Passed</a>
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }} - Passed</a><br>
                 {% else %}
-                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a>
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a><br>
                 {% endif %}
             {% endfor %}
           </div>
