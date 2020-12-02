@@ -191,7 +191,11 @@ def highlight_diff(file_names, file_contents):
 
 
 def compile_results(res):
-    """Compile results into models."""
+    """Compile results into models.
+
+    Input 'res' is in format: {question1: ["Passed", "Error", ...], question2: [...]}
+    Transformed output: {question1: {total_num: ..., passed_num: ..., reason: [...]}, question2: {...}}
+    """
 
     compiled = {}
     for question in res:
@@ -206,10 +210,13 @@ def compile_results(res):
 
 
 def compile_plagarism_report(code, user_id, session_id):
+    """Compare the submitted code with other user submissions in the session."""
 
+    # Fetch a list of code submissions
     results = Result.query.filter(
         Result.user_id != user_id, Result.session_id == session_id).all()
 
+    # Try parsing the code submission. Return an empty list if parsing failed.
     try:
         tree1 = ast.parse(code)
     except Exception as e:
@@ -236,6 +243,8 @@ def compile_plagarism_report(code, user_id, session_id):
 
 
 def compile_plagarism_report_two(file_contents):
+    """Compare two specific files for plagiarism."""
+
     try:
         tree1 = ast.parse(file_contents[0])
         tree2 = ast.parse(file_contents[1])
@@ -258,14 +267,17 @@ def compile_plagarism_report_two(file_contents):
     return comparison
 
 
-# Exact match between two pieces of code
 def exact_match(node1, node2):
+    """Exact match algorithm between two pieces of code."""
+
     if type(node1) is not type(node2):
         return False
     if isinstance(node1, ast.AST):
         for k, v in vars(node1).items():
+            # Skip unrelated information
             if k in ('lineno', 'col_offset', 'ctx'):
                 continue
+            # Recursively check for child nodes
             if not exact_match(v, getattr(node2, k)):
                 return False
 
@@ -276,8 +288,9 @@ def exact_match(node1, node2):
         return node1 == node2
 
 
-# unifying ast match detecting naive variable renaming
 def unifying_ast_match(node1, node2, mapping={}):
+    """Unifying ast match detecting naive variable renaming."""
+
     if type(node1) is not type(node2):
         return False
     if isinstance(node1, ast.AST):
@@ -285,6 +298,7 @@ def unifying_ast_match(node1, node2, mapping={}):
             if k in ('lineno', 'col_offset', 'ctx'):
                 continue
 
+            # Skip id and name of variables.
             if (k == 'id' or k == 'arg') and v != getattr(node2, k):
                 if v not in mapping:
                     mapping[v] = getattr(node2, k)
@@ -300,8 +314,9 @@ def unifying_ast_match(node1, node2, mapping={}):
         return node1 == node2
 
 
-# ignore variables
 def ast_match_ignoring_variables(node1, node2):
+    """AST matching algorithm completely ignoring variables."""
+
     if type(node1) is not type(node2):
         return False
     if isinstance(node1, ast.AST):
@@ -337,23 +352,28 @@ def ast_match_ignoring_variables(node1, node2):
 #         return node1 == node2
 
 
-# ignore variable with line highlighting
 def ast_match_wrapper(node1, node2):
+    """AST matching algorithm completely Ignore variable with line highlighting."""
+
     d = collections.defaultdict(set)
 
     def func(node1, node2, is_parent=True):
+        """Utility function for recursively comparing two nodes."""
+
         if type(node1) is not type(node2):
             return False
         if isinstance(node1, ast.AST):
-
+            # Indicator of whether this node is a parent.
             next_parent = is_parent and 'lineno' not in vars(node1)
 
             for k, v in vars(node1).items():
+                # Skip attributes like variable id and name.
                 if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name'):
                     continue
                 elif not func(v, getattr(node2, k), next_parent):
                     return False
 
+            # If the current node has the line number attribute, add it to the dictionary.
             if 'lineno' in vars(node1) and is_parent:
                 if 'end_lineno' in vars(node1):
                     d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add(
@@ -416,6 +436,7 @@ def traverseAST(node):
 
 
 def copyTree(node, dummy):
+    """Copy AST tree into the format for apply ZSS algorithm."""
     t = type(node).__name__
 
     if 'name' in node._fields:
@@ -439,4 +460,5 @@ def copyTree(node, dummy):
 
 
 def getTreeSize(root):
+    """Utility function for getting the number of nodes in the AST tree."""
     return 1 + sum(getTreeSize(node) for node in root.children)
