@@ -2,29 +2,42 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-{{ codemirror.include_codemirror() }}
-<p><b>Runtime</b>: {{ session.runtime }}</p>
-<p><b>Description</b>: {{ session.description}}</p>
-<p>You could choose to upload your code as a file or paste into the code snippet below</p>
-{{ wtf.quick_form(form) }}
+    {{ codemirror.include_codemirror() }}
 
-<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
-<script>
-    $(document).ready(function() {
-        editor_for_text.on('change', (editor) => {
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('submission.codecacher', session_id=session.id) }}",
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    data: editor.doc.getValue()
-                }),
-                success: function (data) {
-                    console.log(data)
-                }
+    <div class="card">
+      <div class="card-header">
+        <h2>Session {{ session.session_num }}</h2>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Number of Submitted Students: {{ session.get_submission_students()|length }}</li>
+        <li class="list-group-item">Number of Submissions: {{ session.results|length }}</li>
+        <li class="list-group-item">Number of Passed Submissions: {{ session.get_passed_submissions()|length }}</li>
+        <li class="list-group-item">Submission Passage Rate: {{ session.get_passed_rate() }}%</li>
+      </ul>
+    </div>
+
+    <p><b>Runtime</b>: {{ session.runtime }}</p>
+    <p><b>Description</b>: {{ session.description}}</p>
+    <p>You could choose to upload your code as a file or paste into the code snippet below</p>
+    {{ wtf.quick_form(form) }}
+
+    <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            editor_for_text.on('change', (editor) => {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('submission.codecacher', session_id=session.id) }}",
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        data: editor.doc.getValue()
+                    }),
+                    success: function (data) {
+                        console.log(data)
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 {% endblock %}

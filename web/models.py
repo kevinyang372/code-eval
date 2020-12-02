@@ -83,7 +83,24 @@ class Session(db.Model):
     test_code = db.Column(db.String)
 
     def get_blacklist(self):
+        """Get a list of blacklisted packages."""
         return list(filter(lambda x: x != '', self.blacklist.split(',')))
+
+    def get_submission_students(self):
+        """Get a list of students who have submitted."""
+        return set(result.user_id for result in self.results)
+
+    def get_passed_submissions(self):
+        """Get a list of passed results."""
+        return set(result for result in self.results if result.success)
+
+    def get_passed_submission_students(self):
+        """Get a list students who have submitted and passed."""
+        return set(result.user_id for result in self.results if result.success)
+
+    def get_passed_rate(self):
+        """Get the passage rate for submissions."""
+        return round(len(self.get_passed_submissions()) / len(self.results) * 100, 2)
 
 
 class Access(db.Model):

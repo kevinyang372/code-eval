@@ -29,7 +29,7 @@ def view_session_dlc(*args, **kwargs):
 @register_breadcrumb(submission_template, '.', '', dynamic_list_constructor=view_course_dlc)
 @login_required
 def submission_index(course_id):
-    """Index page for submitting code
+    """Index page for submitting code.
 
     Required scope: User / Admin
     Index page for showing all available sessions user can submit to.
@@ -43,15 +43,14 @@ def submission_index(course_id):
 @register_breadcrumb(submission_template, '.course', '', dynamic_list_constructor=view_session_dlc)
 @login_required
 def submission(course_id, session_id):
-    """Page for submitting code
+    """Page for submitting code.
 
     Required scope: User / Admin
     User could submit their code here. Submission needs to include prespecified entry
     function within the code
     """
 
-    # check if filename is valid
-
+    # Check if current user has access to this session
     if not current_user.is_admin and not any(int(course_id) == i.id for i in current_user.courses):
         flash('You have no access to this course!')
         return redirect(url_for('index.index'))
@@ -60,6 +59,7 @@ def submission(course_id, session_id):
         user_id=current_user.id, session_id=session_id).first()
     setting = Session.query.filter_by(id=session_id).first()
 
+    # Fill the code field.
     pre_filled = cache.text if cache else '#Welcome'
     form = CodeSumitForm(
         text=pre_filled
