@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from web.utils import admin_required, highlight_diff, highlight_diff_temp, compile_plagarism_report_two
-from web.models import Result
+from web.models import Result, Session
 from web.forms import FilterResult
 
 compare_template = Blueprint(
@@ -41,3 +41,42 @@ def compare_index(result_id1):
         return render_template('compare_index.html', form=form, results=res, r1=r1.id)
 
     return render_template('compare_index.html', form=form, results=results, r1=r1.id)
+
+@compare_template.route('/plagiarism/<session_id>', methods=['GET', 'POST'])
+@admin_required
+def plagiarism_session(session_id):
+    """Endpoint for showing all the plagiarism comparisons in a specific session."""
+
+    def compare_two_users(results_1, results_2):
+        """Utility function for comparing plagiarim results between two users."""
+
+        c = []
+        for r1 in results_1:
+            for r2 in results_2:
+                _, _, similarity = highlight_diff_temp([r1.content, r2.content])
+                c.append((similarity, r1.id, r2.id, r1.user.email, r2.user.email))
+
+        return c
+
+    all_submitted_users = list(Session.query.filter_by(id=session_id).first().get_passed_submission_students())
+    list_of_results = Result.query.filter_by(session_id=session_id, success=True).all()
+    res = []
+
+    # Query against all submitted users.
+    for u1 in range(len(all_submitted_users) - 1):
+        user_1 = all_submitted_users[u1]
+        result_user_1 = list(filter(lambda x: x.user_id == user_1.id, list_of_results)) # Filter out the results submitted by user_1
+
+        for u2 in range(u1 + 1, len(all_submitted_users)):
+            user_2 = all_submitted_users[u2]
+            result_user_2 = list(filter(lambda x: x.user_id == user_2.id, list_of_results)) # Filter out the results submitted by user_2
+
+            res.extend(compare_two_users(result_user_1, result_user_2))
+
+    # Sort reversely based on similarity.
+    res.sort(reverse=True)
+    return render_template('plagiarism_session.html', results=res)
+
+
+
+

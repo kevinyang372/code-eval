@@ -20,6 +20,11 @@
         <li class="list-group-item">Number of Submissions: {{ session.results|length }}</li>
         <li class="list-group-item">Number of Passed Submissions: {{ session.get_passed_submissions()|length }}</li>
         <li class="list-group-item">Submission Passage Rate: {{ session.get_passed_rate() }}%</li>
+        {% if current_user.is_admin %}
+            <li class="list-group-item">
+                <a type="button" href="{{ url_for('compare.plagiarism_session', session_id=session.id) }}", class="btn btn-info">Plagiarism</a>
+            </li>
+        {% endif %}
       </ul>
     </div>
 

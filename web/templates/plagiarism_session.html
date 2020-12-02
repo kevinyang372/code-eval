@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    {% for r in results %}
+        <div class="card">
+          <div class="card-header">
+            <h4>Case Similarity: {{ r[0] }}</h4>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                User 1: {{ r[3] }}
+                <a type="button" class="btn btn-primary" href="{{ url_for('summary.summary_case', result_id = r[1]) }}">
+                    See Submission Detail
+                </a>
+            </li>
+            <li class="list-group-item">
+                User 2: {{ r[4] }}
+                <a type="button" class="btn btn-primary" href="{{ url_for('summary.summary_case', result_id = r[2]) }}">
+                    See Submission Detail
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a type="button" href="{{ url_for('compare.compare', result_id1 = r[1], result_id2 = r[2]) }}", class="btn btn-info">Compare</a>
+            </li>
+          </ul>
+        </div>
+    {% endfor %}
+{% endblock %}
