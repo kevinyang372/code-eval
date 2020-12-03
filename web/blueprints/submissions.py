@@ -11,15 +11,22 @@ import timeit
 
 submission_template = Blueprint(
     'submission', __name__, template_folder='../templates')
+
+# Register the breadcrumb to be after the index page.
 default_breadcrumb_root(submission_template, '.index')
 
 
 def view_course_dlc(*args, **kwargs):
+    """Utility function for generating course breadcrumb."""
     course_id = request.view_args['course_id']
+
+    # Text: the displayed text of the breadcrumb
+    # Url: the link of the breadcrumb
     return [{'text': ' Courses', 'url': f'/submit/{course_id}'}]
 
 
 def view_session_dlc(*args, **kwargs):
+    """Utility function for generating session breadcrumb."""
     course_id = request.view_args['course_id']
     session_id = request.view_args['session_id']
     return [{'text': ' Sessions', 'url': f'/submit/{course_id}/{session_id}'}]
@@ -66,6 +73,7 @@ def submission(course_id, session_id):
     )
 
     if form.validate_on_submit():
+        # Check if user submission contains code to test on.
         if (form.filename.data and is_valid(form.filename.data.filename)) or form.text.data:
 
             if form.filename.data and is_valid(form.filename.data.filename):
@@ -74,22 +82,24 @@ def submission(course_id, session_id):
                 if filename.split('.')[1] == 'py':
                     to_test = read_file(form.filename.data, filename)
                 else:
-                    to_test = convert_jupyter(form.filename.data, filename)
+                    to_test = convert_jupyter(form.filename.data, filename) # Convert jupyter notebook to python
             else:
                 to_test = form.text.data
 
             d = {}
-            exec(setting.test_code, d)
+            exec(setting.test_code, d) # Compile the test code
 
+            # Read the user submitted code
             temp = d['TestCases'](to_test)
 
             res = temp.test(runtime=setting.runtime,
                             blacklist=setting.get_blacklist())
 
-            # record runtime
+            # Record runtime
             time = round(timeit.timeit(lambda: d['TestCases'](to_test).test(
                 runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1), 3)
 
+            # Convert the test result to correct formatting
             compiled = compile_results(res)
             passed_num = sum([1 for question in compiled if compiled[question]
                               ['passed_num'] == compiled[question]['total_num']])
@@ -149,6 +159,8 @@ def codecacher(session_id):
 
     codecacher = Codecacher.query.filter_by(
         user_id=current_user.id, session_id=int(session_id)).first()
+
+    # Update if code cache exists. Otherwise create a new code cache object.
     if codecacher:
         codecacher.text = text
     else:
