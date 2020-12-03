@@ -23,9 +23,9 @@
                 <td>{{ s.runtime }}</td>
                 <td>{{ s.get_blacklist() }}</td>
                 <td>{{ s.results | length }}</td>
-                <td>{{ s.submitted_students }}</td>
-                <td>{{ s.passing_rate }}</td>
-                <td><a href="{{ url_for('session.change_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Details</a></td>
+                <td>{{ s.get_submission_students() | length }}</td>
+                <td>{{ s.get_passed_rate() }}</td>
+                <td><a href="{{ url_for('session.change_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Change</a></td>
                 <td><a href="{{ url_for('session.delete_session', session_id = s.id) }}", class="btn btn-secondary btn-lg">Delete</a></td>
             </tr>
             {% endfor %}

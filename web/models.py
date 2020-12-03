@@ -103,6 +103,7 @@ class Session(db.Model):
 
     def get_passed_rate(self):
         """Get the passage rate for submissions."""
+        if len(self.results) == 0: return 0.0
         return round(len(self.get_passed_submissions()) / len(self.results) * 100, 2)
 
 

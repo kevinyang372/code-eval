@@ -20,11 +20,14 @@ def upload_session():
     Prerequisites: Course exists
     """
     form = UploadForm()
+
+    # Add the choice of course number dynamically
     form.course_num.choices = sorted(
-        [(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
+        [(s.course_num, f"course {str(s.course_num)}") for s in Course.query.all()])
 
     if form.validate_on_submit():
 
+        # Transform filename to a secure one
         filename = secure_filename(form.filename.data.filename)
         test_code = read_file(form.filename.data, filename)
 
@@ -33,7 +36,7 @@ def upload_session():
         to_add = {'course_id': course_id, 'runtime': form.runtime.data, 'description': form.description.data,
                   'blacklist': form.blacklist.data, 'session_num': form.session_num.data, 'test_code': test_code}
 
-        # update / insert session settings
+        # Update / insert session settings
         if Session.query.filter_by(course_id=course_id, session_num=form.session_num.data).first():
             s = Session.query.filter_by(
                 course_id=course_id, session_num=form.session_num.data).first()
@@ -80,6 +83,7 @@ def change_session(session_id):
         flash('Session to change does not exist')
         return redirect(url_for('/'))
 
+    # Populate the fields with the current settings
     form = UploadForm(
         session_num=session.session_num,
         course_num=session.course.course_num,
@@ -89,7 +93,7 @@ def change_session(session_id):
     )
 
     form.course_num.choices = sorted(
-        [(s.course_num, 'course %s' % str(s.course_num)) for s in Course.query.all()])
+        [(s.course_num, f"course {str(s.course_num)}") for s in Course.query.all()])
 
     if form.validate_on_submit():
 
@@ -136,6 +140,7 @@ def register(link):
         flash('You have already registered!')
         return redirect(url_for('index.index'))
 
+    # Create a registration access object between user and course.
     db.session.add(Access(user_id=current_user.id, course_id=res.id))
     db.session.commit()
 
