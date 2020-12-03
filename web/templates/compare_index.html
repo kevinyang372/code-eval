@@ -2,8 +2,32 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    {{ wtf.quick_form(form) }}
-    {% for r in results %}
-        <a href="{{ url_for('compare.compare', result_id1 = r1, result_id2 = r.id) }}", class="btn btn-secondary btn-lg"> {{ r.user.email }} {{ r.ts }}</a><br>
-    {% endfor %}
+    <script>
+    function outputUpdate(threshold) {
+        document.querySelector('#selected-threshold').value = threshold;
+
+        let results = document.getElementById('results').children;
+        for (let i = 0; i < results.length; i++){
+            if (results[i].className < threshold){
+                results[i].style.visibility = "collapse";
+            } else {
+                results[i].style.visibility = "visible";
+            }
+        }
+    }
+    </script>
+    <form>
+        <p>
+           {{ form.threshold.label }}:
+           {{ form.threshold(min=0, max=1, oninput="outputUpdate(value)") }}
+           <output for="threshold" id="selected-threshold">{{ form.threshold.data }}</output>
+        </p>
+    </form>
+    <div id="results">
+        {% for r in results %}
+            <div class="{{ r[0] }}">
+                <a href="{{ url_for('compare.compare', result_id1 = r1, result_id2 = r[1].id) }}", class="btn btn-secondary btn-lg"> {{ r[1].user.email }} {{ r[1].ts }} - {{ r[0] }}</a><br>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

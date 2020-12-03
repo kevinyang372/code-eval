@@ -26,20 +26,16 @@ def compare(result_id1, result_id2):
 def compare_index(result_id1):
 
     r1 = Result.query.filter_by(id=result_id1).first()
-    results = Result.query.filter_by(session_id=r1.session_id)
+    rs = [r for r in Result.query.filter_by(session_id=r1.session_id).all() if r.user_id != r1.user_id]
+
+    results = []
+    similarities = []
+
+    for result in rs:
+        _, _, similarity = highlight_diff_temp([r1.content, result.content])
+        results.append((similarity, result))
+
     form = FilterResult()
-
-    if form.validate_on_submit():
-
-        res = []
-        for result in results:
-            _, _, similiarity = highlight_diff_temp(
-                [r1.content, result.content])
-            if similiarity > form.threshold.data:
-                res.append(result)
-
-        return render_template('compare_index.html', form=form, results=res, r1=r1.id)
-
     return render_template('compare_index.html', form=form, results=results, r1=r1.id)
 
 @compare_template.route('/plagiarism/<session_id>', methods=['GET', 'POST'])
@@ -75,7 +71,9 @@ def plagiarism_session(session_id):
 
     # Sort reversely based on similarity.
     res.sort(reverse=True)
-    return render_template('plagiarism_session.html', results=res)
+    form = FilterResult()
+
+    return render_template('plagiarism_session.html', results=res, form=form)
 
 
 

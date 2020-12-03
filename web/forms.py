@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, FileField, BooleanField, SubmitField, PasswordField, StringField, DecimalField, IntegerField
 from wtforms.validators import DataRequired, Email, NumberRange, Regexp, Optional, ValidationError
+from wtforms.fields.html5 import DecimalRangeField
 from flask_codemirror.fields import CodeMirrorField
 from web.models import Course, Session
 
@@ -68,6 +69,5 @@ class AddCourse(FlaskForm):
 
 class FilterResult(FlaskForm):
     """Filter result for plagiarism report."""
-    threshold = DecimalField('Threshold', validators=[NumberRange(
-        min=0.0, max=1.0, message='Threshold must be between 0 and 1')])
-    submit = SubmitField('Submit')
+    threshold = DecimalRangeField('Threshold', validators=[NumberRange(
+        min=0.0, max=1.0, message='Threshold must be between 0 and 1')], default=0.0)
