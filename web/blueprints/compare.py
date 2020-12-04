@@ -10,22 +10,29 @@ compare_template = Blueprint(
 @compare_template.route('/compare/<result_id1>/<result_id2>')
 @admin_required
 def compare(result_id1, result_id2):
+    """Endpoint for comparing two user submissions."""
 
     r1 = Result.query.filter_by(id=result_id1).first()
     r2 = Result.query.filter_by(id=result_id2).first()
 
-    parsed1, parsed2, similiarity = highlight_diff_temp(
+    # Get the similarity level and highlighted code block.
+    parsed1, parsed2, similarity = highlight_diff_temp(
         [r1.content, r2.content])
+
+    # Compile a list of test results using different plagiarism detection algorithms.
     comparison = compile_plagarism_report_two([r1.content, r2.content])
 
-    return render_template('compare.html', email1=r1.email, email2=r2.email, parsed1=parsed1, parsed2=parsed2, comparison=comparison, similiarity=similiarity)
+    return render_template('compare.html', email1=r1.email, email2=r2.email, parsed1=parsed1, parsed2=parsed2, comparison=comparison, similarity=similarity)
 
 
 @compare_template.route('/compare/<result_id1>', methods=['GET', 'POST'])
 @admin_required
 def compare_index(result_id1):
+    """Endpoint for showing a list of results in comparison with the current submission."""
 
     r1 = Result.query.filter_by(id=result_id1).first()
+
+    # Filter out results that are created by the same user.
     rs = [r for r in Result.query.filter_by(session_id=r1.session_id).all() if r.user_id != r1.user_id]
 
     results = []

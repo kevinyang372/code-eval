@@ -17,6 +17,7 @@ def index():
     This page only displays courses that the user has access to
     """
     if current_user.is_admin:
+        # If user is an admin, give all the course lists.
         courses = sorted(Course.query.all(), key=lambda x: x.course_num)
     else:
         courses = sorted(Course.query.filter(Course.users.any(

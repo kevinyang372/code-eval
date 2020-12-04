@@ -20,6 +20,7 @@ def add_course():
     or customize their own ones
     """
 
+    # Randomly generate a default registration link.
     random_generated = ''.join(random.choice(
         string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
     form = AddCourse(registration_link=random_generated)
@@ -75,6 +76,7 @@ def change_course(course_id):
         flash('Course to change does not exist')
         return redirect(url_for('setting.all_settings'))
 
+    # Populate the form with existing records.
     form = AddCourse(registration_link=course.registration,
                      course_num=course.course_num)
 

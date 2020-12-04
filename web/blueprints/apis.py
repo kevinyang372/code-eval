@@ -11,6 +11,7 @@ api_template = Blueprint('apis', __name__, template_folder='../templates')
 @api_template.route('/check_alive', methods=["GET"])
 @csrf.exempt
 def check_alive():
+    """Check if the api endpoint is alive."""
     return jsonify(data={'message': 'It works!'})
 
 
@@ -18,6 +19,7 @@ def check_alive():
 @admin_required_api
 @csrf.exempt
 def get_score(student_email, session_id):
+    """Get a list of scores for all user submission to a specific session."""
     user = User.query.filter_by(email=student_email).first()
     if not user:
         return jsonify(data={'message': 'Fails to find user email'})
@@ -30,6 +32,7 @@ def get_score(student_email, session_id):
 @user_required_api
 @csrf.exempt
 def submit(session_id):
+    """Endpoint functioning similarly to the submission page."""
     if 'file' not in request.files:
         return jsonify(data={'message': 'No file part'})
 
@@ -55,7 +58,7 @@ def submit(session_id):
         res = temp.test(runtime=setting.runtime,
                         blacklist=setting.get_blacklist())
 
-        # record runtime
+        # Record runtime.
         time = round(timeit.timeit(lambda: d['TestCases'](to_test).test(
             runtime=setting.runtime, blacklist=setting.get_blacklist()), number=1), 3)
 
