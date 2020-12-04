@@ -9,19 +9,35 @@
         <li class="list-group-item">Number of Sessions: {{ sessions|length }}</li>
         <li class="list-group-item">
           Number of Students: {{ course.users|length }}
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#studentList">
             See Full List
           </button>
         </li>
         <li class="list-group-item">Registration Link: /register/{{ course.registration }}</li>
+        {% if current_user.is_admin %}
+            <li class="list-group-item">
+                <a type="button" href="{{ url_for('course.change_course', course_id=course.id) }}", class="btn btn-primary">Setting</a>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteCourse">Delete</button>
+            </li>
+        {% endif %}
       </ul>
     </div>
 
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    {% if sessions|length == 0 %}
+        <p>Oops there is no sessions available for this course yet!</p>
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('session.upload_session') }}">Upload Session</a>
+        {% endif %}
+    {% endif %}
+    {% for s in sessions %}
+        <a href="{{ url_for('submission.submission', course_id = course.id, session_id = s.id) }}", class="btn btn-secondary btn-lg">Session {{ s.session_num }}</a><br>
+    {% endfor %}
+
+    <div class="modal fade" id="studentList" tabindex="-1" role="dialog" aria-labelledby="studentList" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title" id="exampleModalLongTitle">Students</h4>
+            <h4 class="modal-title" id="studentListTitle">Students</h4>
           </div>
           <div class="modal-body">
             {% for student in course.users %}
@@ -34,13 +50,21 @@
         </div>
       </div>
     </div>
-    {% if sessions|length == 0 %}
-        <p>Oops there is no sessions available for this course yet!</p>
-        {% if current_user.is_admin %}
-            <a href="{{ url_for('session.upload_session') }}">Upload Session</a>
-        {% endif %}
-    {% endif %}
-    {% for s in sessions %}
-        <a href="{{ url_for('submission.submission', course_id = course.id, session_id = s.id) }}", class="btn btn-secondary btn-lg">Session {{ s.session_num }}</a><br>
-    {% endfor %}
+
+    <div class="modal fade" id="deleteCourse" tabindex="-1" role="dialog" aria-labelledby="deleteCourse" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteCourseTitle">Delete Course</h5>
+          </div>
+          <div class="modal-body">
+            Are you sure to delete course {{course.course_num }}? You are not able to undo this.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <a type="button" href="{{ url_for('course.delete_course', course_id=course.id) }}", class="btn btn-danger">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
 {% endblock %}

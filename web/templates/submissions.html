@@ -12,7 +12,7 @@
         <li class="list-group-item">
             Number of Submitted Students: {{ session.get_submission_students()|length }}
             {% if current_user.is_admin %}
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#submittedStudents">
                     See Full List
                 </button>
             {% endif %}
@@ -23,34 +23,12 @@
         {% if current_user.is_admin %}
             <li class="list-group-item">
                 <a type="button" href="{{ url_for('compare.plagiarism_session', session_id=session.id) }}", class="btn btn-info">Plagiarism</a>
+                <a type="button" href="{{ url_for('session.change_session', session_id=session.id) }}", class="btn btn-primary">Setting</a>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteSession">Delete</button>
             </li>
         {% endif %}
       </ul>
     </div>
-
-    {% if current_user.is_admin %}
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" id="exampleModalLongTitle">Submitted Students</h4>
-          </div>
-          <div class="modal-body">
-            {% for student in session.get_submission_students() %}
-                {% if student in session.get_passed_submission_students() %}
-                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }} - Passed</a><br>
-                {% else %}
-                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a><br>
-                {% endif %}
-            {% endfor %}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endif %}
 
     <p><b>Runtime</b>: {{ session.runtime }}</p>
     <p><b>Description</b>: {{ session.description}}</p>
@@ -76,4 +54,45 @@
             });
         });
     </script>
+
+    {% if current_user.is_admin %}
+    <div class="modal fade" id="submittedStudents" tabindex="-1" role="dialog" aria-labelledby="submittedStudents" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="submittedStudentsTitle">Submitted Students</h4>
+          </div>
+          <div class="modal-body">
+            {% for student in session.get_submission_students() %}
+                {% if student in session.get_passed_submission_students() %}
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }} - Passed</a><br>
+                {% else %}
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a><br>
+                {% endif %}
+            {% endfor %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteSession" tabindex="-1" role="dialog" aria-labelledby="deleteSession" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteSessionTitle">Delete Session</h5>
+          </div>
+          <div class="modal-body">
+            Are you sure to delete session {{ session.session_num }}? You are not able to undo this.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <a type="button" href="{{ url_for('session.delete_session', session_id=session.id) }}", class="btn btn-danger">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
 {% endblock %}
