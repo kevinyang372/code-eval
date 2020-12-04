@@ -44,6 +44,7 @@ from blueprints.submissions import submission_template
 from blueprints.apis import api_template
 from blueprints.error import error_template
 from blueprints.compare import compare_template
+from blueprints.static import static_template
 
 # Register the blueprints.
 app.register_blueprint(index_template)
@@ -56,6 +57,7 @@ app.register_blueprint(submission_template)
 app.register_blueprint(api_template, url_prefix="/apis")
 app.register_blueprint(error_template)
 app.register_blueprint(compare_template)
+app.register_blueprint(static_template)
 
 from web import models
 
