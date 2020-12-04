@@ -71,3 +71,10 @@ class FilterResult(FlaskForm):
     """Filter result for plagiarism report."""
     threshold = DecimalRangeField('Threshold', validators=[NumberRange(
         min=0.0, max=1.0, message='Threshold must be between 0 and 1')], default=0.0)
+
+
+class Register(FlaskForm):
+    """Form for registering a new class."""
+    registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[
+                                Regexp(regex=r'^[a-z|A-Z|_|\d+|-]+$', message="Invitation link must have no / in between")])
+    submit = SubmitField('Submit')

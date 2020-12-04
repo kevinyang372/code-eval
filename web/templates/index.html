@@ -3,7 +3,32 @@
 
 {% block app_content %}
     <h2>Code Submission</h2>
+    {% if not current_user.is_admin %}
+        <div>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#register">Register New Class</button>
+        </div>
+    {% endif %}
     {% for s in courses %}
         <a href="{{ url_for('submission.submission_index', course_id = s.id) }}", class="btn btn-secondary btn-lg">Course {{ s.course_num }}</a><br>
     {% endfor %}
+
+    <div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="register" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="registerTitle">Register Course</h5>
+          </div>
+          <form action="" method="post">
+                {{ form.hidden_tag() }}
+              <div class="modal-body">
+                Enter class link: {{ form.registration_link() }}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-success">Submit</button>
+              </div>
+         </form>
+        </div>
+      </div>
+    </div>
 {% endblock %}
