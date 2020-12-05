@@ -138,7 +138,7 @@ class BaseTest(object):
             def compare_lists(a, b):
                 """Utility method to compare the runtime results and provided answers."""
 
-                if not isinstance(a, (list, np.ndarray)) and not isinstance(b, (list, np.ndarray)):
+                if not isinstance(a, (tuple, list, np.ndarray)) and not isinstance(b, (tuple, list, np.ndarray)):
                     # Give a threshold for minimum difference between float point numbers.
                     if isinstance(a, (float, np.float64)) and isinstance(b, (float, np.float64)):
                         return np.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False)

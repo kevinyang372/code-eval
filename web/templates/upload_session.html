@@ -2,5 +2,8 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
+<div>
+    <a href="{{ url_for('static.create_test_example') }}"><u>See here for more information on how to create a test</u></a><br>
+</div>
 {{ wtf.quick_form(form) }}
 {% endblock %}

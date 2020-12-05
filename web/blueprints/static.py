@@ -7,9 +7,13 @@ import markdown.extensions.fenced_code
 static_template = Blueprint(
     'static', __name__, template_folder='../templates')
 
+
 @static_template.route('/how_to/create_test_example')
 @admin_required
 def create_test_example():
+    """How to page on creating test examples."""
+
+    # Read markdown file from folder.
     markdown_file = open("web/how_to/create_test_example.md", "r")
     md_template_string = markdown.markdown(
         markdown_file.read(), extensions=["fenced_code"]
