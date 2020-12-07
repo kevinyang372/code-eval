@@ -67,7 +67,18 @@ def submission(course_id, session_id):
     setting = Session.query.filter_by(id=session_id).first()
 
     # Fill the code field.
-    pre_filled = cache.text if cache else '#Welcome'
+    if cache:
+        pre_filled = cache.text
+    else:
+        d = {}
+        exec(setting.test_code, d)
+
+        pre_filled = ""
+        dummy = d['TestCases']('DUMMY')
+
+        for function_name in dummy.parameters:
+            pre_filled += f"def {function_name}(*args):\n\tpass\n\n\n"
+
     form = CodeSumitForm(
         text=pre_filled
     )
