@@ -44,7 +44,7 @@ def upload_session():
                 setattr(s, key, val)
         else:
             s = Session(**to_add)
-            db.session.add(s)
+            db.session.merge(s)
 
         db.session.commit()
         return redirect('/')

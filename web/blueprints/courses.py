@@ -32,7 +32,7 @@ def add_course():
         if not Course.query.filter_by(course_num=form.course_num.data).first() and not Course.query.filter_by(registration=form.registration_link.data).first():
             new_course = Course(course_num=form.course_num.data,
                                 registration=form.registration_link.data)
-            db.session.add(new_course)
+            db.session.merge(new_course)
             db.session.commit()
         else:
             flash('Course num or course registration link already exists')
