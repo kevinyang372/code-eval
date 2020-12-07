@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+from flask_login import login_required
 from web.utils import admin_required
 
 import markdown
@@ -18,4 +19,17 @@ def create_test_example():
     md_template_string = markdown.markdown(
         markdown_file.read(), extensions=["fenced_code"]
     )
-    return render_template('create_test_example.html', markdown=md_template_string)
+    return render_template('markdown.html', markdown=md_template_string)
+
+
+@static_template.route('/how_to/code_submission')
+@login_required
+def code_submission():
+    """How to page on submitting code."""
+
+    # Read markdown file from folder.
+    markdown_file = open("web/how_to/code_submission.md", "r")
+    md_template_string = markdown.markdown(
+        markdown_file.read(), extensions=["fenced_code"]
+    )
+    return render_template('markdown.html', markdown=md_template_string)
