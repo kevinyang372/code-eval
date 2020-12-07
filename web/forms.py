@@ -55,7 +55,7 @@ class UploadForm(FlaskForm):
 class AddCourse(FlaskForm):
     """Add course form."""
     course_num = StringField('Course', validators=[DataRequired()])
-    registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[
+    registration_link = StringField("Registration Code for Students", validators=[
                                     Regexp(regex=r'^[a-z|A-Z|_|\d+|-]+$', message="Invitation link must have no / in between")])
     submit = SubmitField('Submit')
 
