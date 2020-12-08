@@ -34,17 +34,17 @@ csrf.init_app(app)
 codemirror = CodeMirror(app)
 Breadcrumbs(app=app)
 
-from blueprints.settings import setting_template
-from blueprints.sessions import session_template
-from blueprints.login import login_template
-from blueprints.courses import course_template
-from blueprints.summary import summary_template
-from blueprints.index import index_template
-from blueprints.submissions import submission_template
-from blueprints.apis import api_template
-from blueprints.error import error_template
-from blueprints.compare import compare_template
-from blueprints.static import static_template
+from blueprints.settings import setting_template  # noqa
+from blueprints.sessions import session_template  # noqa
+from blueprints.login import login_template  # noqa
+from blueprints.courses import course_template  # noqa
+from blueprints.summary import summary_template  # noqa
+from blueprints.index import index_template  # noqa
+from blueprints.submissions import submission_template  # noqa
+from blueprints.apis import api_template  # noqa
+from blueprints.error import error_template  # noqa
+from blueprints.compare import compare_template  # noqa
+from blueprints.static import static_template  # noqa
 
 # Register the blueprints.
 app.register_blueprint(index_template)
@@ -59,7 +59,7 @@ app.register_blueprint(error_template)
 app.register_blueprint(compare_template)
 app.register_blueprint(static_template)
 
-from web import models
+from web import models  # noqa
 
 # Create the database if it does not exist yet.
 db.create_all()

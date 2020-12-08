@@ -76,5 +76,5 @@ class FilterResult(FlaskForm):
 class Register(FlaskForm):
     """Form for registering a new class."""
     registration_link = StringField("Registration Link for Students ('/register/-link-')", validators=[
-                                Regexp(regex=r'^[a-z|A-Z|_|\d+|-]+$', message="Invitation link must have no / in between")])
+        Regexp(regex=r'^[a-z|A-Z|_|\d+|-]+$', message="Invitation link must have no / in between")])
     submit = SubmitField('Submit')

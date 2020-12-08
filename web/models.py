@@ -88,7 +88,7 @@ class Session(db.Model):
 
     def get_submission_students(self):
         """Get a list of students who have submitted.
-        
+
         The list is sorted with the students that haven't passed shown first and then those who passed.
         """
         return sorted(list(set(result.user for result in self.results)), key=lambda x: x in self.get_passed_submission_students())
@@ -103,7 +103,8 @@ class Session(db.Model):
 
     def get_passed_rate(self):
         """Get the passage rate for submissions."""
-        if len(self.results) == 0: return 0.0
+        if len(self.results) == 0:
+            return 0.0
         return round(len(self.get_passed_submissions()) / len(self.results) * 100, 2)
 
 

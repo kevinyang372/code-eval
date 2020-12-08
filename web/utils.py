@@ -172,7 +172,7 @@ def highlight_diff(file_names, file_contents):
     res += '<pre class="codehilite">'
     c = 0
 
-    for line in difflib.unified_diff(*(colored+file_names)):
+    for line in difflib.unified_diff(*(colored + file_names)):
         # For each line we output a <div> with the original content,
         # but if it starts with a special diff symbol, we apply a class to it
         cls = {'+': 'diff_plus', '-': 'diff_minus',
