@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    {% for r in results %}
+        <a href="{{ url_for('summary.summary_case', course_id = r.session.course_id, session_id = r.session_id, user_id = r.user_id, result_id = r.id) }}", class="btn btn-secondary btn-lg">{{ r.session.course.course_num }} - {{ r.session.session_num}} - {{r.ts}}</a><br>
+    {% endfor %}
+
+    {% if results|length == 0 %}
+        <p>There is no submission yet!</p>
+    {% endif %}
+{% endblock %}

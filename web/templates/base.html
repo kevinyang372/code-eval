@@ -22,6 +22,8 @@
                         <li><a href="{{ url_for('summary.summary') }}">Summary</a></li>
                         <li><a href="{{ url_for('session.upload_session') }}">Upload Session</a></li>
                         <li><a href="{{ url_for('course.add_course') }}">Add Course</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('index.my_submissions') }}">My Submissions</a></li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

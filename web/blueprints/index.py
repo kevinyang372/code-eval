@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect
 from flask_login import current_user, login_required
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
-from web.models import Course
+from web.models import Course, Result
 from web.forms import Register
 
 index_template = Blueprint('index', __name__, template_folder='../templates')
@@ -31,3 +31,13 @@ def index():
         return redirect(f'/register/{register_link}')
 
     return render_template('index.html', courses=courses, form=form)
+
+
+@index_template.route('/my_submissions')
+@register_breadcrumb(index_template, '.home', ' My Submission')
+@login_required
+def my_submissions():
+    """Page for viewing a list of past submissions."""
+
+    results = Result.query.filter_by(user_id=current_user.id).all()
+    return render_template('my_submissions.html', results=results)

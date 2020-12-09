@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request
 from web.models import Course, Session, Result
 from web.utils import admin_required, highlight_python
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
+from flask_login import login_required
 
 summary_template = Blueprint(
     'summary', __name__, template_folder='../templates')
@@ -83,7 +84,7 @@ def summary_result(course_id, session_id, user_id):
 
 @summary_template.route('/summary/<course_id>/<session_id>/<user_id>/<result_id>')
 @register_breadcrumb(summary_template, '.summary.course.student.result', '', dynamic_list_constructor=view_result_dlc)
-@admin_required
+@login_required
 def summary_case(course_id, session_id, user_id, result_id):
     """Individual submission details."""
     result = Result.query.filter_by(id=result_id).first()

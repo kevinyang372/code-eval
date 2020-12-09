@@ -93,12 +93,12 @@ def submission(course_id, session_id):
                 if filename.split('.')[1] == 'py':
                     to_test = read_file(form.filename.data, filename)
                 else:
-                    to_test = convert_jupyter(form.filename.data, filename) # Convert jupyter notebook to python
+                    to_test = convert_jupyter(form.filename.data, filename)  # Convert jupyter notebook to python
             else:
                 to_test = form.text.data
 
             d = {}
-            exec(setting.test_code, d) # Compile the test code
+            exec(setting.test_code, d)  # Compile the test code
 
             # Read the user submitted code
             temp = d['TestCases'](to_test)
