@@ -4,4 +4,8 @@
     {% for s in students %}
         <a href="{{ url_for('summary.summary_result', course_id = course_id, session_id = session_id, user_id = s.id) }}", class="btn btn-secondary btn-lg">Student {{ s.email }}</a><br>
     {% endfor %}
+
+    {% if students|length == 0 %}
+        <p>No student has submitted their answers yet!</p>
+    {% endif %}
 {% endblock %}

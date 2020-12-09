@@ -4,4 +4,9 @@
     {% for s in sessions %}
         <a href="{{ url_for('summary.summary_student', course_id = course_id, session_id = s.id) }}", class="btn btn-secondary btn-lg">Session {{ s.session_num }}</a><br>
     {% endfor %}
+
+    {% if sessions|length == 0 %}
+        <p>Oops there is no session uploaded yet!</p>
+        <a href="{{ url_for('session.upload_session') }}">Upload Session</a>
+    {% endif %}
 {% endblock %}

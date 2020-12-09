@@ -4,4 +4,9 @@
     {% for c in courses %}
         <a href="{{ url_for('summary.summary_session', course_id = c.id) }}", class="btn btn-secondary btn-lg">Course {{ c.course_num }}</a><br>
     {% endfor %}
+
+    {% if courses|length == 0 %}
+        <p>Oops there is no courses registered yet!</p>
+        <a href="{{ url_for('course.add_course') }}">Create Course</a>
+    {% endif %}
 {% endblock %}

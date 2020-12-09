@@ -8,6 +8,14 @@
             <button type="button" class="btn btn-info" data-toggle="modal" data-target="#register">Register New Class</button>
         </div>
     {% endif %}
+
+    {% if courses|length == 0 %}
+        <p>Oops there is no courses registered yet!</p>
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('course.add_course') }}">Create Course</a>
+        {% endif %}
+    {% endif %}
+
     {% for s in courses %}
         <a href="{{ url_for('submission.submission_index', course_id = s.id) }}", class="btn btn-secondary btn-lg">Course {{ s.course_num }}</a><br>
     {% endfor %}

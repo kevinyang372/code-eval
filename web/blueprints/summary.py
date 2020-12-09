@@ -1,12 +1,50 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from web.models import Course, Session, Result
 from web.utils import admin_required, highlight_python
+from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 
 summary_template = Blueprint(
     'summary', __name__, template_folder='../templates')
 
+# Register the breadcrumb to be after the index page.
+default_breadcrumb_root(summary_template, '.')
+
+
+def view_course_dlc(*args, **kwargs):
+    """Utility function for generating course breadcrumb."""
+    course_id = request.view_args['course_id']
+
+    # Text: the displayed text of the breadcrumb
+    # Url: the link of the breadcrumb
+    return [{'text': ' Course', 'url': f'/summary/{course_id}'}]
+
+
+def view_session_dlc(*args, **kwargs):
+    """Utility function for generating session breadcrumb."""
+    course_id = request.view_args['course_id']
+    session_id = request.view_args['session_id']
+    return [{'text': ' Session', 'url': f'/summary/{course_id}/{session_id}'}]
+
+
+def view_user_dlc(*args, **kwargs):
+    """Utility function for generating user breadcrumb."""
+    course_id = request.view_args['course_id']
+    session_id = request.view_args['session_id']
+    user_id = request.view_args['user_id']
+    return [{'text': ' Student', 'url': f'/summary/{course_id}/{session_id}/{user_id}'}]
+
+
+def view_result_dlc(*args, **kwargs):
+    """Utility function for generating result breadcrumb."""
+    course_id = request.view_args['course_id']
+    session_id = request.view_args['session_id']
+    user_id = request.view_args['user_id']
+    result_id = request.view_args['result_id']
+    return [{'text': ' Result', 'url': f'/summary/{course_id}/{session_id}/{user_id}/{result_id}'}]
+
 
 @summary_template.route('/summary')
+@register_breadcrumb(summary_template, '.', 'Summary')
 @admin_required
 def summary():
     """Summary index page."""
@@ -15,6 +53,7 @@ def summary():
 
 
 @summary_template.route('/summary/<course_id>')
+@register_breadcrumb(summary_template, '.summary', '', dynamic_list_constructor=view_course_dlc)
 @admin_required
 def summary_session(course_id):
     """Summary page of each course."""
@@ -23,6 +62,7 @@ def summary_session(course_id):
 
 
 @summary_template.route('/summary/<course_id>/<session_id>')
+@register_breadcrumb(summary_template, '.summary.course', '', dynamic_list_constructor=view_session_dlc)
 @admin_required
 def summary_student(course_id, session_id):
     """Summary page of each session in the course."""
@@ -32,6 +72,7 @@ def summary_student(course_id, session_id):
 
 
 @summary_template.route('/summary/<course_id>/<session_id>/<user_id>')
+@register_breadcrumb(summary_template, '.summary.course.student', '', dynamic_list_constructor=view_user_dlc)
 @admin_required
 def summary_result(course_id, session_id, user_id):
     """Summary page of each student's submission in one session."""
@@ -40,9 +81,10 @@ def summary_result(course_id, session_id, user_id):
     return render_template('summary_result.html', results=results, course_id=course_id, session_id=session_id, user_id=user_id)
 
 
-@summary_template.route('/result/<result_id>')
+@summary_template.route('/summary/<course_id>/<session_id>/<user_id>/<result_id>')
+@register_breadcrumb(summary_template, '.summary.course.student.result', '', dynamic_list_constructor=view_result_dlc)
 @admin_required
-def summary_case(result_id):
+def summary_case(course_id, session_id, user_id, result_id):
     """Individual submission details."""
     result = Result.query.filter_by(id=result_id).first()
 
