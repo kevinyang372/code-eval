@@ -22,6 +22,18 @@ def is_valid(filename):
     return False
 
 
+def convert_timedelta_to_string(timed):
+    """Convert timedelta to string of 'x amount of time ago'."""
+    if timed.days > 0:
+        return f"{timed.days} days ago" if timed.days > 1 else f"{timed.days} day ago"
+    elif timed.seconds // 3600 > 0:
+        return f"{timed.seconds // 3600} hours ago" if timed.seconds // 3600 > 1 else f"{timed.seconds // 3600} hour ago"
+    elif timed.seconds // 60 > 0:
+        return f"{timed.seconds // 60} minutes ago" if timed.seconds // 60 > 1 else f"{timed.seconds // 60} minute ago"
+    else:
+        return "Just now"
+
+
 def read_file(file, filename):
     """Read user uploaded files."""
 

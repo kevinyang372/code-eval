@@ -2,7 +2,9 @@ from flask import Blueprint, render_template, redirect
 from flask_login import current_user, login_required
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from web.models import Course, Result
+from web.utils import convert_timedelta_to_string
 from web.forms import Register
+from datetime import datetime
 
 index_template = Blueprint('index', __name__, template_folder='../templates')
 default_breadcrumb_root(index_template, '.')
@@ -40,4 +42,14 @@ def my_submissions():
     """Page for viewing a list of past submissions."""
 
     results = Result.query.filter_by(user_id=current_user.id).all()
+    current_time = datetime.utcnow()
+
+    for r in results:
+        r.time = current_time - datetime.strptime(r.ts, "%Y-%m-%d %H:%M:%S")
+
+    results.sort(key=lambda x: x.time)
+
+    for r in results:
+        r.time = convert_timedelta_to_string(r.time)
+
     return render_template('my_submissions.html', results=results)
