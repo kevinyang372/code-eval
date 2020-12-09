@@ -13,15 +13,34 @@ import multiprocess
 from pathos.pools import ProcessPool
 
 
-def getResult(function_lib, function_name, params):
+def getResult(code_block, function_name, params, blacklist):
     """Run the user submitted function against test cases and return the outcome."""
 
     # Check if the function is provided by the user code.
-    if function_name not in function_lib:
+
+    safe_locals = {}
+
+    # Get all safe builtins
+    safe_globals = get_safe_globals()
+
+    # Some third-party dependencies users should be able to use.
+    safe_globals['np'] = np
+
+    # Delete blacklisted packages.
+    for item in blacklist:
+        if item in list(safe_globals.keys()):
+            safe_globals.pop(item)
+
+    try:
+        exec(code_block, safe_globals, safe_locals)
+    except Exception as e:
+        return (1, str(e))
+
+    if function_name not in safe_locals:
         return (1, f"Function {function_name} not found")
 
     try:
-        result = function_lib[function_name](*params)
+        result = safe_locals[function_name](*params)
         return (0, result)
     except Exception as e:
         # Return the exception if one is encountered when running the tests.
@@ -78,42 +97,6 @@ class BaseTest(object):
                 errs[ind] = 'Failed to parse input'
             return errs
 
-        # Initialize a list of builtins users should be able to use.
-        # For more information check https://restrictedpython.readthedocs.io/en/latest/usage/api.html#restricted-builtins.
-        def _hook_getitem(obj, attr):
-            return obj.__getitem__(attr)
-
-        def _hook_write(obj):
-            return obj
-
-        # Default Python builtins.
-        safe_globals = get_safe_globals()
-        safe_globals['_print_'] = PrintCollector
-        safe_globals['_getiter_'] = default_guarded_getiter
-        safe_globals['_iter_unpack_sequence_'] = guarded_iter_unpack_sequence
-        safe_globals['_unpack_sequence_'] = guarded_unpack_sequence
-        safe_globals['_getitem_'] = _hook_getitem
-        safe_globals['_write_'] = _hook_write
-        safe_globals['list'] = list
-
-        # Some third-party dependencies users should be able to use.
-        safe_globals['np'] = np
-
-        # Remove blacklisted packages from builtins.
-        for item in blacklist:
-            if item in list(safe_globals.keys()):
-                safe_globals.pop(item)
-
-        safe_locals = safe_globals.copy()
-
-        # Compile the parsed code and add any error in the compiling process to the err list.
-        try:
-            exec(byte_code.code, safe_locals)
-        except Exception as e:
-            for ind in range(len(self.parameters[entry_point])):
-                errs[ind] = str(e)
-            return errs
-
         # Iterate over each test case.
         for i, params in enumerate(self.parameters[entry_point]):
 
@@ -124,7 +107,7 @@ class BaseTest(object):
             p.restart()
 
             # Use multiprocess here to keep track of the runtime and terminate any that goes over the runtime.
-            res = p.amap(getResult, [safe_locals], [entry_point], [params])
+            res = p.amap(getResult, [byte_code.code], [entry_point], [params], [blacklist])
 
             try:
                 result = res.get(timeout=runtime)[0]
