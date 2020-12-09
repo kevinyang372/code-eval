@@ -7,7 +7,7 @@ summary_template = Blueprint(
     'summary', __name__, template_folder='../templates')
 
 # Register the breadcrumb to be after the index page.
-default_breadcrumb_root(summary_template, '.')
+default_breadcrumb_root(summary_template, '.summary')
 
 
 def view_course_dlc(*args, **kwargs):
@@ -44,7 +44,7 @@ def view_result_dlc(*args, **kwargs):
 
 
 @summary_template.route('/summary')
-@register_breadcrumb(summary_template, '.', 'Summary')
+@register_breadcrumb(summary_template, '.', ' Summary')
 @admin_required
 def summary():
     """Summary index page."""

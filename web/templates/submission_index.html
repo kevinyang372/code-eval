@@ -13,7 +13,7 @@
             See Full List
           </button>
         </li>
-        <li class="list-group-item">Registration Link: /register/{{ course.registration }}</li>
+        <li class="list-group-item">Registration Code: {{ course.registration }}</li>
         {% if current_user.is_admin %}
             <li class="list-group-item">
                 <a type="button" href="{{ url_for('course.change_course', course_id=course.id) }}", class="btn btn-primary">Setting</a>
