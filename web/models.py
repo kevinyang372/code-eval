@@ -1,6 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin
 from web import app, db, login
+from datetime import datetime
 
 
 class User(UserMixin, db.Model):
@@ -36,6 +37,12 @@ class Result(db.Model):
     plagiarisms = db.relationship('Plagiarism',
                                   primaryjoin="or_(Result.id == Plagiarism.first_result_id, Result.id == Plagiarism.second_result_id)",
                                   cascade="all,delete", backref='result', lazy=True)
+
+    def get_timedelta(self):
+        """Get timedelta from current datetime."""
+        current_time = datetime.utcnow()
+        delta = current_time - datetime.strptime(self.ts, "%Y-%m-%d %H:%M:%S")
+        return delta
 
 
 class Question(db.Model):

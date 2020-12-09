@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from web.utils import admin_required_api, user_required_api, is_valid, read_file, convert_jupyter, compile_results
 from werkzeug.utils import secure_filename
 from web.models import User, Result, Session, Question, Case
 from web import csrf, db
+import pybadges
 import timeit
 
 api_template = Blueprint('apis', __name__, template_folder='../templates')
@@ -82,3 +83,17 @@ def submit(session_id):
         db.session.commit()
 
         return jsonify(data={'message': compiled})
+
+
+@api_template.route('/badges')
+def serve_badge():
+    """Serve a badge image based on the request query string."""
+    badge = pybadges.badge(left_text=request.args.get('left_text'),
+                           right_text=request.args.get('right_text'),
+                           left_color=request.args.get('left_color'),
+                           right_color=request.args.get('right_color'),
+                           logo=request.args.get('logo'))
+
+    response = make_response(badge)
+    response.content_type = 'image/svg+xml'
+    return response

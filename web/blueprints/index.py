@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, redirect
+from flask import Blueprint, render_template, redirect, url_for
 from flask_login import current_user, login_required
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from web.models import Course, Result
 from web.utils import convert_timedelta_to_string
 from web.forms import Register
 from datetime import datetime
+import pybadges
 
 index_template = Blueprint('index', __name__, template_folder='../templates')
 default_breadcrumb_root(index_template, '.')
@@ -44,12 +45,14 @@ def my_submissions():
     results = Result.query.filter_by(user_id=current_user.id).all()
     current_time = datetime.utcnow()
 
-    for r in results:
-        r.time = current_time - datetime.strptime(r.ts, "%Y-%m-%d %H:%M:%S")
-
-    results.sort(key=lambda x: x.time)
+    results.sort(key=lambda x: x.get_timedelta())
 
     for r in results:
-        r.time = convert_timedelta_to_string(r.time)
+        r.badge = url_for('apis.serve_badge', **{
+            'left_text': convert_timedelta_to_string(r.get_timedelta()),
+            'right_text': 'Passed' if r.success else 'Failed',
+            'left_color': '#555',
+            'right_color': '#008000' if r.success else '#800000'
+        })
 
     return render_template('my_submissions.html', results=results)

@@ -9,7 +9,7 @@
       <ul class="list-group list-group-flush">
         {% for r in results %}
         <li class="list-group-item">
-            <a href="{{ url_for('summary.summary_case', course_id = r.session.course_id, session_id = r.session_id, user_id = r.user_id, result_id = r.id) }}", class="btn btn-secondary btn-lg">{{ r.session.course.course_num }} - {{ r.session.session_num}}</a>{{ r.time }}<br>
+            <a href="{{ url_for('summary.summary_case', course_id = r.session.course_id, session_id = r.session_id, user_id = r.user_id, result_id = r.id) }}", class="btn btn-secondary btn-lg">{{ r.session.course.course_num }} - {{ r.session.session_num}}</a><img src="{{ r.badge }}"><br>
         </li>
         {% endfor %}
       </ul>
