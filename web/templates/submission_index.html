@@ -25,13 +25,17 @@
 
     {% if sessions|length == 0 %}
         <p>Oops there is no sessions available for this course yet!</p>
-        {% if current_user.is_admin %}
-            <a href="{{ url_for('session.upload_session') }}">Upload Session</a>
-        {% endif %}
     {% endif %}
+
     {% for s in sessions %}
         <a href="{{ url_for('submission.submission', course_id = course.id, session_id = s.id) }}", class="btn btn-secondary btn-lg">Session {{ s.session_num }}</a><br>
     {% endfor %}
+
+    {% if current_user.is_admin %}
+      <div>
+        <a href="{{ url_for('session.upload_session') }}" class="btn btn-light">+ Upload Session</a>
+      </div>
+    {% endif %}
 
     <div class="modal fade" id="studentList" tabindex="-1" role="dialog" aria-labelledby="studentList" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
