@@ -37,11 +37,8 @@ def view_user_dlc(*args, **kwargs):
 
 def view_result_dlc(*args, **kwargs):
     """Utility function for generating result breadcrumb."""
-    course_id = request.view_args['course_id']
-    session_id = request.view_args['session_id']
-    user_id = request.view_args['user_id']
     result_id = request.view_args['result_id']
-    return [{'text': ' Result', 'url': f'/summary/{course_id}/{session_id}/{user_id}/{result_id}'}]
+    return [{'text': ' Result', 'url': f'/summary_result/{result_id}'}]
 
 
 @summary_template.route('/summary')
@@ -82,10 +79,9 @@ def summary_result(course_id, session_id, user_id):
     return render_template('summary_result.html', results=results, course_id=course_id, session_id=session_id, user_id=user_id)
 
 
-@summary_template.route('/summary/<course_id>/<session_id>/<user_id>/<result_id>')
-@register_breadcrumb(summary_template, '.summary.course.student.result', '', dynamic_list_constructor=view_result_dlc)
+@summary_template.route('/summary_result/<result_id>')
 @login_required
-def summary_case(course_id, session_id, user_id, result_id):
+def summary_case(result_id):
     """Individual submission details."""
     result = Result.query.filter_by(id=result_id).first()
 

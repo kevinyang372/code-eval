@@ -45,6 +45,7 @@ def compare_index(result_id1):
     form = FilterResult()
     return render_template('compare_index.html', form=form, results=results, r1=r1.id)
 
+
 @compare_template.route('/plagiarism/<session_id>', methods=['GET', 'POST'])
 @admin_required
 def plagiarism_session(session_id):
@@ -68,11 +69,11 @@ def plagiarism_session(session_id):
     # Query against all submitted users.
     for u1 in range(len(all_submitted_users) - 1):
         user_1 = all_submitted_users[u1]
-        result_user_1 = list(filter(lambda x: x.user_id == user_1.id, list_of_results)) # Filter out the results submitted by user_1
+        result_user_1 = list(filter(lambda x: x.user_id == user_1.id, list_of_results))  # Filter out the results submitted by user_1
 
         for u2 in range(u1 + 1, len(all_submitted_users)):
             user_2 = all_submitted_users[u2]
-            result_user_2 = list(filter(lambda x: x.user_id == user_2.id, list_of_results)) # Filter out the results submitted by user_2
+            result_user_2 = list(filter(lambda x: x.user_id == user_2.id, list_of_results))  # Filter out the results submitted by user_2
 
             res.extend(compare_two_users(result_user_1, result_user_2))
 
@@ -81,7 +82,3 @@ def plagiarism_session(session_id):
     form = FilterResult()
 
     return render_template('plagiarism_session.html', results=res, form=form)
-
-
-
-

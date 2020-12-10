@@ -23,7 +23,7 @@
                 <td>{{ r.passed_num }}</td>
                 <td>{{ r.runtime }}</td>
                 <td>{{ r.ts }}</td>
-                <td><a href="{{ url_for('summary.summary_case', course_id = course_id, session_id = session_id, user_id = user_id, result_id = r.id) }}", class="btn btn-secondary btn-lg">Details</td>
+                <td><a href="{{ url_for('summary.summary_case', result_id = r.id) }}", class="btn btn-secondary btn-lg">Details</td>
                 <td><a href="{{ url_for('compare.compare_index', result_id1 = r.id) }}", class="btn btn-secondary btn-lg">Compare</td>
             </tr>
             {% endfor %}
