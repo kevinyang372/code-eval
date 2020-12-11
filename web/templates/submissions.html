@@ -19,7 +19,9 @@
         </li>
         <li class="list-group-item">Number of Submissions: {{ session.results|length }}</li>
         <li class="list-group-item">Number of Passed Submissions: {{ session.get_passed_submissions()|length }}</li>
-        <li class="list-group-item">Submission Passage Rate: {{ session.get_passed_rate() }}%</li>
+        <li class="list-group-item">Submission Passage Rate: {{ session.get_passed_rate() }}%
+          <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Submission passage rate is calculated with the number of passed submissions and the total number of submissions"></span>
+        </li>
         {% if current_user.is_admin %}
             <li class="list-group-item">
                 <a type="button" href="{{ url_for('compare.plagiarism_session', session_id=session.id) }}", class="btn btn-info">Plagiarism</a>

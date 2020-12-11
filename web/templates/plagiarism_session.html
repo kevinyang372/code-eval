@@ -18,7 +18,7 @@
     </script>
     <form>
         <p>
-           {{ form.threshold.label }}:
+           {{ form.threshold.label }}: <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Threshold is calculated with the ratio of the number of matched lines over the total number of lines." style="font-size: 1.2em"></span>
            {{ form.threshold(min=0, max=1, oninput="outputUpdate(value)") }}
            <output for="threshold" id="selected-threshold">{{ form.threshold.data }}</output>
         </p>
