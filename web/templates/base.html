@@ -20,7 +20,7 @@
                 <ul class="nav navbar-nav">
                     {% if current_user.is_admin %}
                         <li><a href="{{ url_for('summary.summary') }}">Summary</a></li>
-                        <li><a href="{{ url_for('session.upload_session') }}">Upload Session</a></li>
+                        <li><a href="{{ url_for('session.upload_session') }}" target="_blank">Upload Session</a></li>
                     {% else %}
                         <li><a href="{{ url_for('index.my_submissions') }}">My Submissions</a></li>
                     {% endif %}
