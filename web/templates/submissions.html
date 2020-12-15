@@ -20,7 +20,7 @@
         <li class="list-group-item">Number of Submissions: {{ session.results|length }}</li>
         <li class="list-group-item">Number of Passed Submissions: {{ session.get_passed_submissions()|length }}</li>
         <li class="list-group-item">Submission Passage Rate: {{ session.get_passed_rate() }}%
-          <span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Submission passage rate is calculated with the number of passed submissions and the total number of submissions"></span>
+          <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#openInfo"></span>
         </li>
         {% if current_user.is_admin %}
             <li class="list-group-item">
@@ -95,6 +95,22 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             <a type="button" href="{{ url_for('session.delete_session', session_id=session.id) }}", class="btn btn-danger">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="openInfo" tabindex="-1" role="dialog" aria-labelledby="openInfo" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="openInfoTitle">Info</h5>
+          </div>
+          <div class="modal-body">
+            Submission passage rate is calculated with the number of passed submissions and the total number of submissions
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
