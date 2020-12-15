@@ -4,7 +4,7 @@ from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from web.models import Session, Result, Question, Case, Codecacher, Course, Plagiarism
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results, compile_plagarism_report
+from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results, compile_plagarism_report, flake8_test
 from web import app, db, csrf
 from time import gmtime, strftime
 import timeit
@@ -94,8 +94,11 @@ def submission(course_id, session_id):
                     to_test = read_file(form.filename.data, filename)
                 else:
                     to_test = convert_jupyter(form.filename.data, filename)  # Convert jupyter notebook to python
+
+                style_check = flake8_test(to_test, filename)
             else:
                 to_test = form.text.data
+                style_check = flake8_test(to_test, "user_submission.py")
 
             d = {}
             exec(setting.test_code, d)  # Compile the test code
@@ -116,8 +119,18 @@ def submission(course_id, session_id):
                               ['passed_num'] == compiled[question]['total_num']])
 
             ts = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-            to_add = Result(user_id=current_user.id, email=current_user.email, session_id=setting.id,
-                            passed_num=passed_num, content=to_test, runtime=time, success=passed_num == len(temp.answers), ts=ts)
+            to_add = Result(
+                user_id=current_user.id,
+                email=current_user.email,
+                session_id=setting.id,
+                passed_num=passed_num,
+                content=to_test,
+                runtime=time,
+                success=passed_num == len(temp.answers),
+                ts=ts,
+                style_check=style_check
+            )
+
             db.session.add(to_add)
 
             for question in compiled:
@@ -150,7 +163,16 @@ def submission(course_id, session_id):
             # db.session.commit()
             # p = sorted(temp_r, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
 
-            return render_template('results.html', result=res, passed=passed_num, total=len(temp.answers), file=highlight_python(to_test), time=time, i=id)
+            return render_template(
+                'results.html', 
+                result=res,
+                passed=passed_num,
+                total=len(temp.answers),
+                file=highlight_python(to_test),
+                time=time,
+                i=id,
+                style=style_check.split("\n")
+            )
 
         return redirect(request.url)
 

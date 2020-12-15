@@ -22,6 +22,7 @@ dominate==2.4.0
 email-validator==1.1.2
 entrypoints==0.3
 ExtensionClass==4.5.0
+flake8==3.8.4
 Flask==1.1.2
 Flask-Bootstrap==3.3.7.1
 Flask-Breadcrumbs==0.5.1
@@ -64,6 +65,7 @@ psycopg2==2.8.6
 pybadges==2.2.1
 pycodestyle==2.6.0
 pycparser==2.20
+pyflakes==2.2.0
 Pygments==2.6.1
 pylint==2.6.0
 pyparsing==2.4.5

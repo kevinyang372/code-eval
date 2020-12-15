@@ -28,6 +28,7 @@ class Result(db.Model):
     runtime = db.Column(db.Float)
     success = db.Column(db.Boolean)
     content = db.Column(db.String)
+    style_check = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     session_id = db.Column(db.Integer, db.ForeignKey(
         'session.id'), nullable=False)

@@ -91,4 +91,14 @@ def summary_case(result_id):
 
     # p = sorted(result.plagiarisms, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
 
-    return render_template('results.html', result=res, passed=result.passed_num, total=len(result.questions), file=highlight_python(result.content), time=result.runtime, i=result.id)
+    style = result.style_check.split("\n") if result.style_check else ["Style Check not initialized for this commit."]
+    return render_template(
+        'results.html',
+        result=res,
+        passed=result.passed_num,
+        total=len(result.questions),
+        file=highlight_python(result.content),
+        time=result.runtime,
+        i=result.id,
+        style=style
+    )

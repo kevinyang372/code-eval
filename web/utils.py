@@ -12,6 +12,7 @@ import itertools
 import ast
 import difflib
 from zss import simple_distance, Node
+from subprocess import check_output, STDOUT
 import collections
 
 
@@ -34,6 +35,25 @@ def convert_timedelta_to_string(timed):
         return "Just now"
 
 
+def flake8_test(to_test, filename):
+    """Python flake8 style test."""
+    if filename.split(".")[1] == "ipynb":
+        filename = filename.split(".")[0] + ".py"
+
+    path = os.path.join(app.config["FILE_UPLOADS"], filename)
+    with open(path, 'w') as file:
+        file.write(to_test)
+
+    style_check = "Passed Python Style Check."
+    try:
+        check_output(['flake8', path], stderr=STDOUT)
+    except Exception as e:
+        style_check = e.output.decode("utf-8")
+
+    os.remove(path)
+    return style_check
+
+
 def read_file(file, filename):
     """Read user uploaded files."""
 
@@ -45,6 +65,7 @@ def read_file(file, filename):
             content.append(line)
 
     os.remove(os.path.join(app.config["FILE_UPLOADS"], filename))
+
     return ''.join(content)
 
 

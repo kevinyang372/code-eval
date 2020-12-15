@@ -59,6 +59,13 @@
     {% endif %} -->
 
     <div class="card">
+        <div class="card-body">
+            {% for style_err in style %}
+                <p>{{ style_err }}</p>
+            {% endfor %}
+        </div>
+    <div>
+    <div class="card">
       <div class="card-body">
         {{ file|safe }}
       </div>
