@@ -12,7 +12,7 @@ import itertools
 import ast
 import difflib
 from zss import simple_distance, Node
-from subprocess import check_output, STDOUT
+from subprocess import check_output, STDOUT, CalledProcessError
 import collections
 
 
@@ -47,8 +47,10 @@ def flake8_test(to_test, filename):
     style_check = "Passed Python Style Check."
     try:
         check_output(['flake8', path], stderr=STDOUT)
-    except Exception as e:
+    except CalledProcessError as e:
         style_check = e.output.decode("utf-8")
+    except Exception as e:
+        style_check = f"Failed to load flake8 module {e}"
 
     os.remove(path)
     return style_check
