@@ -45,8 +45,10 @@ def flake8_test(to_test, filename):
         file.write(to_test)
 
     style_check = "Passed Python Style Check."
+    rules_to_ignore = ["W191"]
+
     try:
-        check_output(['flake8', path], stderr=STDOUT)
+        check_output(["flake8", f"--ignore={','.join(rules_to_ignore)}", path], stderr=STDOUT)
     except CalledProcessError as e:
         style_check = e.output.decode("utf-8")
     except Exception as e:
@@ -137,6 +139,7 @@ def convert_jupyter(file, filename):
 def highlight_python(code):
     """Highlight python code to html."""
 
+    code = code.replace('\t', '    ')
     formatter = pygments.formatters.HtmlFormatter(
         style="emacs", cssclass="codehilite")
     css_string = "<style>" + formatter.get_style_defs() + "</style>"

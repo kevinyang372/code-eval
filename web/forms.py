@@ -9,7 +9,12 @@ from web.models import Course, Session
 class CodeSumitForm(FlaskForm):
     """Code submission form for students."""
     filename = FileField()
-    text = CodeMirrorField(language='python', config={'lineNumbers': 'true'})   # CodeMirror plugin here.
+    text = CodeMirrorField(language='python', config={
+        'lineNumbers': 'true',
+        'tabSize': 4,
+        'indentUnit': 4,
+        'indentWithTabs': 'true'
+    })   # CodeMirror plugin here.
     submit = SubmitField('Submit')
 
 
