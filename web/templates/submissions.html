@@ -70,9 +70,21 @@
           <div class="modal-body">
             {% for student in session.get_submission_students() %}
                 {% if student in session.get_passed_submission_students() %}
-                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }} - Passed</a><br>
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a>
+                    <img src="{{url_for('apis.serve_badge', **{
+                        'left_text': student.get_num_submission(session.id)|string + ' submissions',
+                        'right_text': 'Passed',
+                        'left_color': '#555',
+                        'right_color': '#008000'
+                    })}}"><br>
                 {% else %}
-                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a><br>
+                    <a href="{{ url_for('summary.summary_result', course_id = session.course_id, session_id = session.id, user_id = student.id) }}">{{ student.email }}</a>
+                    <img src="{{url_for('apis.serve_badge', **{
+                        'left_text': student.get_num_submission(session.id)|string + ' submissions',
+                        'right_text': 'Failed',
+                        'left_color': '#555',
+                        'right_color': '#800000'
+                    })}}"><br>
                 {% endif %}
             {% endfor %}
           </div>

@@ -19,6 +19,9 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_num_submission(self, session_id):
+        return sum(1 for result in self.results if result.session_id == session_id)
+
 
 class Result(db.Model):
     """Data model for submission results."""
