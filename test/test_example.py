@@ -2,10 +2,13 @@ import os
 import io
 import sys
 import json
+import glob
 import unittest
 
 os.environ["DATABASE_URL"] = "sqlite:///test.db"
-from web import app, db, models
+
+from web import app, db, models  # noqa
+
 
 class FlaskTestCase(unittest.TestCase):
 
@@ -13,7 +16,6 @@ class FlaskTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['DEBUG'] = False
-        app.config['DATABASE_URL'] = 'sqlite:///test.db'
 
         example_admin = models.User(
             id=1, email="example_admin_user@gmail.com", is_admin=True)
@@ -41,7 +43,7 @@ class FlaskTestCase(unittest.TestCase):
         example_session = models.Session(id=1, session_num=1.1, course_id=1, test_code=to_test, runtime=1.0, blacklist='')
         db.session.merge(example_session)
         db.session.commit()
-        
+
         self.app = app.test_client()
 
     def tearDown(self):
@@ -65,6 +67,18 @@ class FlaskTestCase(unittest.TestCase):
     def test_login_student(self):
         response = self.app.post('login', data = dict(email="example_user@gmail.com", password="111"), follow_redirects=True)
         assert "Invalid username or password" not in str(response.data)
+
+    # test admin logout
+    def test_logout_admin(self):
+        self.test_login_admin()
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+    # test student logout
+    def test_logout_student(self):
+        self.test_login_student()
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
 
     # admin access
     def test_admin_access(self):
@@ -127,8 +141,7 @@ class FlaskTestCase(unittest.TestCase):
     def test_upload_malicious(self):
         self.test_create_session()
 
-        import glob
-        for filename in glob.glob('malicious/*'):
+        for filename in glob.glob('malicious/test_*.py'):
             to_test = ''
             with open(filename, 'r') as file:
                 for line in file:
@@ -141,7 +154,7 @@ class FlaskTestCase(unittest.TestCase):
     def test_apis_get_score(self):
         self.test_upload_file()
 
-        response = self.app.post('/apis/get_score/example_admin_user@gmail.com/1', data = json.dumps({"credentials":{"email":"example_admin_user@gmail.com", "password":"111"}}), content_type='application/json')
+        response = self.app.post('/apis/get_score/example_admin_user@gmail.com/1', data = json.dumps({"credentials": {"email": "example_admin_user@gmail.com", "password": "111"}}), content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
 
@@ -157,6 +170,39 @@ class FlaskTestCase(unittest.TestCase):
         response = self.app.post('/apis/submit/1', data = dict(file=(io.BytesIO(to_test.encode()), 'test.py'), email="example_admin_user@gmail.com", password="111"))
 
         self.assertEqual(response.status_code, 200)
+
+    # test plagiarism module
+    def test_upload_malicious(self):
+        self.test_create_session()
+
+        files = glob.glob('malicious/plagiarism_test_*.py')
+
+        to_test = ''
+        with open(files[0], 'r') as file:
+            for line in file:
+                to_test += line
+
+        response = self.app.post('/submit/1/1', data = dict(filename=(io.BytesIO(to_test.encode()), 'test.py')), follow_redirects=True)
+
+        self.test_logout_admin()
+        self.test_login_student()
+
+        # Register for the course
+        self.app.get('/register/join156', follow_redirects=True)
+
+        to_test = ''
+        with open(files[1], 'r') as file:
+            for line in file:
+                to_test += line
+
+        response = self.app.post('/submit/1/1', data = dict(filename=(io.BytesIO(to_test.encode()), 'test.py')), follow_redirects=True)
+
+        self.test_logout_student()
+        self.test_login_admin()
+
+        response = self.app.get('/plagiarism/1', follow_redirects=True)
+        assert 'Case Similarity: 1.0' in str(response.data)
+
 
 if __name__ == '__main__':
     unittest.main()
