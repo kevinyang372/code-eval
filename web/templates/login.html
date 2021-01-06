@@ -3,4 +3,5 @@
 
 {% block app_content %}
 {{ wtf.quick_form(form) }}
+<a type="button" href="{{ url_for('login.login_google') }}", class="btn btn-info">Login with Google</a>
 {% endblock %}

@@ -14,6 +14,12 @@ import difflib
 from zss import simple_distance, Node
 from subprocess import check_output, STDOUT, CalledProcessError
 import collections
+import requests
+
+
+def get_google_provider_cfg():
+    """Utility function for logging in google."""
+    return requests.get("https://accounts.google.com/.well-known/openid-configuration").json()
 
 
 def is_valid(filename):
