@@ -15,6 +15,7 @@ from zss import simple_distance, Node
 from subprocess import check_output, STDOUT, CalledProcessError
 import collections
 import requests
+import re
 
 
 def get_google_provider_cfg():
@@ -62,6 +63,28 @@ def flake8_test(to_test, filename):
 
     os.remove(path)
     return style_check
+
+
+def flake8_parser(flake8_output):
+    """Parse the flake8 output.
+
+    Default formatting: '%(path)s:%(row)d:%(col)d: %(code)s %(text)s'.
+    """
+    warnings = flake8_output.split("\n")
+    matching_rules = "(\S+):(\d+):(\d+): (\S+) (.+)"
+
+    results = []
+    for warning in warnings:
+        matched = re.match(matching_rules, warning)
+
+        line_num = matched.group(2)
+        word_num = matched.group(3)
+        rule_code = matched.group(4)
+        warn_text = matched.group(5)
+
+        results.append((line_num, word_num, rule_code, warn_text))
+
+    return results
 
 
 def read_file(file, filename):
