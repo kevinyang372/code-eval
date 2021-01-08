@@ -4,7 +4,7 @@ from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from web.models import Session, Result, Question, Case, Codecacher, Course, Plagiarism
 from werkzeug.utils import secure_filename
 from web.forms import CodeSumitForm
-from web.utils import is_valid, read_file, convert_jupyter, highlight_python, compile_results, compile_plagarism_report, flake8_test
+from web.utils import is_valid, read_file, convert_jupyter, highlight_python_with_flake8, compile_results, compile_plagarism_report, flake8_test, flake8_parser
 from web import app, db, csrf
 from time import gmtime, strftime
 import timeit
@@ -168,10 +168,9 @@ def submission(course_id, session_id):
                 result=res,
                 passed=passed_num,
                 total=len(temp.answers),
-                file=highlight_python(to_test),
+                file=highlight_python_with_flake8(to_test, flake8_parser(style_check)),
                 time=time,
-                i=id,
-                style=style_check.split("\n")
+                i=id
             )
 
         return redirect(request.url)

@@ -77,12 +77,17 @@ def flake8_parser(flake8_output):
     for warning in warnings:
         matched = re.match(matching_rules, warning)
 
-        line_num = matched.group(2)
-        word_num = matched.group(3)
-        rule_code = matched.group(4)
-        warn_text = matched.group(5)
+        try:
+            if matched:
+                line_num = matched.group(2)
+                word_num = matched.group(3)
+                rule_code = matched.group(4)
+                warn_text = matched.group(5)
 
-        results.append((line_num, word_num, rule_code, warn_text))
+                results.append((line_num, word_num, rule_code, warn_text))
+        except Exception as e:
+            print(e)
+            continue
 
     return results
 
@@ -173,7 +178,41 @@ def highlight_python(code):
         style="emacs", cssclass="codehilite")
     css_string = "<style>" + formatter.get_style_defs() + "</style>"
 
-    return css_string + pygments.highlight(code, pygments.lexers.PythonLexer(), formatter)
+    for line in code.split('\n'):
+        css_string += pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)
+    return css_string
+
+
+def highlight_python_with_flake8(code, err):
+    """Highlight python code with flake8 errors."""
+
+    errors = collections.defaultdict(list)
+
+    for lineno, _, _, error_message in err:
+        errors[int(lineno)].append(error_message)
+
+    code = code.replace('\t', '    ').split('\n')
+    formatter = pygments.formatters.HtmlFormatter(style="emacs", cssclass="codehilite")
+    css_string = "<style>" + formatter.get_style_defs() + "</style>"
+
+    prefix = '<div class="codehilite"><pre>'
+    suffix = '</pre></div>\n'
+
+    css_string += prefix
+
+    for lineno in range(len(code)):
+        line = code[lineno]
+
+        highlighted = pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)[len(prefix):-len(suffix)]
+
+        if lineno + 1 in errors:
+            all_errors = '\n'.join(errors[lineno + 1])
+            highlighted = f"<a href=\"#\" title=\"{all_errors}\" data-toggle=\"tooltip\" data-placement=\"top\">{highlighted}</a>"
+
+        css_string += highlighted
+
+    css_string += suffix
+    return css_string
 
 
 def highlight_diff_temp(file_contents):

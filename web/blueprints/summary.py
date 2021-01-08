@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request
 from web.models import Course, Session, Result
-from web.utils import admin_required, highlight_python
+from web.utils import admin_required, highlight_python, highlight_python_with_flake8, flake8_parser
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from flask_login import login_required
 
@@ -91,14 +91,13 @@ def summary_case(result_id):
 
     # p = sorted(result.plagiarisms, key=lambda x: (-x.exact_match, -x.unifying_ast, -x.ignore_variables, -x.reordering_ast, x.edit_tree))[:3]
 
-    style = result.style_check.split("\n") if result.style_check else ["Style Check not initialized for this commit."]
+    style = result.style_check if result.style_check else "Style Check not initialized for this commit."
     return render_template(
         'results.html',
         result=res,
         passed=result.passed_num,
         total=len(result.questions),
-        file=highlight_python(result.content),
+        file=highlight_python(result.content, flake8_parser(style)),
         time=result.runtime,
-        i=result.id,
-        style=style
+        i=result.id
     )
