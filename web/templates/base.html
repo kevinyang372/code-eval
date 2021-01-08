@@ -1,5 +1,17 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block head %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    {{ super() }}
+    <script type="text/javascript">
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+            $('[data-toggle="popover"]').popover()
+        });
+    </script>
+{% endblock %}
+
 {% block title %}
     {% if title %}{{ title }} - Autograder{% else %}Welcome to Autograder{% endif %}
 {% endblock %}
