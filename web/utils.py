@@ -207,7 +207,7 @@ def highlight_python_with_flake8(code, err):
 
         if lineno + 1 in errors:
             all_errors = '\n'.join(errors[lineno + 1])
-            highlighted = f"<a href=\"#\" title=\"{all_errors}\" data-toggle=\"tooltip\" data-placement=\"top\">{highlighted}</a>"
+            highlighted = f"<a href=\"#\" title=\"{all_errors}\" data-toggle=\"tooltip\" data-placement=\"top\" style=\"background-color:#ffcccc;\">{highlighted}</a>"
 
         css_string += highlighted
 
