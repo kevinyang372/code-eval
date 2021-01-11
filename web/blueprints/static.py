@@ -33,3 +33,16 @@ def code_submission():
         markdown_file.read(), extensions=["fenced_code"]
     )
     return render_template('markdown.html', markdown=md_template_string)
+
+
+@static_template.route('/about')
+@login_required
+def about():
+    """How to page on submitting code."""
+
+    # Read markdown file from folder.
+    markdown_file = open("web/how_to/about.md", "r")
+    md_template_string = markdown.markdown(
+        markdown_file.read(), extensions=["fenced_code"]
+    )
+    return render_template('markdown.html', markdown=md_template_string)
