@@ -3,6 +3,7 @@ import collections
 import itertools
 import tokenize
 from apted import APTED, Config
+from io import StringIO
 
 from web.models import User, Result
 
@@ -139,6 +140,28 @@ class Plagiarism:
 
         return 1 - apted.compute_edit_distance() / max(self.get_tree_size(r1), self.get_tree_size(r2))
 
+    def comment_edit_distance(self):
+        """Apply string edit distance algorithm on the comment section of the source code."""
+        comments = ["", ""]
+
+        tokens_1 = tokenize.generate_tokens(StringIO(self.result_1.content).readline)  # Convert code into tokens
+        for token in tokens_1:
+            if token.exact_type in (3, 60):  # Comment - type 3 and string - type 6
+                comments[0] += self.preprocess(token.string)
+
+        tokens_2 = tokenize.generate_tokens(StringIO(self.result_2.content).readline)
+        for token in tokens_2:
+            if token.exact_type in (3, 60):
+                comments[1] += self.preprocess(token.string)
+
+        d = self.edit_distance(comments[0], comments[1])
+        mx_len = len(max(comments[0], comments[1], key=len))
+
+        if mx_len == 0:
+            return 0.0
+
+        return 1 - d / mx_len
+
     #####################
     # Utility Functions #
     #####################
@@ -182,6 +205,7 @@ class Plagiarism:
         comparison.append(self.exact_match(self.tree_1, self.tree_2))
         comparison.append(self.unifying_ast_match(self.tree_1, self.tree_2))
         comparison.append(self.ast_match_ignoring_variables(self.tree_1, self.tree_2))
+        comparison.append(self.comment_edit_distance())
 
         return comparison
 
