@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from web.utils import admin_required, highlight_diff, highlight_diff_temp, compile_plagarism_report_two
+from web.utils import admin_required
+from web.plagiarism import Plagiarism
 from web.models import Result, Session
 from web.forms import FilterResult
 
@@ -12,17 +13,17 @@ compare_template = Blueprint(
 def compare(result_id1, result_id2):
     """Endpoint for comparing two user submissions."""
 
-    r1 = Result.query.filter_by(id=result_id1).first()
-    r2 = Result.query.filter_by(id=result_id2).first()
+    p = Plagiarism(result_id1, result_id2)
 
     # Get the similarity level and highlighted code block.
-    parsed1, parsed2, similarity = highlight_diff_temp(
-        [r1.content, r2.content])
+
+    parsed1, parsed2 = p.highlight_diff()
+    similarity = p.tree_distance()
 
     # Compile a list of test results using different plagiarism detection algorithms.
-    comparison = compile_plagarism_report_two([r1.content, r2.content])
+    comparison = p.compile_plagarism_report_two()
 
-    return render_template('compare.html', email1=r1.email, email2=r2.email, parsed1=parsed1, parsed2=parsed2, comparison=comparison, similarity=similarity)
+    return render_template('compare.html', email1=p.result_1.email, email2=p.result_2.email, parsed1=parsed1, parsed2=parsed2, comparison=comparison, similarity=similarity)
 
 
 @compare_template.route('/compare/<result_id1>', methods=['GET', 'POST'])
@@ -39,8 +40,8 @@ def compare_index(result_id1):
     similarities = []
 
     for result in rs:
-        _, _, similarity = highlight_diff_temp([r1.content, result.content])
-        results.append((similarity, result))
+        p = Plagiarism(r1, result.id)
+        results.append((p.tree_distance(), result))
 
     form = FilterResult()
     return render_template('compare_index.html', form=form, results=results, r1=r1.id)
@@ -57,8 +58,8 @@ def plagiarism_session(session_id):
         c = []
         for r1 in results_1:
             for r2 in results_2:
-                _, _, similarity = highlight_diff_temp([r1.content, r2.content])
-                c.append((similarity, r1.id, r2.id, r1.user.email, r2.user.email))
+                p = Plagiarism(r1.id, r2.id)
+                c.append((p.tree_distance(), r1.id, r2.id, r1.user.email, r2.user.email))
 
         return c
 
