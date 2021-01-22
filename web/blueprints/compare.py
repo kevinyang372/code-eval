@@ -59,7 +59,19 @@ def plagiarism_session(session_id):
         for r1 in results_1:
             for r2 in results_2:
                 p = Plagiarism(r1.id, r2.id)
-                c.append((p.tree_distance(), r1.id, r2.id, r1.user.email, r2.user.email))
+                report = p.compile_plagarism_report_two()
+
+                c.append({
+                    'similarity': p.tree_distance(),
+                    'exact_match': report[0],
+                    'unifying_ast_match': report[1],
+                    'ast_match_ignoring_variables': report[2],
+                    'comment_edit_distance': report[3],
+                    'r1': r1.id,
+                    'r2': r2.id,
+                    'email1': r1.user.email,
+                    'email2': r2.user.email
+                })
 
         return c
 
@@ -79,7 +91,7 @@ def plagiarism_session(session_id):
             res.extend(compare_two_users(result_user_1, result_user_2))
 
     # Sort reversely based on similarity.
-    res.sort(reverse=True)
+    res.sort(key=lambda x: x['similarity'], reverse=True)
     form = FilterResult()
 
     return render_template('plagiarism_session.html', results=res, form=form)

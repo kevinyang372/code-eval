@@ -97,7 +97,7 @@ class Plagiarism:
             return False
         if isinstance(node1, ast.AST):
             for k, v in vars(node1).items():
-                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg'):
+                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'args', 'end_col_offset'):
                     continue
                 elif not self.ast_match_ignoring_variables(v, getattr(node2, k)):
                     return False
@@ -225,7 +225,7 @@ class Plagiarism:
 
                 for k, v in vars(node1).items():
                     # Skip attributes like variable id and name.
-                    if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name'):
+                    if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name', 'args', 'end_col_offset'):
                         continue
                     elif not func(v, getattr(node2, k), next_parent):
                         return False

@@ -97,7 +97,7 @@ def summary_case(result_id):
         result=res,
         passed=result.passed_num,
         total=len(result.questions),
-        file=highlight_python(result.content, flake8_parser(style)),
+        file=highlight_python_with_flake8(result.content, flake8_parser(style)),
         time=result.runtime,
         i=result.id
     )
