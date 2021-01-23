@@ -97,7 +97,7 @@ class Plagiarism:
             return False
         if isinstance(node1, ast.AST):
             for k, v in vars(node1).items():
-                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'args', 'end_col_offset'):
+                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name', 'args', 'end_col_offset', 'end_lineno'):
                     continue
                 elif not self.ast_match_ignoring_variables(v, getattr(node2, k)):
                     return False
@@ -211,27 +211,26 @@ class Plagiarism:
 
     def ast_match_wrapper(self, node1, node2):
         """AST matching algorithm completely Ignore variable with line highlighting."""
-
         d = collections.defaultdict(set)
 
         def func(node1, node2, is_parent=True):
             """Utility function for recursively comparing two nodes."""
-
             if type(node1) is not type(node2):
                 return False
             if isinstance(node1, ast.AST):
                 # Indicator of whether this node is a parent.
                 next_parent = is_parent and 'lineno' not in vars(node1)
+                exact_same = True
 
                 for k, v in vars(node1).items():
                     # Skip attributes like variable id and name.
-                    if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name', 'args', 'end_col_offset'):
+                    if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name', 'args', 'end_col_offset', 'end_lineno'):
                         continue
                     elif not func(v, getattr(node2, k), next_parent):
-                        return False
+                        exact_same = False
 
                 # If the current node has the line number attribute, add it to the dictionary.
-                if 'lineno' in vars(node1) and is_parent:
+                if exact_same and 'lineno' in vars(node1) and is_parent:
                     if 'end_lineno' in vars(node1):
                         d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add(
                             (getattr(node2, 'lineno'), getattr(node2, 'end_lineno')))
@@ -239,35 +238,20 @@ class Plagiarism:
                         d[getattr(node1, 'lineno'), getattr(node1, 'lineno')].add(
                             (getattr(node2, 'lineno'), getattr(node2, 'lineno')))
 
-                return True
+                return exact_same
             elif isinstance(node1, list):
-                if len(node1) <= len(node2):
-                    for i, n1 in enumerate(node1):
-                        f = False
-                        for di in range(-1, 2):
-                            if 0 <= i + di < len(node2) and func(n1, node2[i + di]):
-                                f = True
+                exact_same = True
+                for i in range(len(node1)):
+                    # Make sure to call compare function to cover all the code.
+                    if not func(node1[i], node2[i]):
+                        exact_same = False
 
-                        if not f:
-                            return False
-
-                    return True
-
-                else:
-                    for i, n2 in enumerate(node2):
-                        f = False
-                        for di in range(-1, 2):
-                            if 0 <= i + di < len(node1) and func(node1[i + di], n2):
-                                f = True
-
-                        if not f:
-                            return False
-
-                    return True
+                return exact_same
             else:
                 return node1 == node2
 
         res = func(node1, node2)
+        print(d)
         return d
 
     def highlight_diff(self):
