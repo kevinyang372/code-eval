@@ -82,13 +82,13 @@ def plagiarism_session(session_id):
     # Query against all submitted users.
     for u1 in range(len(all_submitted_users) - 1):
         user_1 = all_submitted_users[u1]
-        result_user_1 = list(filter(lambda x: x.user_id == user_1.id, list_of_results))  # Filter out the results submitted by user_1
+        result_user_1 = min(filter(lambda x: x.user_id == user_1.id, list_of_results), key=lambda x: x.id)
 
         for u2 in range(u1 + 1, len(all_submitted_users)):
             user_2 = all_submitted_users[u2]
-            result_user_2 = list(filter(lambda x: x.user_id == user_2.id, list_of_results))  # Filter out the results submitted by user_2
+            result_user_2 = min(filter(lambda x: x.user_id == user_2.id, list_of_results), key=lambda x: x.id)
 
-            res.extend(compare_two_users(result_user_1, result_user_2))
+            res.extend(compare_two_users([result_user_1], [result_user_2]))
 
     # Sort reversely based on similarity.
     res.sort(key=lambda x: x['similarity'], reverse=True)
