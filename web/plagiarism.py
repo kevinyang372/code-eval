@@ -240,6 +240,9 @@ class Plagiarism:
 
                 return exact_same
             elif isinstance(node1, list):
+                if len(node1) != len(node2):
+                    return False
+
                 exact_same = True
                 for i in range(len(node1)):
                     # Make sure to call compare function to cover all the code.
