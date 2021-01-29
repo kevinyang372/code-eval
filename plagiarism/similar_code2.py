@@ -13,6 +13,6 @@ def func2(b, a):
     return a * b
 
 
-def func4(c, d):
+def func4(c, d, e):
     # this is just a comment
-    return c + d
+    return sum(c, d) + e
