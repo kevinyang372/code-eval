@@ -25,7 +25,7 @@
     </form>
     <div id="results_wrapper">
     {% for r in results %}
-        <div class="card" title="{{ r[0] }}">
+        <div class="card" title="{{ r.similarity }}">
           <div class="card-header">
             <h4>Case Similarity: {{ r.similarity }}</h4>
             <div style="margin:10px">
