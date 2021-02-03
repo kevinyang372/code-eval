@@ -33,7 +33,7 @@ def token_text(text):
 
         line_num += content.count('\n')
 
-    return results
+    return results, line_num
 
 
 def hash_into_num(text):
@@ -106,16 +106,21 @@ def merge_intervals(arr):
     return results
 
 
-def winnowing(t1, t2, k=12):
+def winnowing(filename_1, filename_2, k=12):
     """Use winnowing algorithm to detect the approximity between two texts."""
-    tokens_1, tokens_2 = token_text(t1), token_text(t2)
+
+    with open(filename_1, "r") as f:
+        f1 = f.read()
+
+    with open(filename_2, "r") as f:
+        f2 = f.read()
+
+    tokens_1, file1_len = token_text(f1)
+    tokens_2, file2_len = token_text(f2)
 
     corpus_1 = ''.join(t[0] for t in tokens_1)
     corpus_2 = ''.join(t[0] for t in tokens_2)
 
-    print(corpus_1)
-    print("===================")
-    print(corpus_2)
     fingerprints_1 = generate_fingerprints(list(map(hash_into_num, kgrams(corpus_1, k))))
     fingerprints_2 = generate_fingerprints(list(map(hash_into_num, kgrams(corpus_2, k))))
 
@@ -127,15 +132,6 @@ def winnowing(t1, t2, k=12):
                 intervals_1.append(backtrack_line_num(i, tokens_1, k))
                 intervals_2.append(backtrack_line_num(j, tokens_2, k))
 
-    return merge_intervals(intervals_1), merge_intervals(intervals_2)
-
-
-if __name__ == '__main__':
-
-    with open("similar_code1.py", "r") as f:
-        f1 = f.read()
-
-    with open("similar_code2.py", "r") as f:
-        f2 = f.read()
-
-    print(winnowing(f1, f2))
+    i1 = merge_intervals(intervals_1)
+    i2 = merge_intervals(intervals_2)
+    return i1, i2, sum(b - a + 1 for a, b in i1) / file1_len, sum(b - a + 1 for a, b in i2) / file2_len

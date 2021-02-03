@@ -45,15 +45,9 @@ def getTreeSize(root):
     return 1 + sum(getTreeSize(node) for node in root.children)
 
 
-if __name__ == '__main__':
+def tree_edit_distance(r1, r2):
 
-    with open("similar_code1.py", "r") as source:
-        tree1 = ast.parse(source.read())
-
-    with open("similar_code2.py", "r") as source:
-        tree2 = ast.parse(source.read())
-
-    r1, r2 = copyTree(tree1), copyTree(tree2)
+    r1, r2 = copyTree(r1), copyTree(r2)
     apted = APTED(r1, r2, CustomConfig())
 
-    print(apted.compute_edit_distance() / max(getTreeSize(r1), getTreeSize(r2)))
+    return 1 - apted.compute_edit_distance() / max(getTreeSize(r1), getTreeSize(r2))
