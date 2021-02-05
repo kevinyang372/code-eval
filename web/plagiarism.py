@@ -53,7 +53,7 @@ class Plagiarism:
         if isinstance(node1, ast.AST):
             for k, v in vars(node1).items():
                 # Skip unrelated information
-                if k in ('lineno', 'col_offset', 'ctx'):
+                if k in ('lineno', 'col_offset', 'ctx', 'end_col_offset', 'end_lineno'):
                     continue
                 # Recursively check for child nodes
                 if not self.exact_match(v, getattr(node2, k)):
@@ -65,30 +65,40 @@ class Plagiarism:
         else:
             return node1 == node2
 
-    def unifying_ast_match(self, node1, node2, mapping={}):
+    def unifying_ast_match(self, node1, node2):
         """Unifying ast match detecting naive variable renaming."""
 
-        if type(node1) is not type(node2):
-            return False
-        if isinstance(node1, ast.AST):
-            for k, v in vars(node1).items():
-                if k in ('lineno', 'col_offset', 'ctx'):
-                    continue
+        mapping = {}
 
-                # Skip id and name of variables.
-                if (k == 'id' or k == 'arg') and v != getattr(node2, k):
-                    if v not in mapping:
-                        mapping[v] = getattr(node2, k)
-                    elif mapping[v] != getattr(node2, k):
+        def match(node1, node2):
+            if type(node1) is not type(node2):
+                return False
+            if isinstance(node1, ast.AST):
+                if isinstance(node1, ast.Expr):
+                    return True
+
+                for k, v in vars(node1).items():
+                    if k in ('lineno', 'col_offset', 'ctx', 'end_col_offset', 'end_lineno'):
+                        continue
+
+                    # Skip id and name of variables.
+                    if k == 'id' or k == 'arg':
+                        if v not in mapping:
+                            mapping[v] = getattr(node2, k)
+                        elif mapping[v] != getattr(node2, k):
+                            return False
+                    elif not self.unifying_ast_match(v, getattr(node2, k)):
                         return False
-                elif not self.unifying_ast_match(v, getattr(node2, k), mapping):
-                    return False
 
-            return True
-        elif isinstance(node1, list):
-            return all(itertools.starmap(self.unifying_ast_match, zip(node1, node2, mapping)))
-        else:
-            return node1 == node2
+                return True
+            elif isinstance(node1, list):
+                if len(node1) != len(node2):
+                    return False
+                return all(itertools.starmap(self.unifying_ast_match, zip(node1, node2)))
+            else:
+                return node1 == node2
+
+        return match(node1, node2)
 
     def ast_match_ignoring_variables(self, node1, node2):
         """AST matching algorithm completely ignoring variables."""
