@@ -80,5 +80,20 @@ Add a new course and create a registration link for that course.
 ### All Settings
 View / Modify / Delete courses and sessions.
 
-### Unit Test
+## Unit Test
     $ python3 -m unittest test.test_example
+
+## Plagiarism Detection
+The Autograder comes with a source code plagiarism detection module that applies the following algorithms:
+* Exact Match
+* Unifying AST
+* Unifying AST (Ignore Variables)
+* Winnowing
+* Tree Edit Distance (RTED)
+* Comment Edit Distance (Levenshtein)
+
+A CLI tool is included in the repo for experimenting with the above algorithms on different attack cases. To use the tool, navigate to the `plagiarism` 
+directory and run the following command:
+```
+python3 -m plagiarism.py
+```
