@@ -3,11 +3,11 @@ def func(a, b):
     return a + b
 
 
-def func2(x, y):
+def func2(a, b):
     """function that multiplies two arguments together
 
     param::x => integer
     param::y => integer
     return type => integer
     """
-    return x * y
+    return a * b

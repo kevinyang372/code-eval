@@ -46,3 +46,16 @@ def about():
         markdown_file.read(), extensions=["fenced_code"]
     )
     return render_template('markdown.html', markdown=md_template_string)
+
+
+@static_template.route('/how_to/plagiarism_detection_explained')
+@login_required
+def plagiarism_detection_explained():
+    """How to page on submitting code."""
+
+    # Read markdown file from folder.
+    markdown_file = open("web/how_to/plagiarism_detection_explained.md", "r")
+    md_template_string = markdown.markdown(
+        markdown_file.read(), extensions=["fenced_code"]
+    )
+    return render_template('markdown.html', markdown=md_template_string)

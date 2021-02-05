@@ -1,5 +1,5 @@
 from PyInquirer import prompt, Separator
-from plagiarism_detection import parse_to_ast, exact_match, unifying_ast_match_wrapper, ast_match_ignoring_variables_wrapper
+from plagiarism_detection import parse_to_ast, exact_match, unifying_ast_match_wrapper, ast_match_ignoring_variables
 from apted_tree_edit_distance import tree_edit_distance
 from tokenizer import comment_edit_distance
 from winnowing import winnowing
@@ -8,7 +8,7 @@ from winnowing import winnowing
 name_to_function = {
     'Exact Match': exact_match,
     'Unifying AST': unifying_ast_match_wrapper,
-    'Unifying AST (Ignore Variables)': ast_match_ignoring_variables_wrapper,
+    'Unifying AST (Ignore Variables)': ast_match_ignoring_variables,
     'Tree Edit Distance': tree_edit_distance,
     'Comment Edit Distance': comment_edit_distance,
     'Winnowing': winnowing

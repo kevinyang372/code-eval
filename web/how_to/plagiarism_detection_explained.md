@@ -29,3 +29,237 @@ The winnowing algorithm does not rely on AST to compare the similarity between t
 
 ### Comment Edit Distance
 The algorithms above all prunes away comments as a source for classification. However, sometimes students would simply copy and paste code contents, making comment a valuable evidence as well. The comment edit distance approach utilizes the Levenshtein string edit distance algorithm to calculate the similarity between the comments of two documents.
+
+## Attack Cases
+The following section introduces the sample attack cases used to validate the performance of different source code plagiarism detection algorithms mentioned above. The cases include:
+* Change Comments
+* Rename Variables
+* Change Variable Order
+* Change Function Order
+* Totally Different File (Control Case)
+
+The original document to compare against looks like:
+```
+def func(c, d):
+    # this is just a comment
+    return c + d
+
+
+def func2(c, d):
+    """function that multiplies two arguments together
+
+    param::c => integer
+    param::d => integer
+    return type => integer
+    """
+    return c * d
+```
+
+### - Change Comments
+```
+def func(c, d):
+    # this is just a comment
+    # this is another comment
+    return c + d
+
+
+def func2(c, d):
+    """function that multiplies some arguments
+
+    param::c => integer
+    param::d => integer
+    """
+    return c * d
+```
+This case simply edit some comments and doc-strings in the file and leaves the remaining contents untouched. The performance results are:
+```
+For Change Comment
+======================
+* Exact Match result:
+True
+
+* Unifying AST result:
+True
+
+* Unifying AST (Ignore Variables) result:
+True
+
+* Tree Edit Distance result:
+1.0
+
+* Winnowing result:
+Original Overlap Percentage: 1.0
+Test File Overlap Percentage: 1.0
+
+* Comment Edit Distance result:
+0.5486725663716814
+
+```
+As we expected, all the algorithms successfully identified that the two documents are exactly the same. The comment edit distance doesn't suggest a significant overlap between the comment section as around 50% of one document needs to be changed to match the another. It is worth noticing that since the Exact Match algorithm is based on AST, it automatically prunes away the comments and doc-strings.
+
+### - Rename Variables
+```
+def func(a, b):
+    # this is just a comment
+    return a + b
+
+
+def func2(a, b):
+    """function that multiplies two arguments together
+
+    param::x => integer
+    param::y => integer
+    return type => integer
+    """
+    return a * b
+
+```
+This case focuses on renaming the variable names in a way that won't fundamentally change the functioning of the original source code. The performance results are:
+```
+For Rename Variable
+======================
+* Exact Match result:
+False
+
+* Unifying AST result:
+True
+
+* Unifying AST (Ignore Variables) result:
+True
+
+* Tree Edit Distance result:
+0.84
+
+* Winnowing result:
+Original Overlap Percentage: 1.0
+Test File Overlap Percentage: 1.0
+
+* Comment Edit Distance result:
+0.9823008849557522
+
+```
+The Exact Match algorithm is not able to capture the plagiarism in this case as the contents are no longer exactly the same. Also the tree edit distance also shows difference as some renaming is required to transform one tree to another.
+
+### - Change Variable Order
+```
+def func(c, d):
+    # this is just a comment
+    return d + c
+
+
+def func2(c, d):
+    """function that multiplies two arguments together
+
+    param::c => integer
+    param::d => integer
+    return type => integer
+    """
+    return d * c
+
+```
+This case changes the order of variables using the commutative property of mathematical equations. The performance results are:
+```
+For Change Variable Order
+======================
+* Exact Match result:
+False
+
+* Unifying AST result:
+False
+
+* Unifying AST (Ignore Variables) result:
+True
+
+* Tree Edit Distance result:
+0.84
+
+* Winnowing result:
+Original Overlap Percentage: 1.0
+Test File Overlap Percentage: 1.0
+
+* Comment Edit Distance result:
+1.0
+```
+The Unifying AST match failed because the variables in both files do not have a one-to-one mapping with each other ('c' was mapped to 'c', but then later mapped to 'd'). Other than that, all the remaining algorithms gave pretty accurate result.
+
+### - Change Function Order
+```
+def func2(c, d):
+    """function that multiplies two arguments together
+
+    param::c => integer
+    param::d => integer
+    return type => integer
+    """
+    return c * d
+
+
+def func(c, d):
+    # this is just a comment
+    return c + d
+
+```
+This case swaps the ordering of two functions `func` and `func2`. The performance results are:
+```
+For Change Function Order
+======================
+* Exact Match result:
+False
+
+* Unifying AST result:
+False
+
+* Unifying AST (Ignore Variables) result:
+False
+
+* Tree Edit Distance result:
+0.6799999999999999
+
+* Winnowing result:
+Original Overlap Percentage: 0.8461538461538461
+Test File Overlap Percentage: 0.8461538461538461
+
+* Comment Edit Distance result:
+0.6814159292035398
+
+```
+Changing function order successfully deceives many algorithms that scan the files' AST in order as they do not maintain a mapping between every element in both files. The tree edit distance based algorithm also took a dip as now a significant portion of the tree needs to be swapped for matching. The winnowing algorithm remains to give a relatively high confidence for plagiarism as it is based on fingerprinting, which is less sensitive to the ordering of elements.
+
+### - Different Files (Control Case)
+```
+def func(c, d):
+    # returns sum of c and d
+    return sum(c, d)
+
+
+def func2(c, d):
+    # returns the multiplication of c and d
+    multi = c * d
+    return multi
+
+```
+While maximizing accuracy for identifying plagiarism, we don't want to drastically increase false positives as well since they will create a file base with significant noise. The performance results are:
+```
+For Different
+======================
+* Exact Match result:
+False
+
+* Unifying AST result:
+False
+
+* Unifying AST (Ignore Variables) result:
+False
+
+* Tree Edit Distance result:
+0.6206896551724138
+
+* Winnowing result:
+Original Overlap Percentage: 0.8461538461538461
+Test File Overlap Percentage: 0.3333333333333333
+
+* Comment Edit Distance result:
+0.18584070796460173
+
+```
+Since the test file is relatively short, there could still remain some noise in the plagiarism detection as some algorithms gave comparatively positive results. It is worth noticing that winnowing gave two very different percentage for original overlap and test file overlap, which is suggesting some fingerprints in original file (e.g. c, d, and c * d) still appears in the test file but not in the reverse (e.g. sum never appears in the original file). One method to address the accuracy of winnowing is to change the k-gram value. The higher the k-gram value, the less the false positives with a cost of higher false negatives.

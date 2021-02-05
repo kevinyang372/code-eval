@@ -47,7 +47,7 @@ def unifying_ast_match_wrapper(r1, r2):
                 if k in ('lineno', 'col_offset', 'ctx', 'end_col_offset', 'end_lineno'):
                     continue
 
-                if (k == 'id' or k == 'arg') and v != getattr(node2, k):
+                if k == 'id' or k == 'arg':
                     if v not in mapping:
                         mapping[v] = getattr(node2, k)
                     elif mapping[v] != getattr(node2, k):
@@ -57,41 +57,34 @@ def unifying_ast_match_wrapper(r1, r2):
 
             return True
         elif isinstance(node1, list):
+            if len(node1) != len(node2):
+                return False
             return all(itertools.starmap(unifying_ast_match, zip(node1, node2)))
         else:
             return node1 == node2
 
-    return unifying_ast_match(r1, r2)
+    res = unifying_ast_match(r1, r2)
+    return res
 
 
-def ast_match_ignoring_variables_wrapper(r1, r2):
-    d = collections.defaultdict(set)
-
-    def ast_match_ignoring_variables(node1, node2):
-        if type(node1) is not type(node2):
-            return False
-        if isinstance(node1, ast.AST):
-            if isinstance(node1, ast.Expr):
-                return True
-
-            for k, v in vars(node1).items():
-                if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'end_col_offset', 'end_lineno'):
-                    continue
-                elif not ast_match_ignoring_variables(v, getattr(node2, k)):
-                    return False
-
-            if 'lineno' in vars(node1):
-                if 'end_lineno' in vars(node1):
-                    d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')] = getattr(node2, 'lineno'), getattr(node2, 'end_lineno')
-                else:
-                    d[getattr(node1, 'lineno'), getattr(node1, 'lineno')] = getattr(node2, 'lineno'), getattr(node2, 'lineno')
-
+def ast_match_ignoring_variables(node1, node2):
+    if type(node1) is not type(node2):
+        return False
+    if isinstance(node1, ast.AST):
+        if isinstance(node1, ast.Expr):
             return True
-        elif isinstance(node1, list):
-            return all(itertools.starmap(ast_match_ignoring_variables, zip(node1, node2)))
-        else:
-            return node1 == node2
-    return ast_match_ignoring_variables(r1, r2)
+
+        for k, v in vars(node1).items():
+            if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'end_col_offset', 'end_lineno'):
+                continue
+            elif not ast_match_ignoring_variables(v, getattr(node2, k)):
+                return False
+
+        return True
+    elif isinstance(node1, list):
+        return all(itertools.starmap(ast_match_ignoring_variables, zip(node1, node2)))
+    else:
+        return node1 == node2
 
 
 # # reordering
