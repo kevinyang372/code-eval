@@ -6,6 +6,7 @@ from apted import APTED, Config
 from io import StringIO
 
 from web.models import User, Result
+from web.winnowing import winnowing
 
 
 class Node:
@@ -219,76 +220,31 @@ class Plagiarism:
 
         return comparison
 
-    def ast_match_wrapper(self, node1, node2):
+    def winnowing_wrapper(self):
         """AST matching algorithm completely Ignore variable with line highlighting."""
-        d = collections.defaultdict(set)
-
-        def func(node1, node2, is_parent=True):
-            """Utility function for recursively comparing two nodes."""
-            if type(node1) is not type(node2):
-                return False
-            if isinstance(node1, ast.AST):
-                # Indicator of whether this node is a parent.
-                next_parent = is_parent and 'lineno' not in vars(node1)
-                exact_same = True
-
-                for k, v in vars(node1).items():
-                    # Skip attributes like variable id and name.
-                    if k in ('lineno', 'col_offset', 'ctx', 'id', 'arg', 'name', 'args', 'end_col_offset', 'end_lineno'):
-                        continue
-                    elif not func(v, getattr(node2, k), next_parent):
-                        exact_same = False
-
-                # If the current node has the line number attribute, add it to the dictionary.
-                if exact_same and 'lineno' in vars(node1) and is_parent:
-                    if 'end_lineno' in vars(node1):
-                        d[getattr(node1, 'lineno'), getattr(node1, 'end_lineno')].add(
-                            (getattr(node2, 'lineno'), getattr(node2, 'end_lineno')))
-                    else:
-                        d[getattr(node1, 'lineno'), getattr(node1, 'lineno')].add(
-                            (getattr(node2, 'lineno'), getattr(node2, 'lineno')))
-
-                return exact_same
-            elif isinstance(node1, list):
-                if len(node1) != len(node2):
-                    return False
-
-                exact_same = True
-                for i in range(len(node1)):
-                    # Make sure to call compare function to cover all the code.
-                    if not func(node1[i], node2[i]):
-                        exact_same = False
-
-                return exact_same
-            else:
-                return node1 == node2
-
-        res = func(node1, node2)
-        print(d)
-        return d
+        f1, f2, _, _ = winnowing(self.result_1.content, self.result_2.content)
+        return f1, f2
 
     def highlight_diff(self):
         """Highlight the difference between two Python files."""
 
-        d = self.ast_match_wrapper(self.tree_1, self.tree_2)
+        f1, f2 = self.winnowing_wrapper()
 
         # Wrapper for difference highlight style.
         pre = '<style>.diff_plus { background-color: rgba(0, 255, 0, 0.3) }</style>'
 
         parsed1 = [pre] + self.result_1.content.split('\n')
         parsed2 = [pre] + self.result_2.content.split('\n')
-        visited = set()
 
-        for n1, nodes in d.items():
-            for t in range(n1[0], n1[1] + 1):
-                parsed1[t] = '<div class={}>{}</div>'.format(
-                    'diff_plus', parsed1[t])
-            for n2 in nodes:
-                for j in range(n2[0], n2[1] + 1):
-                    if j not in visited:
-                        parsed2[j] = '<div class={}>{}</div>'.format(
-                            'diff_plus', parsed2[j])
-                        visited.add(j)
+        for start, end in f1:
+            for lin_num in range(start - 1, end):
+                parsed1[lin_num] = '<div class={}>{}</div>'.format(
+                    'diff_plus', parsed1[lin_num])
+
+        for start, end in f2:
+            for lin_num in range(start - 1, end):
+                parsed2[lin_num] = '<div class={}>{}</div>'.format(
+                    'diff_plus', parsed2[lin_num])        
 
         for instance in [parsed1, parsed2]:
             for i in range(1, len(instance)):
