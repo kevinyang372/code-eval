@@ -44,7 +44,7 @@ class TestPlagiarismCase(FlaskTestCase):
         self.login_as_admin()
 
         response = self.app.get('/plagiarism/1', follow_redirects=True)
-        assert 'Case Similarity: ' in str(response.data)
+        assert 'Similarity:' in str(response.data)
 
         response = self.app.get(f'/compare/{rid_1}/{rid_2}', follow_redirects=True)
 

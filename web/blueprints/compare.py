@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from web.utils import admin_required
 from web.plagiarism import Plagiarism
 from web.models import Result, Session
-from web.forms import FilterResult
 
 compare_template = Blueprint(
     'compare', __name__, template_folder='../templates')
@@ -62,11 +61,11 @@ def plagiarism_session(session_id):
                 report = p.compile_plagarism_report_two()
 
                 c.append({
-                    'similarity': p.tree_distance(),
+                    'similarity': round(p.tree_distance(), 3),
                     'exact_match': report[0],
                     'unifying_ast_match': report[1],
                     'ast_match_ignoring_variables': report[2],
-                    'comment_edit_distance': report[3],
+                    'comment_edit_distance': round(report[3], 3),
                     'r1': r1.id,
                     'r2': r2.id,
                     'email1': r1.user.email,
@@ -77,21 +76,24 @@ def plagiarism_session(session_id):
 
     all_submitted_users = list(Session.query.filter_by(id=session_id).first().get_passed_submission_students())
     list_of_results = Result.query.filter_by(session_id=session_id, success=True).all()
-    res = []
+    res = {}
 
     # Query against all submitted users.
-    for u1 in range(len(all_submitted_users) - 1):
+    for u1 in range(len(all_submitted_users)):
         user_1 = all_submitted_users[u1]
         result_user_1 = max(filter(lambda x: x.user_id == user_1.id, list_of_results), key=lambda x: x.id)
+        temp = []
 
-        for u2 in range(u1 + 1, len(all_submitted_users)):
+        for u2 in range(len(all_submitted_users)):
+            if u1 == u2:
+                continue
             user_2 = all_submitted_users[u2]
             result_user_2 = max(filter(lambda x: x.user_id == user_2.id, list_of_results), key=lambda x: x.id)
 
-            res.extend(compare_two_users([result_user_1], [result_user_2]))
+            temp.extend(compare_two_users([result_user_1], [result_user_2]))
 
-    # Sort reversely based on similarity.
-    res.sort(key=lambda x: x['similarity'], reverse=True)
-    form = FilterResult()
+        # Sort reversely based on similarity.
+        temp.sort(key=lambda x: x['similarity'], reverse=True)
+        res[result_user_1.email] = temp
 
-    return render_template('plagiarism_session.html', results=res, form=form)
+    return render_template('plagiarism_session.html', results=res)

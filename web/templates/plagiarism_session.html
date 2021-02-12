@@ -2,64 +2,33 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <script>
-    function outputUpdate(threshold) {
-        document.querySelector('#selected-threshold').value = threshold;
-
-        let results = document.getElementById('results_wrapper').children;
-        for (let i = 0; i < results.length; i++){
-            if (results[i].title < threshold){
-                results[i].style.visibility = "collapse";
-            } else {
-                results[i].style.visibility = "visible";
-            }
-        }
-    }
-    </script>
     <div>
         <a href="{{ url_for('static.plagiarism_detection_explained') }}"><u>See here for more information on plagiarism detection</u></a><br>
     </div>
-    <form>
-        <p>
-           {{ form.threshold.label }}: <span class="glyphicon glyphicon-info-sign" data-toggle="modal" data-target="#openInfo"></span>
-           {{ form.threshold(min=0, max=1, oninput="outputUpdate(value)") }}
-           <output for="threshold" id="selected-threshold">{{ form.threshold.data }}</output>
-        </p>
-    </form>
     <div id="results_wrapper">
-    {% for r in results %}
-        <div class="card" title="{{ r.similarity }}">
+    {% for user_name, comparisons in results.items() %}
+        <div class="card">
           <div class="card-header">
-            <h4>Case Similarity: {{ r.similarity }}</h4>
-            <div style="margin:10px">
-              {% if r.exact_match %}
-                <span class="badge badge-pill badge-primary">Exact Match</span>
-              {% endif %}
-              {% if r.unifying_ast_match %}
-                <span class="badge badge-secondary">Unifying AST</span>
-              {% endif %}
-              {% if r.ast_match_ignoring_variables %}
-                <span class="badge badge-warning">AST Match (Ignore variables)</span>
-              {% endif %}
-              <span class="badge badge-pill badge-info">Comment Edit: {{ r.comment_edit_distance }}</span>
-            </div>
+            <h4>{{ user_name }}</h4>
           </div>
           <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-                User 1: {{ r.email1 }}
-                <a type="button" class="btn btn-primary" href="{{ url_for('summary.summary_case', result_id = r.r1) }}">
-                    See Submission Detail
-                </a>
-            </li>
-            <li class="list-group-item">
-                User 2: {{ r.email2 }}
-                <a type="button" class="btn btn-primary" href="{{ url_for('summary.summary_case', result_id = r.r2) }}">
-                    See Submission Detail
-                </a>
-            </li>
-            <li class="list-group-item">
-                <a type="button" href="{{ url_for('compare.compare', result_id1 = r.r1, result_id2 = r.r2) }}", class="btn btn-info">Compare</a>
-            </li>
+            {% for r in comparisons %}
+              <li class="list-group-item">
+                  User: {{ r.email1 }}
+                  <span class="badge badge-pill badge-primary">Similarity: {{ r.similarity }}</span>
+                  <span class="badge badge-pill badge-primary">Comment Edit: {{ r.comment_edit_distance }}</span>
+                  {% if r.exact_match %}
+                    <span class="badge badge-pill badge-primary">Exact Match</span>
+                  {% endif %}
+                  {% if r.unifying_ast_match %}
+                    <span class="badge badge-secondary">Unifying AST</span>
+                  {% endif %}
+                  {% if r.ast_match_ignoring_variables %}
+                    <span class="badge badge-warning">AST Match (Ignore variables)</span>
+                  {% endif %}
+                  <a type="button" href="{{ url_for('compare.compare', result_id1 = r.r1, result_id2 = r.r2) }}", class="btn btn-info">Compare</a>
+              </li>
+            {% endfor %}
           </ul>
         </div>
     {% endfor %}
