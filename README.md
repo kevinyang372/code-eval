@@ -81,7 +81,7 @@ Add a new course and create a registration link for that course.
 View / Modify / Delete courses and sessions.
 
 ## Unit Test
-    $ python3 -m unittest test.test_example
+    $ python3 -m unittest
 
 ## Plagiarism Detection
 The Autograder comes with a source code plagiarism detection module that applies the following algorithms:
