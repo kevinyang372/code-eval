@@ -7,6 +7,9 @@ compare_template = Blueprint(
     'compare', __name__, template_folder='../templates')
 
 
+PLAGIARISM_RANKING = ['exact_match', 'unifying_ast_match', 'ast_match_ignoring_variables']
+
+
 @compare_template.route('/compare/<result_id1>/<result_id2>')
 @admin_required
 def compare(result_id1, result_id2):
@@ -60,7 +63,7 @@ def plagiarism_session(session_id):
                 p = Plagiarism(r1.id, r2.id)
                 report = p.compile_plagarism_report_two()
 
-                c.append({
+                temp = {
                     'similarity': round(p.tree_distance(), 3),
                     'exact_match': report[0],
                     'unifying_ast_match': report[1],
@@ -70,7 +73,16 @@ def plagiarism_session(session_id):
                     'r2': r2.id,
                     'email1': r1.user.email,
                     'email2': r2.user.email
-                })
+                }
+
+                # Don't need to include all keys if a result of higher ranking is true.
+                for ind, key in enumerate(PLAGIARISM_RANKING):
+                    if temp[key]:
+                        for later_key in PLAGIARISM_RANKING[ind + 1:]:
+                            temp[later_key] = False
+                        break
+
+                c.append(temp)
 
         return c
 
