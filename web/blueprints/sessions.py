@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from web.models import Course, Session, Access
 from web.forms import UploadForm
 from werkzeug.utils import secure_filename
-from web.utils import read_file, admin_required
+from web.utils import read_file, admin_required, check_session_file_parsable
 from werkzeug.datastructures import MultiDict
 from web import app, db
 
@@ -30,6 +30,11 @@ def upload_session():
         # Transform filename to a secure one
         filename = secure_filename(form.filename.data.filename)
         test_code = read_file(form.filename.data, filename)
+
+        passed, err = check_session_file_parsable(test_code)
+        if not passed:
+            flash(err)
+            return render_template('upload_session.html', form=form)
 
         course_id = Course.query.filter_by(
             course_num=form.course_num.data).first().id

@@ -53,7 +53,8 @@ def flake8_test(to_test, filename):
     rules_to_ignore = ["W191"]
 
     try:
-        check_output(["flake8", f"--ignore={','.join(rules_to_ignore)}", path], stderr=STDOUT)
+        check_output(
+            ["flake8", f"--ignore={','.join(rules_to_ignore)}", path], stderr=STDOUT)
     except CalledProcessError as e:
         style_check = e.output.decode("utf-8")
     except Exception as e:
@@ -177,7 +178,8 @@ def highlight_python(code):
     css_string = "<style>" + formatter.get_style_defs() + "</style>"
 
     for line in code.split('\n'):
-        css_string += pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)
+        css_string += pygments.highlight(line,
+                                         pygments.lexers.PythonLexer(), formatter)
     return css_string
 
 
@@ -190,7 +192,8 @@ def highlight_python_with_flake8(code, err):
         errors[int(lineno)].append(error_message)
 
     code = code.replace('\t', '    ').split('\n')
-    formatter = pygments.formatters.HtmlFormatter(style="emacs", cssclass="codehilite")
+    formatter = pygments.formatters.HtmlFormatter(
+        style="emacs", cssclass="codehilite")
     css_string = "<style>" + formatter.get_style_defs() + "</style>"
 
     prefix = '<div class="codehilite"><pre>'
@@ -201,7 +204,8 @@ def highlight_python_with_flake8(code, err):
     for lineno in range(len(code)):
         line = code[lineno]
 
-        highlighted = pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)[len(prefix):-len(suffix)]
+        highlighted = pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)[
+            len(prefix):-len(suffix)]
 
         if lineno + 1 in errors:
             all_errors = '\n'.join(errors[lineno + 1])
@@ -230,3 +234,33 @@ def compile_results(res):
         compiled[question]['reason'] = res[question]
 
     return compiled
+
+
+def check_session_file_parsable(uploaded):
+    d = {}
+    exec(uploaded, d)
+
+    if 'TestCases' not in d:
+        return False, "Can't find class TestCases in the uploaded file. Please look for instructions in session creation for details."
+
+    try:
+        dummy = d['TestCases']('DUMMY')
+
+        parameters = dummy.parameters
+        answers = dummy.answers
+    except Exception as e:
+        return False, f"Can't parse class TestCases due to error {e}"
+
+    if parameters.keys() != answers.keys():
+        return False, f"The keys of parameters are different from the keys of answers."
+    elif any(len(parameters[k]) != len(answers[k]) for k in answers.keys()):
+        return False, f"The number of test cases are incompatiable between parameters and answers."
+    elif any(not isinstance(case, tuple) for k in parameters.keys() for case in parameters[k]):
+        return False, f"Some of the parameters are not wrapped in tuple."
+    else:
+        for k in parameters.keys():
+            for i in range(len(parameters[k]) - 1):
+                if len(parameters[k][i]) != len(parameters[k][i + 1]):
+                    return False, f"The number of parameters for question {k} is inconsistent."
+
+    return True, ""

@@ -28,7 +28,7 @@ class LoginForm(FlaskForm):
 
 class UploadForm(FlaskForm):
     """Create a new session."""
-    filename = FileField()
+    filename = FileField(validators=[DataRequired()])
     session_num = DecimalField('Session Number', validators=[NumberRange(
         min=0.0, max=20.0, message='Session number must be a positive decimal')])
     course_num = SelectField('Choose Course', coerce=str)
