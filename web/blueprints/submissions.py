@@ -19,17 +19,20 @@ default_breadcrumb_root(submission_template, '.index')
 def view_course_dlc(*args, **kwargs):
     """Utility function for generating course breadcrumb."""
     course_id = request.view_args['course_id']
+    course_num = Course.query.filter_by(id=course_id).first().course_num
 
     # Text: the displayed text of the breadcrumb
     # Url: the link of the breadcrumb
-    return [{'text': ' Courses', 'url': f'/submit/{course_id}'}]
+    return [{'text': f" Course {course_num}", 'url': f'/submit/{course_id}'}]
 
 
 def view_session_dlc(*args, **kwargs):
     """Utility function for generating session breadcrumb."""
     course_id = request.view_args['course_id']
     session_id = request.view_args['session_id']
-    return [{'text': ' Sessions', 'url': f'/submit/{course_id}/{session_id}'}]
+
+    session_num = Session.query.filter_by(id=session_id).first().session_num
+    return [{'text': f" Session {session_num}", 'url': f'/submit/{course_id}/{session_id}'}]
 
 
 @submission_template.route('/submit/<course_id>', methods=["GET", "POST"])
