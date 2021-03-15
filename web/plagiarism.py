@@ -246,17 +246,12 @@ class Plagiarism:
                 res.append(pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)[len(prefix):-len(suffix)])
 
             for start, end in diff_line:
-                for lin_num in range(start, end + 1):
-                    res[lin_num] = '<div class={}>{}</div>'.format('diff_plus', res[lin_num])
+                for lin_num in range(start - 1, end):
+                    res[lin_num + 1] = '<div class={}>{}</div>'.format('diff_plus', res[lin_num + 1])
 
             return ''.join(res) + suffix
 
         parsed1 = code_wrapper(self.result_1.content, f1)
         parsed2 = code_wrapper(self.result_2.content, f2)
-
-        # for instance in [parsed1, parsed2]:
-        #     for i in range(1, len(instance)):
-        #         if not instance[i].startswith('<div'):
-        #             instance[i] = '<div>{}</div>'.format(instance[i])
 
         return parsed1, parsed2

@@ -12,17 +12,9 @@ def token_text(text):
 
     for category, content in tokens:
 
-        # Convert variable names to N
-        if category == Name:
-            results.append(('N', line_num, loc_tracker))
-            loc_tracker += 1
         # Convert String contents to S
-        elif category == Literal.String:
+        if category == Literal.String:
             results.append(('S', line_num, loc_tracker))
-            loc_tracker += 1
-        # Convert function names to F
-        elif category == Name.Function:
-            results.append(('F', line_num, loc_tracker))
             loc_tracker += 1
         # Ignore comments, whitespaces, line breaks and doc strings
         elif category in Comment or category in Text or category in Literal.String.Doc:
@@ -106,7 +98,7 @@ def merge_intervals(arr):
     return results
 
 
-def winnowing(f1, f2, k=12):
+def winnowing(f1, f2, k=20):
     """Use winnowing algorithm to detect the approximity between two texts."""
 
     tokens_1, file1_len = token_text(f1)
