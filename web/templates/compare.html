@@ -8,9 +8,7 @@
             <p>{{ email1 }}</p>
             <div class="card">
               <div class="card-body">
-                {% for line in parsed1 %}
-                    {{ line|safe }}
-                {% endfor %}
+                {{ parsed1|safe }}
               </div>
             </div>
         </div>
@@ -18,9 +16,7 @@
             <p>{{ email2 }}</p>
             <div class="card">
               <div class="card-body">
-                {% for line in parsed2 %}
-                    {{ line|safe }}
-                {% endfor %}
+                {{ parsed2|safe }}
               </div>
             </div>
         </div>

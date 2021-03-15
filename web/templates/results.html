@@ -27,37 +27,7 @@
             </tbody>
         </table>
     {% endfor %}
-
-    <!-- {% if current_user.is_admin %}
-        {% for p in plagiarism %}
-        
-            <a href="{{ url_for('compare.compare', result_id1 = p.first_result_id, result_id2 = p.second_result_id) }}">code link</a>
-
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Test</th>
-                        <th>Result</th>
-                    <tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Exact Match</td>
-                        <td>{{ p.exact_match }}</td>
-                    </tr>
-                    <tr>
-                        <td>Unifying AST</td>
-                        <td>{{ p.unifying_ast }}</td>
-                    </tr>
-                    <tr>
-                        <td>Ignore variables</td>
-                        <td>{{ p.ignore_variables }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        {% endfor %}
-    {% endif %} -->
-
+    
     <div class="card">
       <div class="card-body">
         {{ file|safe }}

@@ -4,6 +4,7 @@ import itertools
 import tokenize
 from apted import APTED, Config
 from io import StringIO
+import pygments
 
 from web.models import User, Result
 from web.winnowing import winnowing
@@ -231,24 +232,31 @@ class Plagiarism:
         f1, f2 = self.winnowing_wrapper()
 
         # Wrapper for difference highlight style.
-        pre = '<style>.diff_plus { background-color: rgba(0, 255, 0, 0.3) }</style>'
+        def code_wrapper(code, diff_line):
+            prefix = '<div class="codehilite"><pre>'
+            suffix = '</pre></div>\n'
 
-        parsed1 = [pre] + self.result_1.content.split('\n')
-        parsed2 = [pre] + self.result_2.content.split('\n')
+            code = code.replace('\t', '    ')
 
-        for start, end in f1:
-            for lin_num in range(start - 1, end):
-                parsed1[lin_num] = '<div class={}>{}</div>'.format(
-                    'diff_plus', parsed1[lin_num])
+            formatter = pygments.formatters.HtmlFormatter(style="emacs", cssclass="codehilite")
+            css_string = "<style>" + formatter.get_style_defs() + ".diff_plus { background-color: rgba(0, 255, 0, 0.3) }</style>" + prefix
+            res = [css_string]
 
-        for start, end in f2:
-            for lin_num in range(start - 1, end):
-                parsed2[lin_num] = '<div class={}>{}</div>'.format(
-                    'diff_plus', parsed2[lin_num])        
+            for line in code.split('\n'):
+                res.append(pygments.highlight(line, pygments.lexers.PythonLexer(), formatter)[len(prefix):-len(suffix)])
 
-        for instance in [parsed1, parsed2]:
-            for i in range(1, len(instance)):
-                if not instance[i].startswith('<div'):
-                    instance[i] = '<div>{}</div>'.format(instance[i])
+            for start, end in diff_line:
+                for lin_num in range(start, end + 1):
+                    res[lin_num] = '<div class={}>{}</div>'.format('diff_plus', res[lin_num])
+
+            return ''.join(res) + suffix
+
+        parsed1 = code_wrapper(self.result_1.content, f1)
+        parsed2 = code_wrapper(self.result_2.content, f2)
+
+        # for instance in [parsed1, parsed2]:
+        #     for i in range(1, len(instance)):
+        #         if not instance[i].startswith('<div'):
+        #             instance[i] = '<div>{}</div>'.format(instance[i])
 
         return parsed1, parsed2
