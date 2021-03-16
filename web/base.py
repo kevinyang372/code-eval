@@ -97,26 +97,25 @@ class BaseTest(object):
                 errs[ind] = 'Failed to parse input'
             return errs
 
+        p = ProcessPool()
+
         # Iterate over each test case.
         for i, params in enumerate(self.parameters[entry_point]):
 
-            p = ProcessPool()
-
-            # Make sure process will initialize.
-            p.terminate()
-            p.restart()
-
             # Use multiprocess here to keep track of the runtime and terminate any that goes over the runtime.
-            res = p.amap(getResult, [byte_code.code], [entry_point], [params], [blacklist])
+            try:
+                res = p.amap(getResult, [byte_code.code], [entry_point], [params], [blacklist])
+            except ValueError as e:
+                p.restart()
+                res = p.amap(getResult, [byte_code.code], [entry_point], [params], [blacklist])
 
             try:
                 result = res.get(timeout=runtime)[0]
             except multiprocess.context.TimeoutError as e:
                 result = (1, "Time Out")
+                p.terminate()
 
             # Properly close the process if it did not terminate clean.
-            p.close()
-            p.join()
 
             def compare_lists(a, b):
                 """Utility method to compare the runtime results and provided answers."""
@@ -140,5 +139,8 @@ class BaseTest(object):
                 errs[str(params)] = "Passed"
             else:
                 errs[str(params)] = f"Wrong Answer: {result[1]}"
+
+        p.close()
+        p.join()
 
         return errs

@@ -37,7 +37,9 @@
     </div>
     <p><b>Runtime</b>: {{ session.runtime }}</p>
     <p><b>Description</b>: {{ session.description}}</p>
-    <p>You could choose to upload your code as a file or paste into the code snippet below</p>
+    <div class="alert alert-success" role="alert">
+      You could choose to upload your code as a file or submit using the code input field below!
+    </div>
     {{ wtf.quick_form(form) }}
 
     <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
