@@ -87,6 +87,9 @@ def merge_intervals(arr):
     results = []
 
     for i, j in arr:
+        if i > j:
+            continue
+
         if not results:
             results.append((i, j))
 
@@ -120,4 +123,5 @@ def winnowing(f1, f2, k=20):
 
     i1 = merge_intervals(intervals_1)
     i2 = merge_intervals(intervals_2)
+
     return i1, i2, sum(b - a + 1 for a, b in i1) / file1_len, sum(b - a + 1 for a, b in i2) / file2_len
