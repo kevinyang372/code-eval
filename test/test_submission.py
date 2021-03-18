@@ -9,7 +9,7 @@ class TestSubmissionCase(FlaskTestCase):
     # Test submitting files.
     def test_upload_file(self):
         response = self.upload_file()
-        assert "Passed Test Cases: 3 / 3" in str(response.data)
+        assert "Congratulations! You passed all test cases!" in str(response.data)
 
     # Test submitting malicious files.
     def test_upload_malicious(self):
