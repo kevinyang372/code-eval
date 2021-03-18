@@ -10,26 +10,29 @@
         <div class="card">
           <div class="card-header">
             <h4>{{ user_name }}</h4>
+            <a data-toggle="collapse" href="#{{ loop.index }}" aria-expanded="true" aria-controls="{{ loop.index }}">collapse</a>
           </div>
-          <ul class="list-group list-group-flush">
-            {% for r in comparisons %}
-              <li class="list-group-item">
-                  User: {{ r.email2 }}
-                  <span class="badge badge-pill badge-primary" style="background-color:#a84e32">Similarity: {{ r.similarity }}</span>
-                  <span class="badge badge-pill badge-primary">Comment Edit: {{ r.comment_edit_distance }}</span>
-                  {% if r.exact_match %}
-                    <span class="badge badge-pill badge-primary">Exact Match</span>
-                  {% endif %}
-                  {% if r.unifying_ast_match %}
-                    <span class="badge badge-secondary">Unifying AST</span>
-                  {% endif %}
-                  {% if r.ast_match_ignoring_variables %}
-                    <span class="badge badge-warning">AST Match (Ignore variables)</span>
-                  {% endif %}
-                  <a type="button" href="{{ url_for('compare.compare', result_id1 = r.r1, result_id2 = r.r2) }}", class="btn btn-info">Compare</a>
-              </li>
-            {% endfor %}
-          </ul>
+
+          <div id="{{ loop.index }}"> 
+            <ul class="list-group list-group-flush">
+              {% for r in comparisons %}
+                <li class="list-group-item">
+                    User: {{ r.email2 }}
+                    <span class="badge badge-pill badge-primary" style="background-color:#a84e32">Similarity: {{ r.similarity }}</span>
+                    <span class="badge badge-pill badge-primary">Comment Edit: {{ r.comment_edit_distance }}</span>
+                    {% if r.exact_match %}
+                      <span class="badge badge-pill badge-primary">Exact Match</span>
+                    {% endif %}
+                    {% if r.unifying_ast_match %}
+                      <span class="badge badge-secondary">Unifying AST</span>
+                    {% endif %}
+                    {% if r.ast_match_ignoring_variables %}
+                      <span class="badge badge-warning">AST Match (Ignore variables)</span>
+                    {% endif %}
+                    <a type="button" href="{{ url_for('compare.compare', result_id1 = r.r1, result_id2 = r.r2) }}", class="btn btn-info">Compare</a>
+                </li>
+              {% endfor %}
+            </ul>
         </div>
     {% endfor %}
     </div>
