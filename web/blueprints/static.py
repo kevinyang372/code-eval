@@ -49,7 +49,6 @@ def about():
 
 
 @static_template.route('/how_to/plagiarism_detection_explained')
-@login_required
 def plagiarism_detection_explained():
     """How to page on submitting code."""
 
