@@ -236,6 +236,7 @@ class Plagiarism:
             prefix = '<div class="codehilite"><pre>'
             suffix = '</pre></div>\n'
 
+            # Pygments automatically removes tabs so convert them to spaces here
             code = code.replace('\t', '    ')
 
             formatter = pygments.formatters.HtmlFormatter(style="emacs", cssclass="codehilite")
@@ -247,6 +248,7 @@ class Plagiarism:
 
             for start, end in diff_line:
                 for lin_num in range(start - 1, end):
+                    # Highlight overlaps in green background
                     res[lin_num + 1] = '<div class={}>{}</div>'.format('diff_plus', res[lin_num + 1])
 
             return ''.join(res) + suffix

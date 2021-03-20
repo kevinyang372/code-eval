@@ -237,6 +237,7 @@ def compile_results(res):
 
 
 def check_session_file_parsable(uploaded):
+    """Validate if a user submitted session file is parsable."""
     d = {}
     exec(uploaded, d)
 

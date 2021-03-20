@@ -83,10 +83,12 @@ def backtrack_line_num(ind, token_map, k):
 
 
 def merge_intervals(arr):
+    """Merge intervals sorted in increasing order."""
     arr.sort()
     results = []
 
     for i, j in arr:
+        # Should not merge if the start of the interval is larger than the end.
         if i > j:
             continue
 
