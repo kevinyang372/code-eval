@@ -1,23 +1,22 @@
 # Creating New Tests
 
-Below is an example test file for three easy questions: add, subtract and multiply.
+Below is an example test file for two easy questions: bubble sort and selection sort.
 
 ```
 from base import BaseTest
+
 
 class TestCases(BaseTest):
 
     def __init__(self, func):
         super().__init__(func)
         self.parameters = {
-            'add': [(2, 3), (4, 5), (6, 7)],
-            'subtract': [(2, 3), (4, 5)],
-            'multiply': [(2, 3), (4, 5), (6, 7)]
+            'bubble_sort': [([2, 3, 4, 5],), ([4, 3, 5, 2],), ([5, 4, 3, 2],), ([4, 5, 3, 2],)],
+            'selection_sort': [([2, 3, 4, 5],), ([4, 3, 5, 2],), ([5, 4, 3, 2],), ([4, 5, 3, 2],)],
         }
         self.answers = {
-            'add': [5, 9, 13],
-            'subtract': [-1, -1],
-            'multiply': [6, 20, 42]
+            'bubble_sort': [[2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5]],
+            'selection_sort': [[2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5]],
         }
 ```
 
@@ -50,7 +49,14 @@ The customizable part contains two variables -- parameters and answers. Paramete
 
 _Note: The number of cases do not have to be the same across different questions_.
 
-Each case in the parameters should be wrapped in tuples no matter the number of input parameters. Furthermore, the type of variables in answers should also match that of the expected output (e.g. a list if the function outputs a list).
+**Each case in the parameters should be wrapped in tuples no matter the number of input parameters.** Furthermore, the type of variables in answers should also match that of the expected output (e.g. a list if the function outputs a list). Note that Python will automatically 'detuple' tuples that only contains one element. One solution is to always add a tailing comma at the end of each element. E.g.:
+
+```
+self.parameters = {
+    'bubble_sort': [([2, 3, 4, 5],), ([4, 3, 5, 2],), ([5, 4, 3, 2],), ([4, 5, 3, 2],)],
+    'selection_sort': [([2, 3, 4, 5],), ([4, 3, 5, 2],), ([5, 4, 3, 2],), ([4, 5, 3, 2],)],
+}
+```
 
 ### Answer Precisions
 For float type answers, AutoGrader uses the `numpy.isclose` to decide whether an output is close enough to the expected answer. The code looks like the following
