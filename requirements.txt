@@ -69,7 +69,7 @@ pybadges==2.2.1
 pycodestyle==2.6.0
 pycparser==2.20
 pyflakes==2.2.0
-Pygments==2.6.1
+Pygments==2.7.4
 PyInquirer==1.0.3
 pylint==2.6.0
 pyparsing==2.4.5
