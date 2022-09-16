@@ -44,7 +44,7 @@ jupyter-client==6.1.7
 jupyter-core==4.6.3
 jupyterlab-pygments==0.1.2
 lazy-object-proxy==1.4.3
-Mako==1.1.0
+Mako==1.2.2
 Markdown==3.3.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
